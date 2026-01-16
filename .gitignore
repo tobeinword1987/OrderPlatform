@@ -1,0 +1,15 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+
+# Tests
+/coverage
+/.nyc_output
+
+# dotenv environment variable files
+.env.development
+.env.test
+
+README.example.md
