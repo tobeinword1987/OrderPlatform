@@ -37,15 +37,15 @@ $ npm run test:cov
 
 ## Clean architecture and modularity
 
-There are main priciples to build clean and good quality project with the clean and scalable architecture:
+There are main principles to build clean and good quality project with a clean and scalable architecture:
 
-1) Domen Design Concern
+1) Domain Design Concern
 2) SOLID
 3) Separation of concerns
 
-Nest allows us to complied all of these principles. 
+Nest allows us to comply all of these principles. 
 
-ORDER PLATFORM's core domains are based on separate modules which are responsible for special goals, can depend on each other but their responsibilty is clearly separated from each other. This allows to scale them independently from each other.
+ORDER PLATFORM's core domains are based on separate modules that are responsible for specific goals, can depend on each other but their responsibilities are clearly separated from one another. This allows to scale them independently from each other.
 
 ORDER PLATFORM's core modules: UsersModule, ProductsModule, OrdersModule, PaymentsModule.
 
@@ -59,13 +59,13 @@ ProductsModule is the module which is responsible for processing products.
 
 # OrdersModule
 
-OrdersModule depends on UsersModule and ProductsModule. It is responsible for all user's orders, what is the quantity of ordered products, final price for each order, status of the order and so on.
+OrdersModule depends on UsersModule and ProductsModule. It is responsible for all user's orders, including the quantity of ordered products, final price for each order, status of the order and so on.
 
 # PaymentsModule
 
-It can be separated to the separate service, it shouldn't make system's workload too heavy. 
+It can be separated into a distinct service, it shouldn't make system's workload too heavy. 
 
-It will use an external services (billing SaaS) to process payments and data which depends on it:
+It will use an external services (billing SaaS) to process payments and data that depends on it:
 - invoices;
 - subscriptions;
 - payment statuses
