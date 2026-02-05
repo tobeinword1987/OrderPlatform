@@ -74,3 +74,92 @@ It will use an external services (billing SaaS) to process payments and data tha
 
 - Billing SaaS module
 - AWS
+
+# Fill DB with test data
+
+Run commands:
+
+- npm run db:generate
+- npm run db:migrate
+- npm run db:seed
+
+- npm run start:dev
+
+# Run Create order API
+POST http://localhost:3000/orders
+
+Use body for this:
+
+- 201:
+{
+    "idempotencyKey": "1000001",
+    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d5a1",
+    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
+    "products": 
+    [
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
+            "quantity": 1
+        },
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
+            "quantity": 2
+        }
+    ]
+}
+
+- You can try to do the same request with the same idempotency_key, the order will be returned
+
+- 400:
+{
+    "idempotencyKey": "1000002",
+    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d5a1",
+    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
+    "products": 
+    [
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
+            "quantity": 1
+        },
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
+            "quantity": 25
+        }
+    ]
+}
+
+- 404:
+{
+    "idempotencyKey": "1000003",
+    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d525",
+    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
+    "products": 
+    [
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
+            "quantity": 1
+        },
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
+            "quantity": 25
+        }
+    ]
+}
+
+- 500:
+{
+    "idempotencyKey": "1000004",
+    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d5h5",
+    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
+    "products": 
+    [
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
+            "quantity": 1
+        },
+        {
+            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
+            "quantity": 25
+        }
+    ]
+}
