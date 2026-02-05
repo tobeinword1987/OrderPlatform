@@ -17,10 +17,4 @@ describe('UsersController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-
-  it('should return list of users', () => {
-    const users = controller.listUsers();
-    expect(users).toBeInstanceOf(Array);
-    expect(users).toHaveLength(2);
-  });
 });

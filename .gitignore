@@ -11,5 +11,12 @@
 # dotenv environment variable files
 .env.development
 .env.test
+.env.dev
+.env.prod
+.env.qa
+
+# in real development there migrations folder will be ignored too
+# I left it to show what was done
+# migrations
 
 README.example.md
