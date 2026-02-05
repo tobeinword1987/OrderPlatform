@@ -75,6 +75,8 @@ It will use an external services (billing SaaS) to process payments and data tha
 - Billing SaaS module
 - AWS
 
+# Add .env.dev to the configuration folder
+
 # Fill DB with test data
 
 Run commands:

@@ -15,21 +15,18 @@ import { OrderItem } from './orders/order.item.entity';
 import { OrdersModule } from './orders/orders.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './http.exception.filter';
-import { DataSource } from 'typeorm';
-import { DataSourceOptions } from 'typeorm/browser';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `./src/configuration/.env.${process.env.NODE_ENV}`,
+      envFilePath: `./src/configuration/.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       extraProviders: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
         toRetry: (err: any) => true,
-        // retryAttempts: 3,
         type: 'postgres',
         host: cfg.get('DB_HOST'),
         port: Number(cfg.get('DB_PORT')),
