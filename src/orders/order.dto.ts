@@ -1,6 +1,5 @@
-import { User } from "src/users/user.dto";
-import { OrderItem } from "./order.item.dto";
-
+import { User } from 'src/users/user.dto';
+import { OrderItem } from './order.item.dto';
 
 export class Order {
   idempotencyKey: string;
@@ -13,8 +12,8 @@ export class Order {
 }
 
 export class Product {
-    productId: string;
-    quantity: number;
+  productId: string;
+  quantity: number;
 }
 
 export class NewOrderReq {

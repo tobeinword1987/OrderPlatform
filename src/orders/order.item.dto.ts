@@ -1,5 +1,5 @@
-import { Product } from "src/products/product.dto";
-import { Order } from "./order.dto";
+import { Product } from 'src/products/product.dto';
+import { Order } from './order.dto';
 
 export type OrderItem = {
   quantity: number;
@@ -7,4 +7,4 @@ export type OrderItem = {
   order: Order;
   productId: string;
   product: Product;
-}
+};

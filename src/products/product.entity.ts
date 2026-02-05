@@ -24,13 +24,15 @@ export class Product {
   @Column({ type: 'uuid', name: 'category_id' })
   categoryId: string;
 
-  @Column({ type: 'float'})
+  @Column({ type: 'float' })
   price: number;
 
   @Column()
   quantity: number;
 
-  @ManyToOne(() => Category, (category) => category.products, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Category, (category) => category.products, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'category_id' })
   category: Category;
 

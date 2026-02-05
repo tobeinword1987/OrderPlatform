@@ -21,7 +21,7 @@ export class Order {
   id: string;
 
   @Column({ name: 'idempotency_key' })
-  idempotencyKey: string
+  idempotencyKey: string;
 
   @Column({ name: 'delivery_address' })
   deliveryAddress: string;

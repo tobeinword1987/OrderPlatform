@@ -58,9 +58,9 @@ import { HttpExceptionFilter } from './http.exception.filter';
     ConfigService,
     CategoriesService,
     {
-        provide: APP_FILTER,
-        useClass: HttpExceptionFilter,
-    }
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

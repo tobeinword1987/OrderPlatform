@@ -1,5 +1,5 @@
-import { Category } from "src/categories/category.dto";
-import { OrderItem } from "src/orders/order.item.dto";
+import { Category } from 'src/categories/category.dto';
+import { OrderItem } from 'src/orders/order.item.dto';
 
 export class Product {
   name: string;
