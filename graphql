@@ -19,7 +19,7 @@ type Order {
   id: ID!
   idempotency_key: String!
   orderItems: [OrderItem!]!
-  order_status: String!
+  order_status: OrderStatus!
   updated_at: DateTime!
   user: User!
   user_id: ID!
@@ -35,6 +35,13 @@ type OrderItem {
   quantity: Float!
 }
 
+enum OrderStatus {
+  CLOSED
+  CREATED
+  IN_PROGRESS
+  UPDATED
+}
+
 type Product {
   category: Category!
   category_id: ID!
@@ -47,6 +54,7 @@ type Product {
 
 type Query {
   orders: [Order!]!
+  ordersFiltered(dateFrom: DateTime, dateTo: DateTime, status: String): [Order!]!
   test: String!
 }
 

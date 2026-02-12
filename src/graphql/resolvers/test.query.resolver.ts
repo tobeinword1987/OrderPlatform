@@ -4,6 +4,6 @@ import { Query, Resolver } from "@nestjs/graphql";
 export class TestResolver {
     @Query(() => String)
     test() {
-        return "Hello, Kyryl";
+        return `Hello, Kyryl`;
     }
 }
