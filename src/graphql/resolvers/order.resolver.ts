@@ -1,4 +1,4 @@
-import { Args, ArgsType, Context, Field, Parent, Query, ResolveField } from "@nestjs/graphql";
+import { Args, ArgsType, Context, Field, ObjectType, Parent, Query, ResolveField } from "@nestjs/graphql";
 import { Resolver } from "@nestjs/graphql";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Order } from "src/orders/order.entity";
@@ -7,18 +7,44 @@ import { User } from "src/users/user.entity";
 import { LessThan, MoreThan, Repository } from "typeorm";
 import DataLoader from "dataloader";
 import type { ORDER_STATUS } from "src/orders/order.dto";
-import { MinKey } from "typeorm/browser";
 
 @ArgsType()
 class OrdersFilterInput {
-  @Field({ nullable: true })
+  @Field()
   status?: ORDER_STATUS;
 
-  @Field({ nullable: true })
+  @Field()
   dateFrom?: Date;
 
-  @Field({ nullable: true })
+  @Field()
   dateTo?: Date;
+}
+
+@ArgsType()
+class OrdersPaginationInput {
+    @Field()
+    limit: number;
+
+    @Field()
+    createdAt?: Date;
+
+    @Field()
+    idTieBreaker?: string;
+}
+
+@ObjectType()
+@ArgsType()
+class PageResult {
+
+    orders: Order[];
+
+    @Field()
+    countOfPages: number;
+
+    cursor: {
+        createdAt: Date,
+        idTieBreaker: string
+    }
 }
 
 @Resolver(() => Order)
@@ -30,6 +56,8 @@ export class OrderResolver {
         @InjectRepository(User) private userRepository: Repository<User>,
     ) { }
 
+   private limitFirst: number = 2;
+
     @Query(() => [Order])
     async orders(): Promise<Order[]> {
         const orders = await this.orderRepository.find({
@@ -40,14 +68,47 @@ export class OrderResolver {
     }
 
     @Query(() => [Order])
-    async ordersFiltered(@Args() filter: OrdersFilterInput): Promise<Order[]> {
-        console.log(filter);//{status: 'created'}
-        const orders = await this.orderRepository
+    async ordersFiltered(@Args() filter: OrdersFilterInput, @Args() ordersPaginationInput: OrdersPaginationInput): Promise<Order[]> {
+        if(this.limitFirst !== ordersPaginationInput.limit) {
+            console.log('Limit was changed, we have to reload pages from 0');
+            ordersPaginationInput.createdAt = undefined;
+            this.limitFirst = ordersPaginationInput.limit;
+        }
+
+        const ordersSortedQb = this.orderRepository
             .createQueryBuilder()
-            .where({orderStatus: filter.status})
-            .andWhere({createdAt: MoreThan(filter.dateFrom ? filter.dateFrom : new Date(0))})
-            .andWhere({createdAt: LessThan(filter.dateTo ? filter.dateTo : new Date())})
-            .getMany();
+            .where({ orderStatus: filter.status })
+            .andWhere({ createdAt: MoreThan(filter.dateFrom ? filter.dateFrom : new Date(0)) })
+            .andWhere({ createdAt: LessThan(filter.dateTo ? filter.dateTo : new Date()) })
+            .orderBy('created_at', 'DESC')
+            .addOrderBy('id', 'DESC')
+
+        const cursor = ordersPaginationInput.createdAt;
+        if (cursor) {
+            ordersSortedQb.andWhere('(created_at, id) < (:createdAt, :id)', {
+                createdAt: ordersPaginationInput.createdAt,
+                id: ordersPaginationInput.idTieBreaker,
+            });
+
+        }
+
+        const orders = await ordersSortedQb
+            .take(ordersPaginationInput.limit + 1)
+            .getMany()
+
+        const countOfPages = Math.floor(orders.length / this.limitFirst);
+        const idTieBreaker = orders[orders.length - 1].id;
+        const createdAt = orders[orders.length - 1].createdAt;
+
+        const pageResult = {
+            orders,
+            countOfPages,
+            cursor: {
+                createdAt,
+                idTieBreaker
+            }
+        }
+        console.log('~~~~~~~~~~~~~~@@@', pageResult);
 
         return orders;
     }

@@ -54,7 +54,7 @@ type Product {
 
 type Query {
   orders: [Order!]!
-  ordersFiltered(dateFrom: DateTime, dateTo: DateTime, status: String): [Order!]!
+  ordersFiltered(createdAt: DateTime!, dateFrom: DateTime!, dateTo: DateTime!, idTieBreaker: String!, limit: Float!, status: String!): [Order!]!
   test: String!
 }
 

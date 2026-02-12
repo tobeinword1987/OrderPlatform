@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import DataLoader from "dataloader";
-import { Order } from "src/orders/order.dto";
 import { OrderItem } from "src/orders/order.item.entity";
 import { Product } from "src/products/product.entity";
 import { User } from "src/users/user.entity";
