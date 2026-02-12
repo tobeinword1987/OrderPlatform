@@ -15,6 +15,8 @@ import { OrderItem } from './orders/order.item.entity';
 import { OrdersModule } from './orders/orders.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './http.exception.filter';
+import { GraphQlModule } from './graphql/graphql.module';
+import { DataLoaderModule } from './graphql/dataLoaders/data.loader.module';
 
 @Module({
   imports: [
@@ -35,7 +37,8 @@ import { HttpExceptionFilter } from './http.exception.filter';
         database: cfg.get('DB_NAME'),
         ssl: cfg.get('DB_SSL') ? { rejectUnauthorized: false } : undefined,
         autoLoadEntities: true,
-        synchronize: cfg.get('NODE_ENV') === 'dev' ? true : false,
+        // synchronize: cfg.get('NODE_ENV') === 'dev' ? true : false,
+        synchronize: false,
 
         migrationsRun: true,
         migrations: [],
@@ -51,6 +54,8 @@ import { HttpExceptionFilter } from './http.exception.filter';
     OrdersModule,
     UsersModule,
     CategoriesModule,
+    GraphQlModule,
+    DataLoaderModule,
   ],
   controllers: [AppController],
   providers: [
@@ -63,4 +68,4 @@ import { HttpExceptionFilter } from './http.exception.filter';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
