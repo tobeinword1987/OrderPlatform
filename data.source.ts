@@ -14,6 +14,11 @@ const PostgresDataSource = new DataSource({
     migrations: ['src/migrations/*{.ts,.js}'],
     migrationsRun: false,
     synchronize: false,
+    cache: {
+        duration: 3000,
+        type: "database",
+        tableName: "configurable-table-query-result-cache"
+    }
 })
 
 export default PostgresDataSource;

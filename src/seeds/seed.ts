@@ -4,6 +4,7 @@ import { Order } from '../orders/order.entity';
 import { Product } from '../products/product.entity';
 import { Category } from '../categories/category.entity';
 import { OrderItem } from '../orders/order.item.entity';
+import { ORDER_STATUS } from 'src/orders/order.dto';
 
 type SeedUser = {
   id: string;
@@ -22,6 +23,7 @@ type SeedOrder = {
   id: string;
   idempotencyKey: string;
   deliveryAddress: string;
+  orderStatus: ORDER_STATUS;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -184,6 +186,7 @@ const orders: SeedOrder[] = [
     idempotencyKey: '100000',
     deliveryAddress:
       'Ukraine, Cherkasy, Taraskova street, building 12, loc. 12, 85-796',
+    orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a3',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -193,6 +196,7 @@ const orders: SeedOrder[] = [
     idempotencyKey: '100001',
     deliveryAddress:
       'Ukraine, Cherkasy, Taraskova street, building 11, loc. 11, 85-796',
+    orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a2',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -202,6 +206,7 @@ const orders: SeedOrder[] = [
     idempotencyKey: '100003',
     deliveryAddress:
       'Ukraine, Cherkasy, Taraskova street, building 10, loc. 166, 85-796',
+    orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a1',
     createdAt: new Date(),
     updatedAt: new Date(),
