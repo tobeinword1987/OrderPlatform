@@ -11,8 +11,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { OrderItem } from './order.item.entity';
-import { Field, GraphQLISODateTime, ID, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ORDER_STATUS } from './order.dto';
+
+registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 
 @Entity()
 @ObjectType()
@@ -33,7 +35,7 @@ export class Order {
   deliveryAddress: string;
 
   @Column({ type: 'enum', enum: ORDER_STATUS, enumName: 'order_status_enum', default: ORDER_STATUS.CREATED, name: 'order_status '})
-  @Field(() => String, { name: 'order_status' })
+  @Field(() => ORDER_STATUS!, { name: 'order_status' })
   orderStatus: ORDER_STATUS
 
   @Column({ type: 'uuid', name: 'user_id' })
@@ -56,4 +58,5 @@ export class Order {
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   @Field(() => GraphQLISODateTime!, { name: 'updated_at' })
   updatedAt: Date;
+
 }

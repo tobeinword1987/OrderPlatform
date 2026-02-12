@@ -25,6 +25,10 @@ import { TestResolver } from './resolvers/test.query.resolver';
         graphiql: true,
         autoSchemaFile: join(process.cwd(), '/graphql'),
         sortSchema: true,
+        definitions: {
+          emitTypenameField: true,
+          enumsAsTypes: true,
+        },
         context: () => ({
           loaders: dtLoader.createLoaders(),
           strategy: 'optimized' as const
@@ -34,4 +38,5 @@ import { TestResolver } from './resolvers/test.query.resolver';
   ],
   providers: [OrderResolver, OrderItemResolver, TestResolver],
 })
+
 export class GraphQlModule { }
