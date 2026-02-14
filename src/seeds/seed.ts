@@ -1,9 +1,11 @@
+import { randomUUID } from 'crypto';
 import PostgresDataSource from 'data.source';
 import { User } from '../users/user.entity';
 import { Order } from '../orders/order.entity';
 import { Product } from '../products/product.entity';
 import { Category } from '../categories/category.entity';
 import { OrderItem } from '../orders/order.item.entity';
+import { Repository } from 'typeorm';
 
 type SeedUser = {
   id: string;
@@ -178,7 +180,25 @@ const products: SeedProduct[] = [
   },
 ];
 
-const orders: SeedOrder[] = [
+const orders: SeedOrder[] = [];
+const orderIds = [];
+for (let i = 0; i < 100000; i++) {
+  orderIds.push(randomUUID());
+  orders.push(
+    {
+      id: orderIds[i],
+      idempotencyKey: Math.random().toString().slice(2),
+      deliveryAddress:
+        'Ukraine, Cherkasy, Taraskova street, building 12, loc. 12, 85-796',
+      userId: users[Math.floor(Math.random() * 3)].id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+  )
+}
+
+// for SQL ANALIZE TESTING
+orders.push(
   {
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5e1',
     idempotencyKey: '100000',
@@ -206,22 +226,33 @@ const orders: SeedOrder[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
-];
+)
 
-const orderItems: SeedOrderItem[] = [
-  {
-    quantity: 2,
-    orderId: '0c6af838-fad5-4f6f-909d-d74886b1d5e2',
-    priceAtPurchase: 12,
-    productId: '0c6af838-fad5-4f6f-909d-d74886b1d5d6',
-  },
+const orderItems: SeedOrderItem[] = [];
+for (let i = 0; i < 300000; i++) {
+  orderItems.push(
+    {
+      quantity: 2,
+      orderId: orders[Math.floor(Math.random() * 99999)].id,
+      priceAtPurchase: 12,
+      productId: products[Math.floor(Math.random() * 9)].id,
+    }
+  )
+}
+
+// for SQL ANALIZE TESTING
+orderItems.push({
+  quantity: 2,
+  orderId: '0c6af838-fad5-4f6f-909d-d74886b1d5e2',
+  priceAtPurchase: 12,
+  productId: products[Math.floor(Math.random() * 9)].id,
+},
   {
     quantity: 1,
     orderId: '0c6af838-fad5-4f6f-909d-d74886b1d5e3',
     priceAtPurchase: 13,
     productId: '0c6af838-fad5-4f6f-909d-d74886b1d5d2',
-  },
-];
+  })
 
 async function seed() {
   if (process.env.NODE_ENV === 'production') {
@@ -237,13 +268,31 @@ async function seed() {
     const categoryRepository = PostgresDataSource.getRepository(Category);
     const orderItemRepository = PostgresDataSource.getRepository(OrderItem);
 
-    await usersRepository.upsert(users, ['id']);
-    await categoryRepository.upsert(categories, ['id']);
-    await productRepository.upsert(products, ['id']);
-    await orderRepository.upsert(orders, ['id']);
-    await orderItemRepository.upsert(orderItems, ['id']);
+    await upsertBatchElements(usersRepository, users);
+    await upsertBatchElements(categoryRepository, categories);
+    await upsertBatchElements(productRepository, products);
+    await upsertBatchElements(orderRepository, orders);
+    await upsertBatchElements(orderItemRepository, orderItems);
   } finally {
     await PostgresDataSource.destroy();
+  }
+}
+
+const upsertBatchElements = async (repository: Repository<any>, arr1: Array<any>) => {
+  let start = 0;
+  let flag = 0;
+  const arr = arr1;
+  let count = 0;
+  for(let i = 0; i < arr1.length; i + 5000) {
+    count++;
+    if (start + 5000 > arr.length) {
+      start = arr.length;
+      flag = 1;
+    }
+    const limitArr = arr.slice(start, start + 5000);
+    start = start + 5000;
+    await repository.upsert(limitArr, ['id']);
+    if(flag) { break; }
   }
 }
 
