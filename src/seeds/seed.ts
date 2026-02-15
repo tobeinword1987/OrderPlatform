@@ -56,8 +56,8 @@ const users: SeedUser[] = [
     lastName: 'Popova',
     email: 'liudmyla.popova@icloud.com',
     address:
-      'Ukraine, Cherkasy, Taraskova street, building 10, loc. 166, 85-796',
-    phoneNumber: '43-00-24',
+      'Ukraine, Cherkasy, Tarask street, building 100, loc. 166, 85-796',
+    phoneNumber: '43-66-24',
     postCode: '85-796',
     isActive: true,
     createdAt: new Date(),
@@ -69,8 +69,8 @@ const users: SeedUser[] = [
     lastName: 'Ivan',
     email: 'gorbatko.ivan@icloud.com',
     address:
-      'Ukraine, Cherkasy, Taraskova street, building 11, loc. 11, 85-796',
-    phoneNumber: '43-00-24',
+      'Ukraine, Cherkasy, Taraask street, building 11, loc. 11, 85-796',
+    phoneNumber: '43-66-24',
     postCode: '85-796',
     isActive: true,
     createdAt: new Date(),
@@ -82,8 +82,8 @@ const users: SeedUser[] = [
     lastName: 'Oksana',
     email: 'kosinova.oksana@icloud.com',
     address:
-      'Ukraine, Cherkasy, Taraskova street, building 12, loc. 12, 85-796',
-    phoneNumber: '43-00-24',
+      'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
+    phoneNumber: '43-66-24',
     postCode: '85-796',
     isActive: true,
     createdAt: new Date(),
@@ -182,14 +182,14 @@ const products: SeedProduct[] = [
 
 const orders: SeedOrder[] = [];
 const orderIds = [];
-for (let i = 0; i < 100000; i++) {
+for (let i = 0; i < 6000; i++) {
   orderIds.push(randomUUID());
   orders.push(
     {
       id: orderIds[i],
       idempotencyKey: Math.random().toString().slice(2),
       deliveryAddress:
-        'Ukraine, Cherkasy, Taraskova street, building 12, loc. 12, 85-796',
+        'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
       userId: users[Math.floor(Math.random() * 3)].id,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -203,7 +203,7 @@ orders.push(
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5e1',
     idempotencyKey: '100000',
     deliveryAddress:
-      'Ukraine, Cherkasy, Taraskova street, building 12, loc. 12, 85-796',
+      'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a3',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -212,7 +212,7 @@ orders.push(
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5e2',
     idempotencyKey: '100001',
     deliveryAddress:
-      'Ukraine, Cherkasy, Taraskova street, building 11, loc. 11, 85-796',
+      'Ukraine, Cherkasy, Taraask street, building 11, loc. 11, 85-796',
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a2',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -221,7 +221,7 @@ orders.push(
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5e3',
     idempotencyKey: '100003',
     deliveryAddress:
-      'Ukraine, Cherkasy, Taraskova street, building 10, loc. 166, 85-796',
+      'Ukraine, Cherkasy, Taraask street, building 10, loc. 166, 85-796',
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a1',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -229,11 +229,11 @@ orders.push(
 )
 
 const orderItems: SeedOrderItem[] = [];
-for (let i = 0; i < 300000; i++) {
+for (let i = 0; i < 10000; i++) {
   orderItems.push(
     {
       quantity: 2,
-      orderId: orders[Math.floor(Math.random() * 99999)].id,
+      orderId: orders[Math.floor(Math.random() * 5999)].id,
       priceAtPurchase: 12,
       productId: products[Math.floor(Math.random() * 9)].id,
     }
@@ -278,15 +278,13 @@ async function seed() {
   }
 }
 
-const upsertBatchElements = async (repository: Repository<any>, arr1: Array<any>) => {
+const upsertBatchElements = async (repository: Repository<any>, arr: Array<any>) => {
   let start = 0;
   let flag = 0;
-  const arr = arr1;
   let count = 0;
-  for(let i = 0; i < arr1.length; i + 5000) {
+  for(let i = 0; i < arr.length; i + 5000) {
     count++;
     if (start + 5000 > arr.length) {
-      start = arr.length;
       flag = 1;
     }
     const limitArr = arr.slice(start, start + 5000);

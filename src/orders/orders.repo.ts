@@ -4,6 +4,7 @@ import { OrderItem } from './order.item.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { DataSource } from 'typeorm';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class OrderDB {
@@ -13,8 +14,9 @@ export class OrderDB {
       const orderRepository = manager.getRepository(Order);
       const orderItemRepository = manager.getRepository(OrderItem);
       const productRepository = manager.getRepository(Product);
+      const userRepository = manager.getRepository(User);
 
-      const user = await orderRepository.findOneBy({ userId: order.userId });
+      const user = await userRepository.findOneBy({ id: order.userId });
       if (!user) {
         throw new HttpException(
           {
