@@ -48,8 +48,8 @@ enum OrderStatus {
 }
 
 input OrdersFilterInput {
-  dateFrom: DateTime!
-  dateTo: DateTime!
+  dateFrom: DateTime
+  dateTo: DateTime
   status: OrderStatus!
 }
 
@@ -57,6 +57,12 @@ input OrdersPaginationInput {
   createdAt: DateTime
   idTieBreaker: String
   limit: Float!
+}
+
+type PageResult {
+  countOfPages: Float!
+  cursor: Cursor!
+  orders: [Order!]!
 }
 
 type Product {
@@ -71,7 +77,7 @@ type Product {
 
 type Query {
   orders: [Order!]!
-  ordersFiltered(filter: OrdersFilterInput!, ordersPaginationInput: OrdersPaginationInput!): [Order!]!
+  ordersFiltered(filter: OrdersFilterInput!, ordersPaginationInput: OrdersPaginationInput!): PageResult!
   test: String!
 }
 

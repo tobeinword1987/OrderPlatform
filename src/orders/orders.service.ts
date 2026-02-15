@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { OrderDB } from './orders.repo';
-import { OrdersFilterInput, OrdersPaginationInput } from './order.types.graphql';
+import { OrdersFilterInput, OrdersPaginationInput, PageResult } from './order.types.graphql';
 import { Order } from './order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, MoreThan, Repository } from 'typeorm';
@@ -53,7 +53,7 @@ export class OrdersService {
     }
   }
 
-  async ordersFiltered(filter: OrdersFilterInput, ordersPaginationInput: OrdersPaginationInput): Promise<Order[]> {
+  async ordersFiltered(filter: OrdersFilterInput, ordersPaginationInput: OrdersPaginationInput): Promise<PageResult> {
     if (this.limitFirst !== ordersPaginationInput.limit) {
       console.log('Limit was changed, we have to reload pages from 0');
       ordersPaginationInput.createdAt = undefined;
@@ -77,11 +77,16 @@ export class OrdersService {
 
     }
 
-    const orders = await ordersSortedQb
-      .take(ordersPaginationInput.limit + 1)
+    const allFilteredOrders = await ordersSortedQb
       .getMany()
 
-    const countOfPages = Math.floor(orders.length / this.limitFirst);
+    const orders = await ordersSortedQb
+      .take(ordersPaginationInput.limit)
+      .getMany()
+
+    const numberOfPages =  Math.round(allFilteredOrders.length / this.limitFirst);
+
+    const countOfPages = allFilteredOrders.length % this.limitFirst ? numberOfPages : numberOfPages + 1;
     const idTieBreaker = orders[orders.length - 1].id;
     const createdAt = orders[orders.length - 1].createdAt;
 
@@ -95,6 +100,6 @@ export class OrdersService {
     }
     console.log(pageResult);
 
-    return orders;
+    return pageResult;
   }
 }

@@ -7,10 +7,10 @@ export class OrdersFilterInput {
     @Field(() => ORDER_STATUS!)
     status?: ORDER_STATUS;
 
-    @Field()
+    @Field({ nullable: true })
     dateFrom?: Date;
 
-    @Field()
+    @Field({ nullable: true })
     dateTo?: Date;
 }
 

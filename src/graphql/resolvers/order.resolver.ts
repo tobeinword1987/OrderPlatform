@@ -7,7 +7,7 @@ import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import DataLoader from "dataloader";
 import { ORDER_STATUS } from '../../orders/order.dto';
-import { OrdersFilterInput, OrdersPaginationInput } from "src/orders/order.types.graphql";
+import { OrdersFilterInput, OrdersPaginationInput, PageResult } from "src/orders/order.types.graphql";
 import { OrdersService } from "src/orders/orders.service";
 
 registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
@@ -30,8 +30,8 @@ export class OrderResolver {
         return orders;
     }
 
-    @Query(() => [Order])
-    async ordersFiltered(@Args('filter') filter: OrdersFilterInput, @Args('ordersPaginationInput') ordersPaginationInput: OrdersPaginationInput): Promise<Order[]> {
+    @Query(() => PageResult)
+    async ordersFiltered(@Args('filter') filter: OrdersFilterInput, @Args('ordersPaginationInput') ordersPaginationInput: OrdersPaginationInput): Promise<PageResult> {
         return await this.orderService.ordersFiltered(filter, ordersPaginationInput);
     }
 

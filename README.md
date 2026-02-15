@@ -223,34 +223,41 @@ query ordersFiltered($filter: OrdersFilterInput!, $ordersPaginationInput: Orders
 {
     ordersFiltered( filter: $filter, ordersPaginationInput: $ordersPaginationInput )
         {
-            id
-            idempotency_key
-            user_id
-            delivery_address
-            order_status
-            created_at
-            updated_at
-            user {
+            orders {
                 id
-                first_name
-                last_name
-                address
-                phone_number
-                post_code
-            }
-            orderItems {
-                id
-                price_at_purchase
-                quantity
-                product_id
-                product {
+                idempotency_key
+                user_id
+                delivery_address
+                order_status
+                created_at
+                updated_at
+                user {
                     id
-                    category_id
-                    name
-                    quantity
+                    first_name
+                    last_name
+                    address
+                    phone_number
+                    post_code
                 }
-            }
+                orderItems {
+                    id
+                    price_at_purchase
+                    quantity
+                    product_id
+                    product {
+                        id
+                        category_id
+                        name
+                        quantity
+                    }
+                }
         }
+        cursor {
+            createdAt
+            idTieBreaker
+        }
+        countOfPages
+    }
 }
 ------------------------------------------------
 variables: 
@@ -263,9 +270,15 @@ variables:
 or, but set correct values of createdAt and idTieBreaker, because after db:seed these values will be changed
 
 {
-    "filter" : { "status": "CREATED", "dateFrom": "2026-02-12T09:37:45.010Z", "dateTo": "2026-02-18T10:37:45.010Z"},
-
-    "ordersPaginationInput": {"limit": 2, "createdAt":"2026-02-15T12:15:20.438Z", "idTieBreaker": "ff529ee8-7a8b-4457-a7bc-b04526853257"}
+    "filter" : { "status": "CREATED", 
+        "dateFrom": "2026-02-12T09:37:45.010Z", 
+        "dateTo": "2026-02-18T10:37:45.010Z"
+        },
+    "ordersPaginationInput": {
+        "limit" : 2,
+        "createdAt":"2026-02-15T12:15:20.438Z", 
+        "idTieBreaker": "ff529ee8-7a8b-4457-a7bc-b04526853257"
+        }
 }
 
 # Optimization 1 + 1 + (....), additional DataLoader: (implemented for User, OrderItem and Product).
