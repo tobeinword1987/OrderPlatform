@@ -23,21 +23,25 @@ export class DtLoader {
     }
 
     async getOptimizedOrderItems(orderIds: string[]) {
-        const orderItems = await this.orderItemRepository
+        let orderItems = await this.orderItemRepository
             .createQueryBuilder()
             .where("order_id IN (:...orderIds)", { orderIds: orderIds })
             .getMany()
 
-            console.log('---OPTIMIZED---Request to OrderItem table')
+        const orderItemsByOrderIds = new Map(orderItems.map(orderItem => [orderItem.orderId, orderItem]));
 
-            const result: OrderItem[][] = [];
+        const orderIts = orderIds.map(orderId => orderItemsByOrderIds.get(orderId))
 
-            orderIds.forEach(id => {
-                const oi = orderItems.filter(orderItem => orderItem.orderId === id)
-                result.push(oi);
-            })
+        console.log('---OPTIMIZED---Request to OrderItem table')
 
-            return result;
+        const result: OrderItem[][] = [];
+
+        orderIds.forEach(id => {
+            const oi = orderIts.filter(orderItem => orderItem?.orderId === id) as OrderItem[]
+            result.push(oi);
+        })
+
+        return result;
     }
 
     async getOptimizedUsers(userIds: string[]) {
@@ -46,20 +50,23 @@ export class DtLoader {
             .where("id IN (:...userIds)", { userIds: userIds })
             .getMany()
 
-            console.log('---OPTIMIZED---Request to User table')
+        const usersByIds = new Map(users.map(user => [user.id, user]));
 
-            return users;
+        console.log('---OPTIMIZED---Request to User table')
+
+        return userIds.map(userId => usersByIds.get(userId) ?? null)
     }
 
     async getOptimizedProducts(orderItemsIds: string[]) {
-        const users = await this.productRepository
+        const products = await this.productRepository
             .createQueryBuilder()
             .where("id IN (:...orderItemsIds)", { orderItemsIds: orderItemsIds })
             .getMany()
 
-            console.log('---OPTIMIZED---Request to Product table')
+        const productsByIds = new Map(products.map(product => [product.id, product]));
 
-            return users;
+        console.log('---OPTIMIZED---Request to Product table')
+
+        return orderItemsIds.map(orderItemsId => productsByIds.get(orderItemsId) ?? null)
     }
-
 }

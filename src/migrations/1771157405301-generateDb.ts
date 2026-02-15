@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class GenerateDb1770892647216 implements MigrationInterface {
-    name = 'GenerateDb1770892647216'
+export class GenerateDb1771157405301 implements MigrationInterface {
+    name = 'GenerateDb1771157405301'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "category" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, CONSTRAINT "PK_9c4e4a89e3674fc9f382d733f03" PRIMARY KEY ("id"))`);
@@ -11,7 +11,7 @@ export class GenerateDb1770892647216 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "order_item" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "quantity" integer NOT NULL, "price_at_purchase" double precision NOT NULL, "order_id" uuid NOT NULL, "product_id" uuid NOT NULL, CONSTRAINT "PK_d01158fe15b1ead5c26fd7f4e90" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "Index_order_item_product_id" ON "order_item" ("product_id") `);
         await queryRunner.query(`CREATE INDEX "Index_order_item_order_id" ON "order_item" ("order_id") `);
-        await queryRunner.query(`CREATE TABLE "order" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "idempotency_key" character varying NOT NULL, "delivery_address" character varying NOT NULL, "order_status " "public"."order_status_enum" NOT NULL DEFAULT 'created', "user_id" uuid NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_1031171c13130102495201e3e20" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "order" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "idempotency_key" character varying NOT NULL, "delivery_address" character varying NOT NULL, "order_status" "public"."order_status_enum" NOT NULL DEFAULT 'created', "user_id" uuid NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_1031171c13130102495201e3e20" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "Index_idempotency_key_unique" ON "order" ("idempotency_key") `);
         await queryRunner.query(`CREATE INDEX "Index_order_created_at" ON "order" ("created_at") `);
         await queryRunner.query(`CREATE INDEX "Index_order_user_id" ON "order" ("user_id") `);

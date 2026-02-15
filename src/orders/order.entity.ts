@@ -34,7 +34,7 @@ export class Order {
   @Field(() => String!, { name: 'delivery_address' })
   deliveryAddress: string;
 
-  @Column({ type: 'enum', enum: ORDER_STATUS, enumName: 'order_status_enum', default: ORDER_STATUS.CREATED, name: 'order_status '})
+  @Column({ type: 'enum', enum: ORDER_STATUS, enumName: 'order_status_enum', default: ORDER_STATUS.CREATED, name: 'order_status' })
   @Field(() => ORDER_STATUS!, { name: 'order_status' })
   orderStatus: ORDER_STATUS
 

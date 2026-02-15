@@ -8,6 +8,11 @@ type Category {
   products: [Product!]!
 }
 
+type Cursor {
+  createdAt: DateTime!
+  idTieBreaker: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -42,6 +47,18 @@ enum OrderStatus {
   UPDATED
 }
 
+input OrdersFilterInput {
+  dateFrom: DateTime!
+  dateTo: DateTime!
+  status: OrderStatus!
+}
+
+input OrdersPaginationInput {
+  createdAt: DateTime
+  idTieBreaker: String
+  limit: Float!
+}
+
 type Product {
   category: Category!
   category_id: ID!
@@ -54,7 +71,7 @@ type Product {
 
 type Query {
   orders: [Order!]!
-  ordersFiltered(createdAt: DateTime!, dateFrom: DateTime!, dateTo: DateTime!, idTieBreaker: String!, limit: Float!, status: String!): [Order!]!
+  ordersFiltered(filter: OrdersFilterInput!, ordersPaginationInput: OrdersPaginationInput!): [Order!]!
   test: String!
 }
 

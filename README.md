@@ -219,8 +219,9 @@ POST http://localhost:3000/graphql
 
 POST http://localhost:3000/graphql
 
+query ordersFiltered($filter: OrdersFilterInput!, $ordersPaginationInput: OrdersPaginationInput!)
 {
-    ordersFiltered(status: "created", dateFrom: "2026-02-12T09:37:45.010Z", dateTo: "2026-02-18T10:37:45.010Z",  limit: 2, createdAt:"2026-02-12T12:37:45.010Z", idTieBreaker: "68f695a0-057c-44f7-b7ff-ddd5a82cdd03")
+    ordersFiltered( filter: $filter, ordersPaginationInput: $ordersPaginationInput )
         {
             id
             idempotency_key
@@ -251,23 +252,61 @@ POST http://localhost:3000/graphql
             }
         }
 }
+------------------------------------------------
+variables: 
+{
+    "filter" : { "status": "CREATED", "dateFrom": "2026-02-12T09:37:45.010Z", "dateTo": "2026-02-18T10:37:45.010Z"},
+
+    "ordersPaginationInput": {"limit": 2}
+}
+
+or, but set correct values of createdAt and idTieBreaker, because after db:seed these values will be changed
+
+{
+    "filter" : { "status": "CREATED", "dateFrom": "2026-02-12T09:37:45.010Z", "dateTo": "2026-02-18T10:37:45.010Z"},
+
+    "ordersPaginationInput": {"limit": 2, "createdAt":"2026-02-15T12:15:20.438Z", "idTieBreaker": "ff529ee8-7a8b-4457-a7bc-b04526853257"}
+}
 
 # Optimization 1 + 1 + (....), additional DataLoader: (implemented for User, OrderItem and Product).
 
 All requests to all tables: OrderItem, Product and User were optimized with batch requests with the Dataloader strategy
 
-You can set in context 
-strategy: 'naive' as const
+You can set in env file STRATEGY env
+
+In case of 'naive'
 
 You will see a lot of comments:
 - '---NAIVE---Request to OrderItem table'
 - '---NAIVE---Request to Product table'
 - '---NAIVE---Request to User table'
 
-If you set strategy: 'optimized' as const
+If you set strategy: 'optimized'
 You will see only 3 requests to the database in comments:
 - '---OPTIMIZED---Request to OrderItem table'
 - '---OPTIMIZED---Request to Product table'
 - '---OPTIMIZED---Request to User table'
+
+LOGS FROM CONSOLE:
+
+In 'naive' case there are next logs from terminal:
+
+---NAIVE---Request to User table
+---NAIVE---Request to OrderItem table
+---NAIVE---Request to User table
+---NAIVE---Request to OrderItem table
+---NAIVE---Request to User table
+---NAIVE---Request to OrderItem table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+
+In 'optimized' case there are only 3 logs from terminal:
+
+---OPTIMIZED---Request to User table
+---OPTIMIZED---Request to OrderItem table
+---OPTIMIZED---Request to Product table
 
 # ORDER_STATUS was added as enum

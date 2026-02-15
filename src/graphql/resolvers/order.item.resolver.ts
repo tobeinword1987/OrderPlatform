@@ -2,7 +2,6 @@ import { Context, Parent, Query, ResolveField } from "@nestjs/graphql";
 import { Resolver } from "@nestjs/graphql";
 import { InjectRepository } from "@nestjs/typeorm";
 import DataLoader from "dataloader";
-import { Order } from "src/orders/order.entity";
 import { OrderItem } from "src/orders/order.item.entity";
 import { Product } from "src/products/product.entity";
 import { Repository } from "typeorm";

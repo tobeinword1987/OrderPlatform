@@ -12,6 +12,8 @@ import { OrderResolver } from './resolvers/order.resolver';
 import { OrderItemResolver } from './resolvers/order.item.resolver';
 import { DataLoaderModule } from './dataLoaders/data.loader.module';
 import { TestResolver } from './resolvers/test.query.resolver';
+import { OrdersService } from 'src/orders/orders.service';
+import { OrderDB } from 'src/orders/orders.repo';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { TestResolver } from './resolvers/test.query.resolver';
       useFactory: (dtLoader: DtLoader) => ({
         path: '/graphql',
         graphiql: true,
-        autoSchemaFile: join(process.cwd(), '/graphql'),
+        autoSchemaFile: join(process.cwd(), '/graphql.gql'),
         sortSchema: true,
         definitions: {
           emitTypenameField: true,
@@ -31,12 +33,12 @@ import { TestResolver } from './resolvers/test.query.resolver';
         },
         context: () => ({
           loaders: dtLoader.createLoaders(),
-          strategy: 'optimized' as const
+          strategy: process.env['STRATEGY'] || 'optimized' as const
         })
       })
     })
   ],
-  providers: [OrderResolver, OrderItemResolver, TestResolver],
+  providers: [OrderResolver, OrderItemResolver, TestResolver, OrdersService, OrderDB],
 })
 
 export class GraphQlModule { }
