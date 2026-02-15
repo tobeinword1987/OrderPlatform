@@ -6,11 +6,10 @@ import {
 } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { OrderDB } from './orders.repo';
-import { DataSource } from 'typeorm';
 
 @Injectable()
 export class OrdersService {
-  constructor(private orderDb: OrderDB) {}
+  constructor(private orderDb: OrderDB) { }
 
   async createOrder(order: NewOrderReq) {
     try {
@@ -22,6 +21,23 @@ export class OrdersService {
     } catch (err) {
       if (!(err instanceof HttpException)) {
         throw new InternalServerErrorException('Creating order failed');
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  async getOrdersByUserId(id: string) {
+    try {
+      const orders = await this.orderDb.getOrdersByUserId(id);
+      if (!orders) {
+        throw new HttpException('Orders were not found for the user', HttpStatus.NOT_FOUND);
+      }
+      return orders;
+    } catch (err) {
+      if (!(err instanceof HttpException)) {
+        console.log(err);
+        throw new InternalServerErrorException('Getting orders for the user failed');
       } else {
         throw err;
       }

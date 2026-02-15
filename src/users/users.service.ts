@@ -16,9 +16,10 @@ export class UsersService {
     return users.map((user) => this.convertDbUserToUser(user));
   }
 
-  // findOne(id: number): Promise<User | null> {
-  //   return this.usersRepository.findOneBy({ id });
-  // }
+  async listUserById(id: string): Promise<User> {
+    const users = await this.usersRepository.findBy({ id });
+    return this.convertDbUserToUser(users[0]);
+  }
 
   async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);

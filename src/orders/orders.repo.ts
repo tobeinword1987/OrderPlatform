@@ -1,10 +1,10 @@
 import { Order } from './order.entity';
-import { Product } from 'src/products/product.entity';
+import { Product } from '../products/product.entity';
 import { OrderItem } from './order.item.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { DataSource } from 'typeorm';
-import { User } from 'src/users/user.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class OrderDB {
@@ -115,5 +115,20 @@ export class OrderDB {
       });
       return createdOrder;
     });
+  }
+
+  async getOrdersByUserId(id: string) {
+    try {
+      const userOrders = await this.dataSource
+        .createQueryBuilder(Order, "order")
+        .leftJoinAndSelect("order.user", "user")
+        .where("order.user_id = :id", { id })
+        .andWhere("user.address = :address", { address: 'Ukraine, Cherkasy, Taraskova street, building 10, loc. 166, 85-796' })
+        .getMany()
+
+      return userOrders;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }
