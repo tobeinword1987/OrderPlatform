@@ -6,6 +6,7 @@ import { Product } from '../products/product.entity';
 import { Category } from '../categories/category.entity';
 import { OrderItem } from '../orders/order.item.entity';
 import { Repository } from 'typeorm';
+import { ORDER_STATUS } from 'src/orders/order.dto';
 
 type SeedUser = {
   id: string;
@@ -24,6 +25,7 @@ type SeedOrder = {
   id: string;
   idempotencyKey: string;
   deliveryAddress: string;
+  orderStatus: ORDER_STATUS;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -190,6 +192,7 @@ for (let i = 0; i < 6000; i++) {
       idempotencyKey: Math.random().toString().slice(2),
       deliveryAddress:
         'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
+      orderStatus: ORDER_STATUS.CREATED,
       userId: users[Math.floor(Math.random() * 3)].id,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -204,6 +207,7 @@ orders.push(
     idempotencyKey: '100000',
     deliveryAddress:
       'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
+    orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a3',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -213,6 +217,7 @@ orders.push(
     idempotencyKey: '100001',
     deliveryAddress:
       'Ukraine, Cherkasy, Taraask street, building 11, loc. 11, 85-796',
+    orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a2',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -222,6 +227,7 @@ orders.push(
     idempotencyKey: '100003',
     deliveryAddress:
       'Ukraine, Cherkasy, Taraask street, building 10, loc. 166, 85-796',
+    orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a1',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -282,7 +288,7 @@ const upsertBatchElements = async (repository: Repository<any>, arr: Array<any>)
   let start = 0;
   let flag = 0;
   let count = 0;
-  for(let i = 0; i < arr.length; i + 5000) {
+  for (let i = 0; i < arr.length; i + 5000) {
     count++;
     if (start + 5000 > arr.length) {
       flag = 1;
@@ -290,7 +296,7 @@ const upsertBatchElements = async (repository: Repository<any>, arr: Array<any>)
     const limitArr = arr.slice(start, start + 5000);
     start = start + 5000;
     await repository.upsert(limitArr, ['id']);
-    if(flag) { break; }
+    if (flag) { break; }
   }
 }
 

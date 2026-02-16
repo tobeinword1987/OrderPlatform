@@ -87,7 +87,7 @@ Run commands:
 
 - npm run start:dev
 
-# Run Create order API
+<!-- # Run Create order API
 POST http://localhost:3000/orders
 
 Use body for this:
@@ -164,4 +164,162 @@ Use body for this:
             "quantity": 25
         }
     ]
+} -->
+
+<!-- GraphQl homework -->
+
+# GRAPHQL HOMEWORK
+
+# Run test endpoint
+
+POST http://localhost:3000/graphql
+
+{
+     test
 }
+
+# Run get orders without any filters endpoint
+
+POST http://localhost:3000/graphql
+
+{
+    orders
+        {
+            id
+            idempotency_key
+            user_id
+            delivery_address
+            order_status
+            created_at
+            updated_at
+            user {
+                id
+                first_name
+                last_name
+                address
+                phone_number
+                post_code
+            }
+            orderItems {
+                id
+                price_at_purchase
+                quantity
+                product_id
+                product {
+                    id
+                    category_id
+                    name
+                    quantity
+                }
+            }
+        }
+}
+
+# Run get orders endpoint with filters and pagination parameters for cursor pagination
+
+POST http://localhost:3000/graphql
+
+query ordersFiltered($filter: OrdersFilterInput!, $ordersPaginationInput: OrdersPaginationInput!)
+{
+    ordersFiltered( filter: $filter, ordersPaginationInput: $ordersPaginationInput )
+        {
+            orders {
+                id
+                idempotency_key
+                user_id
+                delivery_address
+                order_status
+                created_at
+                updated_at
+                user {
+                    id
+                    first_name
+                    last_name
+                    address
+                    phone_number
+                    post_code
+                }
+                orderItems {
+                    id
+                    price_at_purchase
+                    quantity
+                    product_id
+                    product {
+                        id
+                        category_id
+                        name
+                        quantity
+                    }
+                }
+        }
+        cursor {
+            createdAt
+            idTieBreaker
+        }
+        countOfPages
+    }
+}
+------------------------------------------------
+variables: 
+{
+    "filter" : { "status": "CREATED", "dateFrom": "2026-02-12T09:37:45.010Z", "dateTo": "2026-02-18T10:37:45.010Z"},
+
+    "ordersPaginationInput": {"limit": 2}
+}
+
+or, but set correct values of createdAt and idTieBreaker, because after db:seed these values will be changed
+
+{
+    "filter" : { "status": "CREATED", 
+        "dateFrom": "2026-02-12T09:37:45.010Z", 
+        "dateTo": "2026-02-18T10:37:45.010Z"
+        },
+    "ordersPaginationInput": {
+        "limit" : 2,
+        "createdAt":"2026-02-15T12:15:20.438Z", 
+        "idTieBreaker": "ff529ee8-7a8b-4457-a7bc-b04526853257"
+        }
+}
+
+# Optimization 1 + 1 + (....), additional DataLoader: (implemented for User, OrderItem and Product).
+
+All requests to all tables: OrderItem, Product and User were optimized with batch requests with the Dataloader strategy
+
+You can set in env file STRATEGY env
+
+In case of 'naive'
+
+You will see a lot of comments:
+- '---NAIVE---Request to OrderItem table'
+- '---NAIVE---Request to Product table'
+- '---NAIVE---Request to User table'
+
+If you set strategy: 'optimized'
+You will see only 3 requests to the database in comments:
+- '---OPTIMIZED---Request to OrderItem table'
+- '---OPTIMIZED---Request to Product table'
+- '---OPTIMIZED---Request to User table'
+
+LOGS FROM CONSOLE:
+
+In 'naive' case there are next logs from terminal:
+
+---NAIVE---Request to User table
+---NAIVE---Request to OrderItem table
+---NAIVE---Request to User table
+---NAIVE---Request to OrderItem table
+---NAIVE---Request to User table
+---NAIVE---Request to OrderItem table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+---NAIVE---Request to Product table
+
+In 'optimized' case there are only 3 logs from terminal:
+
+---OPTIMIZED---Request to User table
+---OPTIMIZED---Request to OrderItem table
+---OPTIMIZED---Request to Product table
+
+# ORDER_STATUS was added as enum
