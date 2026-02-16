@@ -1,0 +1,96 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Category {
+  id: ID!
+  name: String!
+  products: [Product!]!
+}
+
+type Cursor {
+  createdAt: DateTime!
+  idTieBreaker: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Order {
+  created_at: DateTime!
+  delivery_address: String!
+  id: ID!
+  idempotency_key: String!
+  orderItems: [OrderItem!]!
+  order_status: OrderStatus!
+  updated_at: DateTime!
+  user: User!
+  user_id: ID!
+}
+
+type OrderItem {
+  id: ID!
+  order: Order!
+  order_id: ID!
+  price_at_purchase: Float!
+  product: Product!
+  product_id: ID!
+  quantity: Float!
+}
+
+enum OrderStatus {
+  CLOSED
+  CREATED
+  IN_PROGRESS
+  UPDATED
+}
+
+input OrdersFilterInput {
+  dateFrom: DateTime
+  dateTo: DateTime
+  status: OrderStatus!
+}
+
+input OrdersPaginationInput {
+  createdAt: DateTime
+  idTieBreaker: String
+  limit: Float!
+}
+
+type PageResult {
+  countOfPages: Float!
+  cursor: Cursor!
+  orders: [Order!]!
+}
+
+type Product {
+  category: Category!
+  category_id: ID!
+  id: ID!
+  name: String!
+  orderItems: [OrderItem!]!
+  price: Float!
+  quantity: Float!
+}
+
+type Query {
+  orders: [Order!]!
+  ordersFiltered(filter: OrdersFilterInput!, ordersPaginationInput: OrdersPaginationInput!): PageResult!
+  test: String!
+}
+
+type User {
+  address: String!
+  created_at: DateTime!
+  email: String!
+  first_name: String!
+  id: ID!
+  is_active: Boolean!
+  last_name: String
+  orders: [Order!]!
+  phone_number: String
+  post_code: String!
+  updated_at: DateTime!
+}
