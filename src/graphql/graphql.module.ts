@@ -8,19 +8,16 @@ import { OrderItem } from 'src/orders/order.item.entity';
 import { Product } from 'src/products/product.entity';
 import { User } from 'src/users/user.entity';
 import { DtLoader } from './dataLoaders/data.loader';
-import { OrderResolver } from './resolvers/orders/order.resolver';
-import { OrderItemResolver } from './resolvers/orders/order.item.resolver';
 import { DataLoaderModule } from './dataLoaders/data.loader.module';
 import { TestResolver } from './resolvers/test.query.resolver';
 import { OrdersService } from 'src/orders/orders.service';
-import { OrderDB } from 'src/orders/orders.repo';
-import { UserResolver } from './resolvers/users/user.resolver';
+import { UserResolver } from '../users/user.resolver';
 import { UsersModule } from 'src/users/users.module';
-import { AuthModule } from 'src/auth/auth.module';
-import { UsersService } from 'src/users/users.service';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
+    OrdersModule,
     UsersModule,
     TypeOrmModule.forFeature([Order, OrderItem, Product, User]),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -43,7 +40,7 @@ import { UsersService } from 'src/users/users.service';
       })
     }),
   ],
-  providers: [OrderResolver, OrderItemResolver, TestResolver, OrdersService, OrderDB, UserResolver],
+  providers: [TestResolver],
 })
 
 export class GraphQlModule { }

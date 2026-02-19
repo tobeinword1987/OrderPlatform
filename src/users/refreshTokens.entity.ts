@@ -16,6 +16,10 @@ export class RefreshTokens {
   @Field(() => ID!)
   id: string;
 
+  @Column({ name: 'user_id' })
+  @Field(() => String!, { name: 'user_id' })
+  userId: string;
+
   @Column({ name: 'token' })
   @Field(() => String!, { name: 'token' })
   token: string;

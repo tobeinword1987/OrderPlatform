@@ -6,7 +6,7 @@ import { OrderItem } from "src/orders/order.item.entity";
 import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import DataLoader from "dataloader";
-import { ORDER_STATUS } from '../../../orders/order.dto';
+import { ORDER_STATUS } from './order.dto';
 import { OrdersFilterInput, OrdersPaginationInput, PageResult } from "src/orders/order.types.graphql";
 import { OrdersService } from "src/orders/orders.service";
 

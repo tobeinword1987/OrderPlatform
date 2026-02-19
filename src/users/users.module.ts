@@ -7,12 +7,14 @@ import { Role } from './role.entity';
 import { Scope } from './scope.entity';
 import { RolesToScopes } from './rolesToScopes.entity';
 import { UsersRoles } from './usersRoles.entity';
-import { RefreshTokens } from './refreshTokens.entetity';
+import { RefreshTokens } from './refreshTokens.entity';
+import { UserResolver } from './user.resolver';
+import { Repository } from 'typeorm';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Role, RolesToScopes, Scope, UsersRoles, RefreshTokens])],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [Repository<User>, UsersService, UserResolver],
   exports: [UsersService]
 })
 export class UsersModule { }
