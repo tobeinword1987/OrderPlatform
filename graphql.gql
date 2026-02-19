@@ -8,6 +8,11 @@ type Category {
   products: [Product!]!
 }
 
+input Credentials {
+  password: String!
+  username: String!
+}
+
 type Cursor {
   createdAt: DateTime!
   idTieBreaker: String!
@@ -17,6 +22,10 @@ type Cursor {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Mutation {
+  signIn(credentials: Credentials!): [User!]!
+}
 
 type Order {
   created_at: DateTime!
@@ -79,6 +88,8 @@ type Query {
   orders: [Order!]!
   ordersFiltered(filter: OrdersFilterInput!, ordersPaginationInput: OrdersPaginationInput!): PageResult!
   test: String!
+  userByLogin(login: String!): User!
+  users: [User!]!
 }
 
 type User {
@@ -89,7 +100,9 @@ type User {
   id: ID!
   is_active: Boolean!
   last_name: String
+  login: String!
   orders: [Order!]!
+  password: String!
   phone_number: String
   post_code: String!
   updated_at: DateTime!

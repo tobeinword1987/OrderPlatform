@@ -8,15 +8,29 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { UsersRoles } from './usersRoles.entity';
+import { Role } from './role.entity';
 
 @Entity()
 @ObjectType()
 @Index('Index_users_email_unique', ['email'], { unique: true })
+@Index('Index_users_login_unique', ['email'], { unique: true })
+@Index('Index_users_login_password_unique', ['login', 'password'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => ID!)
   id: string;
+
+  @Column({ name: 'login' })
+  @Field(() => String!, { name: 'login' })
+  login: string;
+
+  @Column({ name: 'password' })
+  @Field(() => String!, { name: 'password' })
+  password: string;
 
   @Column({ name: 'first_name' })
   @Field(() => String!, { name: 'first_name' })
@@ -57,4 +71,22 @@ export class User {
   @OneToMany(() => Order, (order) => order.user)
   @Field(() => [Order]!)
   orders: Order[];
+
+  @ManyToMany(
+    () => Role,
+    role => role.users) //optional
+    @JoinTable(
+    //   {
+    //   name: 'user_role',
+    //   joinColumn: {
+    //     name: 'user_id',
+    //     referencedColumnName: 'id',
+    //   },
+    //   inverseJoinColumn: {
+    //     name: 'role_id',
+    //     referencedColumnName: 'id',
+    //   },
+    // }
+  )
+    roles?: Role[];
 }

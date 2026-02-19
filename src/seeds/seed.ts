@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID, UUID } from 'crypto';
 import PostgresDataSource from 'data.source';
 import { User } from '../users/user.entity';
 import { Order } from '../orders/order.entity';
@@ -7,9 +7,26 @@ import { Category } from '../categories/category.entity';
 import { OrderItem } from '../orders/order.item.entity';
 import { Repository } from 'typeorm';
 import { ORDER_STATUS } from 'src/orders/order.dto';
+import { Role } from 'src/users/role.entity';
+import { RolesToScopes } from 'src/users/rolesToScopes.entity';
+import { UsersRoles } from 'src/users/usersRoles.entity';
+import { Scope } from 'src/users/scope.entity';
+import { hashdata } from 'src/utils/helper';
+
+type SeedRole = {
+  id: string;
+  role: string;
+}
+
+type SeedScope = {
+  id: string;
+  scope: string
+}
 
 type SeedUser = {
   id: string;
+  login: string;
+  password: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -51,9 +68,115 @@ type SeedOrderItem = {
   productId: string;
 };
 
+const roles: SeedRole[] = [
+  {
+    id: randomUUID(),
+    role: 'admin'
+  },
+  {
+    id: randomUUID(),
+    role: 'user'
+  },
+  {
+    id: randomUUID(),
+    role: 'guest'
+  }
+]
+
+type SeedRoleToScope = {
+  id: string,
+  roleId: string,
+  scopeId: string
+}
+
+type SeedUserRoles = {
+  id: string,
+  roleId: string,
+  userId: string
+}
+
+const scopes: SeedScope[] = [
+  {
+    id: randomUUID(),
+    scope: 'orders:read'
+  },
+  {
+    id: randomUUID(),
+    scope: 'orders:write'
+  },
+  {
+    id: randomUUID(),
+    scope: 'categories:read'
+  },
+  {
+    id: randomUUID(),
+    scope: 'categories:write'
+  },
+  {
+    id: randomUUID(),
+    scope: 'products:read'
+  },
+  {
+    id: randomUUID(),
+    scope: 'products:write'
+  },
+  {
+    id: randomUUID(),
+    scope: 'users:read'
+  },
+  {
+    id: randomUUID(),
+    scope: 'users:write'
+  },
+  {
+    id: randomUUID(),
+    scope: 'scopes:read'
+  },
+  {
+    id: randomUUID(),
+    scope: 'scopes:write'
+  },
+  {
+    id: randomUUID(),
+    scope: 'roles:read'
+  },
+  {
+    id: randomUUID(),
+    scope: 'roles:write'
+  }
+]
+
+const roleToScope: SeedRoleToScope[] = [];
+const roleToScopeIds: UUID[] = []
+for (let i = 0; i < scopes.length; i++) {
+  roleToScopeIds.push(randomUUID());
+  roleToScope.push(
+    {
+      id: randomUUID(),
+      roleId: roles[0].id,
+      scopeId: scopes[i].id,
+    },
+    {
+      id: randomUUID(),
+      roleId: roles[1].id,
+      scopeId: scopes[i].id,
+    },
+    {
+      id: randomUUID(),
+      roleId: roles[2].id,
+      scopeId: scopes[i].id,
+    }
+  )
+}
+
+
+
+
 const users: SeedUser[] = [
   {
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5a1',
+    login: 'login1',
+    password: hashdata('password1'),
     firstName: 'Liudmyla',
     lastName: 'Popova',
     email: 'liudmyla.popova@icloud.com',
@@ -67,6 +190,8 @@ const users: SeedUser[] = [
   },
   {
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5a2',
+    login: 'login2',
+    password: hashdata('password2'),
     firstName: 'Gorbatko',
     lastName: 'Ivan',
     email: 'gorbatko.ivan@icloud.com',
@@ -80,6 +205,8 @@ const users: SeedUser[] = [
   },
   {
     id: '0c6af838-fad5-4f6f-909d-d74886b1d5a3',
+    login: 'login3',
+    password: hashdata('password3'),
     firstName: 'Kosinova',
     lastName: 'Oksana',
     email: 'kosinova.oksana@icloud.com',
@@ -92,6 +219,19 @@ const users: SeedUser[] = [
     updatedAt: new Date(),
   },
 ];
+
+const userRoles: SeedUserRoles[] = [];
+const userRolesIds: UUID[] = [];
+for (let i = 0; i < users.length; i++) {
+  userRolesIds.push(randomUUID());
+  userRoles.push(
+    {
+      id: userRolesIds[i],
+      roleId: roles[Math.floor(Math.random() * 3)].id,
+      userId: users[i].id,
+    }
+  )
+}
 
 const categories: SeedCategory[] = [
   {
@@ -273,12 +413,21 @@ async function seed() {
     const orderRepository = PostgresDataSource.getRepository(Order);
     const categoryRepository = PostgresDataSource.getRepository(Category);
     const orderItemRepository = PostgresDataSource.getRepository(OrderItem);
+    const roleRepository = PostgresDataSource.getRepository(Role);
+    const scopeRepository = PostgresDataSource.getRepository(Scope);
+    const rolesToScopesRepository = PostgresDataSource.getRepository(RolesToScopes);
+    const usersRolesRepository = PostgresDataSource.getRepository(UsersRoles);
 
     await upsertBatchElements(usersRepository, users);
     await upsertBatchElements(categoryRepository, categories);
     await upsertBatchElements(productRepository, products);
     await upsertBatchElements(orderRepository, orders);
     await upsertBatchElements(orderItemRepository, orderItems);
+
+    await upsertBatchElements(roleRepository, roles);
+    await upsertBatchElements(scopeRepository, scopes);
+    await upsertBatchElements(rolesToScopesRepository, roleToScope);
+    await upsertBatchElements(usersRolesRepository, userRoles);
   } finally {
     await PostgresDataSource.destroy();
   }

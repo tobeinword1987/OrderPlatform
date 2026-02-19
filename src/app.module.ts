@@ -17,6 +17,8 @@ import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './http.exception.filter';
 import { GraphQlModule } from './graphql/graphql.module';
 import { DataLoaderModule } from './graphql/dataLoaders/data.loader.module';
+import { AuditLogsModule } from './auditLogs/auditLog.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { DataLoaderModule } from './graphql/dataLoaders/data.loader.module';
     CategoriesModule,
     GraphQlModule,
     DataLoaderModule,
+    AuditLogsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
