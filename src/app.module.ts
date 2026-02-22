@@ -19,9 +19,14 @@ import { GraphQlModule } from './graphql/graphql.module';
 import { DataLoaderModule } from './graphql/dataLoaders/data.loader.module';
 import { AuditLogsModule } from './auditLogs/auditLog.module';
 import { AuthModule } from './auth/auth.module';
+import { Role } from './users/role.entity';
+import { RefreshTokens } from './users/refreshTokens.entity';
+import { UsersRoles } from './users/usersRoles.entity';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `./src/configuration/.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
@@ -46,7 +51,7 @@ import { AuthModule } from './auth/auth.module';
         migrations: [],
         migrationsTableName: 'migrationsHistory',
         migrationsTransactionMode: 'all',
-        entities: [User, Category, Order, OrderItem, Product],
+        entities: [User, Category, Order, OrderItem, Product, Role, RefreshTokens, UsersRoles],
       }),
       // dataSourceFactory: async (options) => {
       //   const dataSource = await new DataSource(options as DataSourceOptions).initialize();
@@ -60,6 +65,7 @@ import { AuthModule } from './auth/auth.module';
     DataLoaderModule,
     AuditLogsModule,
     AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [
@@ -68,7 +74,7 @@ import { AuthModule } from './auth/auth.module';
     CategoriesService,
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: HttpExceptionFilter
     },
   ],
 })

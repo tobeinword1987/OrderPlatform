@@ -17,7 +17,7 @@ export class OrdersService {
 
   constructor(
     private orderDb: OrderDB,
-      private orderRepository: Repository<Order>,
+      @InjectRepository(Order) private orderRepository: Repository<Order>,
   ) { }
 
   async createOrder(order: NewOrderReq) {

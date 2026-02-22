@@ -2,6 +2,7 @@ import { Body, Controller,  Get,  Post, Request, UseGuards } from '@nestjs/commo
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LogInAuthGuard } from './auth/log.in.guard';
+import { Public } from './decorators/public';
 
 @Controller()
 export class AppController {
@@ -9,6 +10,7 @@ export class AppController {
   constructor(private authService: AuthService) {}
 
   @UseGuards(LogInAuthGuard)
+  @Public()
   @Post('auth/login')
   async login(@Request() req: any) {
     return this.authService.login(req.user);
@@ -20,9 +22,4 @@ export class AppController {
     return this.authService.refreshToken(req.user, refreshToken);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req: any) {
-    return req.user;
-  }
 }

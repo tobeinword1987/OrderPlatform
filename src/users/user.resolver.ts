@@ -1,14 +1,14 @@
-import { Args, Mutation, Query } from "@nestjs/graphql";
+import { Args, Query } from "@nestjs/graphql";
 import { Resolver } from "@nestjs/graphql";
 import { User } from "src/users/user.entity";
-import { Credentials } from "./user.types.graphql";
 import { UsersService } from "src/users/users.service";
+import { AuthService } from "src/auth/auth.service";
 
 @Resolver(() => User)
 export class UserResolver {
 
     constructor(
-        private usersService: UsersService
+        private usersService: UsersService,
     ) { }
 
     @Query(() => [User])
@@ -23,10 +23,10 @@ export class UserResolver {
         return user;
     }
 
-    @Mutation(() => [User])
-    async signIn(@Args('credentials') credentials: Credentials): Promise<User[]> {
-        console.log(credentials)
-        const users = await this.usersService.listUsers()
-        return users;
-    }
+    // @Mutation(() => UserWithTokens)
+    // @UseGuards(GqlLocalAuthGuard)
+    // async signIn(@CurrentUser() user: User, @Args('username') username: string, @Args('password') pass: string): Promise<{ user: { login: string, id: string }, accessToken: string, refresh_token: string }> {
+    //     console.log('###################', user);
+    //     return this.authService.login(user);
+    // }
 }
