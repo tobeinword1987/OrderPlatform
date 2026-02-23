@@ -34,7 +34,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const { user } = context.switchToHttp().getRequest();
 
         const roles = this.reflector.get(Roles, context.getHandler());
-        console.log(roles);
         if (!roles) {
             return true;
         }
@@ -45,7 +44,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     async matchRoles(roles: string[], userId: string) {
-        console.log(userId);
         const uRoles = await this.userRolesRepository.find({
             where: {
                 userId,

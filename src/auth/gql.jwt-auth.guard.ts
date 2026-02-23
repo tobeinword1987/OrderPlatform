@@ -39,7 +39,6 @@ export class GqlAuthGuard extends AuthGuard('jwt') {
           const { user } = this.getRequest(context);
 
           const roles = this.reflector.get(Roles, context.getHandler());
-          console.log(roles);
           if (!roles) {
               return true;
           }
@@ -50,8 +49,6 @@ export class GqlAuthGuard extends AuthGuard('jwt') {
       }
 
       async matchRoles(roles: string[], userId: string) {
-        console.log('@@@@@', userId, roles)
-          console.log(userId);
           const uRoles = await this.userRolesRepository.find({
               where: {
                   userId,

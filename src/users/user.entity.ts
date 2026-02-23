@@ -11,8 +11,8 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { UsersRoles } from './usersRoles.entity';
 import { Role } from './role.entity';
+import { File } from '../files/file.entity';
 
 @Entity()
 @ObjectType()
@@ -72,21 +72,12 @@ export class User {
   @Field(() => [Order]!)
   orders: Order[];
 
+  @OneToMany(() => File, (file) => file.user, { nullable: true })
+  files?: File[];
+
   @ManyToMany(
     () => Role,
-    role => role.users) //optional
-    @JoinTable(
-    //   {
-    //   name: 'user_role',
-    //   joinColumn: {
-    //     name: 'user_id',
-    //     referencedColumnName: 'id',
-    //   },
-    //   inverseJoinColumn: {
-    //     name: 'role_id',
-    //     referencedColumnName: 'id',
-    //   },
-    // }
-  )
+    role => role.users)
+    @JoinTable()
     roles?: Role[];
 }

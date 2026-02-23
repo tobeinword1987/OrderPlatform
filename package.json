@@ -23,7 +23,10 @@
     "db:revert": "typeorm-ts-node-commonjs -d data.source.ts migration:revert",
     "db:seed": "ts-node -r tsconfig-paths/register src/seeds/seed.ts",
     "typeorm": "typeorm-ts-node-esm",
-    "test:unique_race": "node scripts/test_parallel_requests.js"
+    "test:unique_race": "node scripts/test_parallel_requests.js",
+    "up": "docker compose up",
+    "downAll": "docker compose down --volumes",
+    "down": "docker compose down && docker volume rm order-platform_pgdata_files_module"
   },
   "dependencies": {
     "@apollo/server": "^5.4.0",

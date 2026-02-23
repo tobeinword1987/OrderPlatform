@@ -45,7 +45,7 @@ services:
       POSTGRES_PASSWORD: liudmyla
       POSTGRES_DB: liudmyla
     ports:
-      - 5432:5432
+      - 5433:5432
     volumes:
       - pgdata_files_module:/var/lib/postgresql/data
 

@@ -22,7 +22,7 @@ import { AuthModule } from './auth/auth.module';
 import { Role } from './users/role.entity';
 import { RefreshTokens } from './users/refreshTokens.entity';
 import { UsersRoles } from './users/usersRoles.entity';
-import { FilesModule } from './files/files.module';
+import { FilesModule } from './files/file.module';
 
 @Module({
   imports: [

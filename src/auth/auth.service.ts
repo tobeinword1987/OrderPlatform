@@ -15,11 +15,8 @@ export class AuthService {
   ) { }
 
   async validateUser(username: string, pass: string): Promise<any> {
-    console.log('********', username, pass)
     const user = await this.usersService.findUserByLogin(username);
-    console.log('~~~~~~~~~~~~~~~~', user);
     const hashedPassword = hashdata(pass);
-    console.log('~~~~~~~~~~~~~~~~', user?.password, hashedPassword);
     if (user && user.password === hashedPassword) {
       const { password, ...result } = user;
       return result;
@@ -29,7 +26,6 @@ export class AuthService {
 
   async login(user: { login: string, id: string }) {
     const payload = { userName: user.login, sub: user.id };
-    console.log(user, '***', payload);
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = hashdata(accessToken);
     await this.refreshTokenRepository.update({ userId: user.id }, { isActive: false });
@@ -42,7 +38,6 @@ export class AuthService {
   }
 
   async refreshToken(user: { login: string, id: string }, refreshToken: string) {
-    console.log('refreshToken', refreshToken)
     const currentToken = await this.refreshTokenRepository.findOneBy({ userId: user.id, token: refreshToken });
     if (!currentToken || currentToken.isActive === false || !(Math.floor(Date.now() / 1000) <
     (Math.floor((new Date(currentToken.createdAt)).getTime() / 1000) + 10 * 24 * 3600))) {
