@@ -1,4 +1,4 @@
-import { User } from 'src/users/user.dto';
+import { User } from '../users/user.dto';
 import { OrderItem } from './order.item.dto';
 
 export type OrdersFilterInput = {

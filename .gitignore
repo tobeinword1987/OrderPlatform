@@ -20,3 +20,5 @@
 # migrations
 
 README.example.md
+pgdata_files_module
+minio_files_module

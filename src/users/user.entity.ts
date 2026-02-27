@@ -10,9 +10,12 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
-import { File } from '../files/file.entity';
+import { UploadFile } from '../files/file.entity';
+import type { UUID } from 'crypto';
 
 @Entity()
 @ObjectType()
@@ -60,6 +63,9 @@ export class User {
   @Field(() => Boolean!, { defaultValue: true, name: 'is_active' })
   isActive: boolean;
 
+  @Column({ type: 'uuid', name: 'avatar_id', nullable: true })
+  avatarId: UUID;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   @Field(() => GraphQLISODateTime!, { name: 'created_at' })
   createdAt: Date;
@@ -72,12 +78,19 @@ export class User {
   @Field(() => [Order]!)
   orders: Order[];
 
-  @OneToMany(() => File, (file) => file.user, { nullable: true })
-  files?: File[];
+  @OneToMany(() => UploadFile, (file) => file.user, { nullable: true })
+  files?: UploadFile[];
 
   @ManyToMany(
     () => Role,
     role => role.users)
-    @JoinTable()
-    roles?: Role[];
+  @JoinTable()
+  roles?: Role[];
+
+  @OneToOne(
+    () => UploadFile,
+    file => file.user,
+    { nullable: true })
+  @JoinColumn({ name: 'avatar_id' })
+  avatar?: UploadFile;
 }

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class GenerateDb1771797270320 implements MigrationInterface {
-    name = 'GenerateDb1771797270320'
+export class GenerateDb1772098907075 implements MigrationInterface {
+    name = 'GenerateDb1772098907075'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "scope" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "scope" character varying NOT NULL, CONSTRAINT "PK_d3425631cbb370861a58c3e88c7" PRIMARY KEY ("id"))`);
@@ -20,10 +20,10 @@ export class GenerateDb1771797270320 implements MigrationInterface {
         await queryRunner.query(`CREATE INDEX "Index_order_user_id" ON "order" ("user_id") `);
         await queryRunner.query(`CREATE TYPE "public"."file_status" AS ENUM('pending', 'ready')`);
         await queryRunner.query(`CREATE TYPE "public"."file_visibility" AS ENUM('private', 'public')`);
-        await queryRunner.query(`CREATE TABLE "file" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" uuid NOT NULL, "key" character varying NOT NULL, "content_type" character varying NOT NULL, "size" integer NOT NULL, "status" "public"."file_status" NOT NULL DEFAULT 'pending', "visibility" "public"."file_visibility" NOT NULL DEFAULT 'private', "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_36b46d232307066b3a2c9ea3a1d" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "file" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" uuid NOT NULL, "key" character varying NOT NULL, "content_type" character varying NOT NULL, "size" integer, "status" "public"."file_status" NOT NULL DEFAULT 'pending', "visibility" "public"."file_visibility" NOT NULL DEFAULT 'private', "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_e4a453ce0a609a5f94c66afb6ca" UNIQUE ("key"), CONSTRAINT "PK_36b46d232307066b3a2c9ea3a1d" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "Index_file_created_at" ON "file" ("created_at") `);
         await queryRunner.query(`CREATE INDEX "Index_file_user_id" ON "file" ("user_id") `);
-        await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "login" character varying NOT NULL, "password" character varying NOT NULL, "first_name" character varying NOT NULL, "last_name" character varying NOT NULL, "email" character varying NOT NULL, "address" character varying NOT NULL, "phone_number" character varying NOT NULL, "post_code" character varying NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "login" character varying NOT NULL, "password" character varying NOT NULL, "first_name" character varying NOT NULL, "last_name" character varying NOT NULL, "email" character varying NOT NULL, "address" character varying NOT NULL, "phone_number" character varying NOT NULL, "post_code" character varying NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "avatar_id" uuid, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "REL_b777e56620c3f1ac0308514fc4" UNIQUE ("avatar_id"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "Index_users_login_password_unique" ON "user" ("login", "password") `);
         await queryRunner.query(`CREATE UNIQUE INDEX "Index_users_login_unique" ON "user" ("email") `);
         await queryRunner.query(`CREATE UNIQUE INDEX "Index_users_email_unique" ON "user" ("email") `);
@@ -47,6 +47,7 @@ export class GenerateDb1771797270320 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "order_item" ADD CONSTRAINT "FK_5e17c017aa3f5164cb2da5b1c6b" FOREIGN KEY ("product_id") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "order" ADD CONSTRAINT "FK_199e32a02ddc0f47cd93181d8fd" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "file" ADD CONSTRAINT "FK_516f1cf15166fd07b732b4b6ab0" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "user" ADD CONSTRAINT "FK_b777e56620c3f1ac0308514fc4c" FOREIGN KEY ("avatar_id") REFERENCES "file"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "user_role" ADD CONSTRAINT "FK_d0e5815877f7395a198a4cb0a46" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "user_role" ADD CONSTRAINT "FK_32a6fc2fcb019d8e3a8ace0f55f" FOREIGN KEY ("role_id") REFERENCES "role"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "role_to_scope" ADD CONSTRAINT "FK_68cd07c817f2082a69d768b5a79" FOREIGN KEY ("scope_id") REFERENCES "scope"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -68,6 +69,7 @@ export class GenerateDb1771797270320 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "role_to_scope" DROP CONSTRAINT "FK_68cd07c817f2082a69d768b5a79"`);
         await queryRunner.query(`ALTER TABLE "user_role" DROP CONSTRAINT "FK_32a6fc2fcb019d8e3a8ace0f55f"`);
         await queryRunner.query(`ALTER TABLE "user_role" DROP CONSTRAINT "FK_d0e5815877f7395a198a4cb0a46"`);
+        await queryRunner.query(`ALTER TABLE "user" DROP CONSTRAINT "FK_b777e56620c3f1ac0308514fc4c"`);
         await queryRunner.query(`ALTER TABLE "file" DROP CONSTRAINT "FK_516f1cf15166fd07b732b4b6ab0"`);
         await queryRunner.query(`ALTER TABLE "order" DROP CONSTRAINT "FK_199e32a02ddc0f47cd93181d8fd"`);
         await queryRunner.query(`ALTER TABLE "order_item" DROP CONSTRAINT "FK_5e17c017aa3f5164cb2da5b1c6b"`);

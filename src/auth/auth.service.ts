@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { RefreshTokens } from 'src/users/refreshTokens.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +25,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: { login: string, id: string }) {
+  async login(user: User) {
     const payload = { userName: user.login, sub: user.id };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = hashdata(accessToken);
@@ -37,10 +38,10 @@ export class AuthService {
     };
   }
 
-  async refreshToken(user: { login: string, id: string }, refreshToken: string) {
-    const currentToken = await this.refreshTokenRepository.findOneBy({ userId: user.id, token: refreshToken });
+  async refreshToken(user: User, refreshTokenBody: { refresh_token: string }) {
+    const currentToken = await this.refreshTokenRepository.findOneBy({ userId: user.id, token: refreshTokenBody.refresh_token });
     if (!currentToken || currentToken.isActive === false || !(Math.floor(Date.now() / 1000) <
-    (Math.floor((new Date(currentToken.createdAt)).getTime() / 1000) + 10 * 24 * 3600))) {
+      (Math.floor((new Date(currentToken.createdAt)).getTime() / 1000) + 10 * 24 * 3600))) {
       await this.refreshTokenRepository.update({ userId: user.id }, { isActive: false });
       throw new HttpException('You have to authorized again', HttpStatus.UNAUTHORIZED);
     } else {

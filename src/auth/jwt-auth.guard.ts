@@ -38,7 +38,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             return true;
         }
         if(user) {
-            return await this.matchRoles(roles, user.user.id);
+            const userId = user?.user?.id ?? user.id;
+            return await this.matchRoles(roles, userId);
         }
         return true;
     }

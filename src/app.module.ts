@@ -7,7 +7,6 @@ import { ConfigService } from './config-service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { CategoriesModule } from './categories/categories.module';
-import { CategoriesService } from './categories/categories.service';
 import { Category } from './categories/category.entity';
 import { Order } from './orders/order.entity';
 import { Product } from './products/product.entity';
@@ -22,7 +21,8 @@ import { AuthModule } from './auth/auth.module';
 import { Role } from './users/role.entity';
 import { RefreshTokens } from './users/refreshTokens.entity';
 import { UsersRoles } from './users/usersRoles.entity';
-import { FilesModule } from './files/file.module';
+import { FileModule } from './files/file.module';
+import { UploadFile } from './files/file.entity';
 
 @Module({
   imports: [
@@ -44,19 +44,13 @@ import { FilesModule } from './files/file.module';
         database: cfg.get('DB_NAME'),
         ssl: cfg.get('DB_SSL') ? { rejectUnauthorized: false } : undefined,
         autoLoadEntities: true,
-        // synchronize: cfg.get('NODE_ENV') === 'dev' ? true : false,
         synchronize: false,
-
         migrationsRun: true,
         migrations: [],
         migrationsTableName: 'migrationsHistory',
         migrationsTransactionMode: 'all',
-        entities: [User, Category, Order, OrderItem, Product, Role, RefreshTokens, UsersRoles],
+        entities: [User, Category, UploadFile, Order, OrderItem, Product, Role, RefreshTokens, UsersRoles],
       }),
-      // dataSourceFactory: async (options) => {
-      //   const dataSource = await new DataSource(options as DataSourceOptions).initialize();
-      //   return dataSource;
-      // },
     }),
     OrdersModule,
     UsersModule,
@@ -65,13 +59,12 @@ import { FilesModule } from './files/file.module';
     DataLoaderModule,
     AuditLogsModule,
     AuthModule,
-    FilesModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     ConfigService,
-    CategoriesService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter

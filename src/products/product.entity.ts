@@ -10,7 +10,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { OneToOne } from 'typeorm';
 
 @Entity()
 @ObjectType()

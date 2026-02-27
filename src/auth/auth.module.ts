@@ -22,7 +22,7 @@ import { Role } from 'src/users/role.entity';
       inject: [ConfigService],
       useFactory: (conf: ConfigService) => ({
         secret: conf.get('JWT_SECRET'),
-        signOptions: { expiresIn: '60s' }
+        signOptions: { expiresIn: '1d' }
       }),
     })
   ],

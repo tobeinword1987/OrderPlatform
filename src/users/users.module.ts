@@ -10,10 +10,11 @@ import { UsersRoles } from './usersRoles.entity';
 import { RefreshTokens } from './refreshTokens.entity';
 import { UserResolver } from './user.resolver';
 import { Repository } from 'typeorm';
-import { File } from '../files/file.entity';
+import { UploadFile } from '../files/file.entity';
+import { FileModule } from 'src/files/file.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([File, User, Role, RolesToScopes, Scope, RefreshTokens, UsersRoles])],
+  imports: [TypeOrmModule.forFeature([UploadFile, User, Role, RolesToScopes, Scope, RefreshTokens, UsersRoles]), FileModule],
   controllers: [UsersController],
   providers: [
     Repository<User>,

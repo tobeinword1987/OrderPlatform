@@ -18,7 +18,7 @@ services:
       - NODE_ENV=dev
       - PORT=3000
       - STRATEGY=optimized
-      - JWT_SECRET=secret_for_very_ver_secret_application
+      - JWT_SECRET='secret_for_very_ver_secret_application'
       - AWS_REGION=eu-central-1
       - AWS_S3_BUCKET=files-private
       - AWS_ACCESS_KEY_ID=minioadmin
@@ -47,7 +47,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - pgdata_files_module:/var/lib/postgresql/data
+      - ./pgdata_files_module:/var/lib/postgresql/data
 
   minio:
     image: minio/minio:latest
@@ -74,7 +74,7 @@ services:
     restart: 'no'
     entrypoint: >
       /bin/sh -c "
-      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
+      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
         echo 'waiting for minio...';
         sleep 2;
       done;

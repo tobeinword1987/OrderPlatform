@@ -70,15 +70,15 @@ type SeedOrderItem = {
 
 const roles: SeedRole[] = [
   {
-    id: randomUUID(),
+    id: 'e37a41b2-234a-41b1-b32b-ca251d1b0086',
     role: 'admin'
   },
   {
-    id: randomUUID(),
+    id: 'e37a41b2-234a-41b1-b32b-ca251d1b0087',
     role: 'user'
   },
   {
-    id: randomUUID(),
+    id: 'e37a41b2-234a-41b1-b32b-ca251d1b0085',
     role: 'guest'
   }
 ]
@@ -227,7 +227,7 @@ for (let i = 0; i < users.length; i++) {
   userRoles.push(
     {
       id: userRolesIds[i],
-      roleId: roles[Math.floor(Math.random() * 3)].id,
+      roleId: 'e37a41b2-234a-41b1-b32b-ca251d1b0086',
       userId: users[i].id,
     }
   )
@@ -418,16 +418,30 @@ async function seed() {
     const rolesToScopesRepository = PostgresDataSource.getRepository(RolesToScopes);
     const usersRolesRepository = PostgresDataSource.getRepository(UsersRoles);
 
-    await upsertBatchElements(usersRepository, users);
-    await upsertBatchElements(categoryRepository, categories);
-    await upsertBatchElements(productRepository, products);
-    await upsertBatchElements(orderRepository, orders);
-    await upsertBatchElements(orderItemRepository, orderItems);
+    const countUsers = await usersRepository.count()
+    const countProducts = await productRepository.count();
+    const countOrders = await orderRepository.count();
+    const countCategories = await categoryRepository.count();
+    const countOrderItems = await orderItemRepository.count();
+    const countRoles = await roleRepository.count();
+    const countScopes = await scopeRepository.count();
+    const countRolesToScopes = await rolesToScopesRepository.count();
+    const countUsersRoles = await usersRolesRepository.count();
 
-    await upsertBatchElements(roleRepository, roles);
-    await upsertBatchElements(scopeRepository, scopes);
-    await upsertBatchElements(rolesToScopesRepository, roleToScope);
-    await upsertBatchElements(usersRolesRepository, userRoles);
+    if (!(countUsers && countProducts && countOrders &&
+      countCategories && countOrderItems && countRoles &&
+      countScopes && countRolesToScopes && countUsersRoles)) {
+      await upsertBatchElements(usersRepository, users);
+      await upsertBatchElements(categoryRepository, categories);
+      await upsertBatchElements(productRepository, products);
+      await upsertBatchElements(orderRepository, orders);
+      await upsertBatchElements(orderItemRepository, orderItems);
+
+      await upsertBatchElements(roleRepository, roles);
+      await upsertBatchElements(scopeRepository, scopes);
+      await upsertBatchElements(rolesToScopesRepository, roleToScope);
+      await upsertBatchElements(usersRolesRepository, userRoles);
+    }
   } finally {
     await PostgresDataSource.destroy();
   }
