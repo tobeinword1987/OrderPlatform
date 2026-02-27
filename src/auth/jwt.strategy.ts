@@ -41,9 +41,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
                 return user;
             } else
             throw new HttpException('Access token was expired, please refresh it with refreshToken', HttpStatus.UNAUTHORIZED);
-            // console.log('^^^^^^', accessToken, '****', hashdata(accessToken));
-            // await this.authService.refreshToken({ login: payload.userName, id: payload.sub } as User, request?.body?.refreshToken ?? token);
-            // return user;
         }
     }
 }
