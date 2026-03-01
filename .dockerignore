@@ -1,10 +1,12 @@
 *.md
 
-**/*.env.*
+**/.env.*
 
 .gitignore
 
-**/node_modules/
+**/node_modules
+
+node_modules
 
 dist
 
@@ -16,8 +18,9 @@ coverage
 
 .git
 
+test
+
 npm-debug.log
 
-.aws
 
 **/*spec.ts
