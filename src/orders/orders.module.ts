@@ -14,14 +14,31 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UsersRoles } from 'src/users/usersRoles.entity';
 import { Role } from 'src/users/role.entity';
-import { GqlAuthGuard } from 'src/auth/gql.jwt-auth.guard';
+import { RabbitmqModule } from 'src/rabbitmq/rabbitmq.module';
+import { OrdersWorkerService } from './orders.worker.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Product, UsersRoles, Role])],
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Product, UsersRoles, Role]), RabbitmqModule,
+  ClientsModule.register([
+    {
+      name: 'OrdersService',
+      transport: Transport.RMQ,
+      options: {
+        urls: ['amqp://user1:pass1@localhost:5673'],
+        queue: 'orders.process',
+        queueOptions: {
+          durable: false
+        },
+      },
+    },
+  ]),
+  ],
   providers: [
     OrderResolver,
     OrderItemResolver,
     OrdersService,
+    OrdersWorkerService,
     OrderDB,
     Repository<Order>,
     {

@@ -1,5 +1,13 @@
+import { UUID } from 'crypto';
 import { User } from '../users/user.dto';
 import { OrderItem } from './order.item.dto';
+
+export type OrderProcessedMessage = {
+  messageId: UUID,
+  orderId: UUID,
+  createdAt: string,
+  attempt: number
+}
 
 export type OrdersFilterInput = {
   status?: ORDER_STATUS,
@@ -14,6 +22,7 @@ export type OrdersPaginationInput = {
 
 export enum ORDER_STATUS {
   CREATED = 'created',
+  PROCEED = 'proceed',
   UPDATED = 'updated',
   IN_PROGRESS = 'in_progress',
   CLOSED = 'closed'

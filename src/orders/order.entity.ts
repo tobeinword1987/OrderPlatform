@@ -13,6 +13,7 @@ import {
 import { OrderItem } from './order.item.entity';
 import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ORDER_STATUS } from './order.dto';
+import type { UUID } from 'crypto';
 
 registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 
@@ -24,7 +25,7 @@ registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => ID!)
-  id: string;
+  id: UUID;
 
   @Column({ name: 'idempotency_key' })
   @Field(() => String!, { name: 'idempotency_key' })

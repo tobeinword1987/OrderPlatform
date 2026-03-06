@@ -4,12 +4,14 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { NewOrderReq } from './order.dto';
+import { NewOrderReq, ORDER_STATUS, OrderProcessedMessage } from './order.dto';
 import { OrderDB } from './orders.repo';
 import { OrdersFilterInput, OrdersPaginationInput, PageResult } from './order.types.graphql';
 import { Order } from './order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, MoreThan, Repository } from 'typeorm';
+import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class OrdersService {
@@ -17,7 +19,8 @@ export class OrdersService {
 
   constructor(
     private orderDb: OrderDB,
-      @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(Order) private orderRepository: Repository<Order>,
+    private rabbitmqService: RabbitmqService
   ) { }
 
   async createOrder(order: NewOrderReq) {
@@ -26,6 +29,18 @@ export class OrdersService {
         throw new HttpException('There should be body', HttpStatus.BAD_REQUEST);
       }
       const createdOrder = await this.orderDb.createOrder(order);
+
+      if (createdOrder) {
+        const message: OrderProcessedMessage = {
+          orderId: createdOrder.id,
+          messageId: createdOrder.id,
+          attempt: 0,
+          createdAt: (new Date()).toISOString()
+        }
+        const res = this.rabbitmqService.publishToQueue('orders.process', message, { correlationId: createdOrder.id, messageId: createdOrder.id });
+        console.log('message was sent', res);
+      }
+
       return createdOrder;
     } catch (err) {
       if (!(err instanceof HttpException)) {
@@ -34,6 +49,14 @@ export class OrdersService {
         throw err;
       }
     }
+  }
+
+  async updateOrderStatus(orderId: UUID, status: ORDER_STATUS) {
+    const order = await this.orderRepository.findOneBy({ id: orderId });
+    if (!order) {
+      throw new HttpException(`There is no order with id ${orderId}`, HttpStatus.NOT_FOUND);
+    }
+    await this.orderRepository.update({ id: orderId }, { orderStatus: status })
   }
 
   async getOrdersByUserId(id: string) {
@@ -84,7 +107,7 @@ export class OrdersService {
       .take(ordersPaginationInput.limit)
       .getMany()
 
-    const numberOfPages =  Math.round(allFilteredOrders.length / this.limitFirst);
+    const numberOfPages = Math.round(allFilteredOrders.length / this.limitFirst);
 
     const countOfPages = allFilteredOrders.length % this.limitFirst ? numberOfPages : numberOfPages + 1;
     const idTieBreaker = orders[orders.length - 1].id;
