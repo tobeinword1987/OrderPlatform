@@ -79,6 +79,8 @@ type Query {
   orders: [Order!]!
   ordersFiltered(filter: OrdersFilterInput!, ordersPaginationInput: OrdersPaginationInput!): PageResult!
   test: String!
+  userByLogin(login: String!): User!
+  users: [User!]!
 }
 
 type User {
@@ -89,7 +91,9 @@ type User {
   id: ID!
   is_active: Boolean!
   last_name: String
+  login: String!
   orders: [Order!]!
+  password: String!
   phone_number: String
   post_code: String!
   updated_at: DateTime!

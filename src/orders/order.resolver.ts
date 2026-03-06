@@ -6,9 +6,14 @@ import { OrderItem } from "src/orders/order.item.entity";
 import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import DataLoader from "dataloader";
-import { ORDER_STATUS } from '../../orders/order.dto';
+import { ORDER_STATUS } from './order.dto';
 import { OrdersFilterInput, OrdersPaginationInput, PageResult } from "src/orders/order.types.graphql";
 import { OrdersService } from "src/orders/orders.service";
+import { GqlAuthGuard } from "src/auth/gql.jwt-auth.guard";
+import { UseGuards } from "@nestjs/common";
+import { Public } from "src/decorators/public";
+import { CurrentUser } from "src/decorators/current.user.decorator";
+import { Roles } from "src/decorators/roles.decorator";
 
 registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 
@@ -31,7 +36,9 @@ export class OrderResolver {
     }
 
     @Query(() => PageResult)
-    async ordersFiltered(@Args('filter') filter: OrdersFilterInput, @Args('ordersPaginationInput') ordersPaginationInput: OrdersPaginationInput): Promise<PageResult> {
+    @Roles(['user'])
+    @UseGuards(GqlAuthGuard)
+    async ordersFiltered(@CurrentUser() user: User, @Args('filter') filter: OrdersFilterInput, @Args('ordersPaginationInput') ordersPaginationInput: OrdersPaginationInput): Promise<PageResult> {
         return await this.orderService.ordersFiltered(filter, ordersPaginationInput);
     }
 

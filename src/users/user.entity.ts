@@ -8,15 +8,32 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Role } from './role.entity';
+import { UploadFile } from '../files/file.entity';
+import type { UUID } from 'crypto';
 
 @Entity()
 @ObjectType()
 @Index('Index_users_email_unique', ['email'], { unique: true })
+@Index('Index_users_login_unique', ['email'], { unique: true })
+@Index('Index_users_login_password_unique', ['login', 'password'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => ID!)
   id: string;
+
+  @Column({ name: 'login' })
+  @Field(() => String!, { name: 'login' })
+  login: string;
+
+  @Column({ name: 'password' })
+  @Field(() => String!, { name: 'password' })
+  password: string;
 
   @Column({ name: 'first_name' })
   @Field(() => String!, { name: 'first_name' })
@@ -46,6 +63,9 @@ export class User {
   @Field(() => Boolean!, { defaultValue: true, name: 'is_active' })
   isActive: boolean;
 
+  @Column({ type: 'uuid', name: 'avatar_id', nullable: true })
+  avatarId: UUID;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   @Field(() => GraphQLISODateTime!, { name: 'created_at' })
   createdAt: Date;
@@ -57,4 +77,20 @@ export class User {
   @OneToMany(() => Order, (order) => order.user)
   @Field(() => [Order]!)
   orders: Order[];
+
+  @OneToMany(() => UploadFile, (file) => file.user, { nullable: true })
+  files?: UploadFile[];
+
+  @ManyToMany(
+    () => Role,
+    role => role.users)
+  @JoinTable()
+  roles?: Role[];
+
+  @OneToOne(
+    () => UploadFile,
+    file => file.user,
+    { nullable: true })
+  @JoinColumn({ name: 'avatar_id' })
+  avatar?: UploadFile;
 }

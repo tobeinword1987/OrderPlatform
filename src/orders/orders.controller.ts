@@ -1,11 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { NewOrderReq, Order } from './order.dto';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { NewOrderReq } from './order.dto';
 import { OrdersService } from './orders.service';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('orders')
 export class OrdersController {
   constructor(public ordersService: OrdersService) {}
 
+  @Roles(['admin', 'user'])
   @Post()
   async createOrder(@Body() order: NewOrderReq) {
     const orders = this.ordersService.createOrder(order);

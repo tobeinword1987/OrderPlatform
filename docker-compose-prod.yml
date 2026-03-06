@@ -1,0 +1,110 @@
+services:
+
+  app:
+    image: order-platform-prod-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - minio
+      - seed
+    env_file:
+      - ./src/configuration/.env.compose.prod
+    ports:
+      - "${PORT:-3000}:3000"
+    networks:
+      - backend
+
+  migration:
+    image: order-platform-dev-runner
+    container_name: migration
+    command: sh -c "npm run db:migrate"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=liudmyla
+      - DB_PASSWORD=liudmyla
+      - DB_NAME=liudmyla
+      - NODE_ENV=dev
+    networks:
+      - backend
+    volumes:
+      - ./src/migrations:/app/src/migrations
+      - ./src/seeds:/app/src/seeds
+    links:
+      - postgres
+    depends_on:
+      - postgres
+
+  seed:
+    image: order-platform-dev-runner
+    command: sh -c "npm run db:seed"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=liudmyla
+      - DB_PASSWORD=liudmyla
+      - DB_NAME=liudmyla
+      - NODE_ENV=dev
+    networks:
+      - backend
+    volumes:
+      - ./src/migrations:/app/src/migrations
+      - ./src/seeds:/app/src/seeds
+    depends_on:
+      - migration
+
+  postgres:
+    image: postgres:16
+    container_name: files-module-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: liudmyla
+      POSTGRES_PASSWORD: liudmyla
+      POSTGRES_DB: liudmyla
+    networks:
+      - backend
+    volumes:
+      - ./pgdata_files_module:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: files-module-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_files_module:/data
+    depends_on:
+      - postgres
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: files-module-minio-init
+    depends_on:
+      - minio
+      - postgres
+    restart: 'no'
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
+        echo 'waiting for minio...';
+        sleep 2;
+      done;
+      mc mb --ignore-existing local/${AWS_S3_BUCKET:-files-private};
+      mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
+      echo 'minio bucket is ready';
+      "
+
+volumes:
+  pgdata_files_module:
+  minio_files_module:
+
+networks:
+  backend: {}

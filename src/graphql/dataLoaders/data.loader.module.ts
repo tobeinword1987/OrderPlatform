@@ -8,6 +8,6 @@ import { Product } from 'src/products/product.entity';
 @Module({
     imports: [TypeOrmModule.forFeature([OrderItem, User, Product])],
     providers: [DtLoader],
-    exports: [DataLoaderModule, DtLoader]
+    exports: [DtLoader]
 })
 export class DataLoaderModule {}

@@ -1,0 +1,132 @@
+services:
+
+  app:
+    image: order-platform-dev-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - minio
+      - seed
+    env_file:
+      - ./src/configuration/.env.compose.dev
+    # environment:
+      # - BASE_URL=http://localhost:3000
+      # - DB_HOST=xxx
+      # - DB_PORT=xxx
+      # - DB_USER=xxx
+      # - DB_PASSWORD=xxx
+      # - DB_NAME=xxx
+      # - NODE_ENV=prod
+      # - PORT=3000
+      # - STRATEGY=optimized
+      # - JWT_SECRET='xxx'
+      # - AWS_REGION=eu-central-1
+      # - AWS_S3_BUCKET=files-private
+      # - AWS_ACCESS_KEY_ID=xxx
+      # - AWS_SECRET_ACCESS_KEY=xxx
+      # - AWS_S3_ENDPOINT=http://localhost:9000
+      # - AWS_S3_FORCE_PATH_STYLE=true
+      # - AWS_CLOUDFRONT_URL=
+      # - FILES_PRESIGN_EXPIRES_IN_SEC=900
+    ports:
+      - "${PORT:-3000}:3000"
+    networks:
+      - backend
+    volumes:
+      - ./:/app
+      - ./node_modules:/app/node_modules
+
+  migration:
+    image: order-platform-dev-runner
+    container_name: migration
+    command: sh -c "npm run db:migrate"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=liudmyla
+      - DB_PASSWORD=liudmyla
+      - DB_NAME=liudmyla
+      - NODE_ENV=dev
+    networks:
+      - backend
+    volumes:
+      - ./src/migrations:/app/src/migrations
+      - ./src/seeds:/app/src/seeds
+    links:
+      - postgres
+    depends_on:
+      - postgres
+
+  seed:
+    image: order-platform-dev-runner
+    command: sh -c "npm run db:seed"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=liudmyla
+      - DB_PASSWORD=liudmyla
+      - DB_NAME=liudmyla
+      - NODE_ENV=dev
+    networks:
+      - backend
+    volumes:
+      - ./src/migrations:/app/src/migrations
+      - ./src/seeds:/app/src/seeds
+    depends_on:
+      - migration
+
+  postgres:
+    image: postgres:16
+    container_name: files-module-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: liudmyla
+      POSTGRES_PASSWORD: liudmyla
+      POSTGRES_DB: liudmyla
+    networks:
+      - backend
+    volumes:
+      - ./pgdata_files_module:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: files-module-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_files_module:/data
+    depends_on:
+      - postgres
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: files-module-minio-init
+    depends_on:
+      - minio
+      - postgres
+    restart: 'no'
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
+        echo 'waiting for minio...';
+        sleep 2;
+      done;
+      mc mb --ignore-existing local/${AWS_S3_BUCKET:-files-private};
+      mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
+      echo 'minio bucket is ready';
+      "
+
+volumes:
+  pgdata_files_module:
+  minio_files_module:
+
+networks:
+  backend: {}

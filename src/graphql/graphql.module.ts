@@ -8,15 +8,17 @@ import { OrderItem } from 'src/orders/order.item.entity';
 import { Product } from 'src/products/product.entity';
 import { User } from 'src/users/user.entity';
 import { DtLoader } from './dataLoaders/data.loader';
-import { OrderResolver } from './resolvers/order.resolver';
-import { OrderItemResolver } from './resolvers/order.item.resolver';
 import { DataLoaderModule } from './dataLoaders/data.loader.module';
 import { TestResolver } from './resolvers/test.query.resolver';
-import { OrdersService } from 'src/orders/orders.service';
-import { OrderDB } from 'src/orders/orders.repo';
+import { UsersModule } from 'src/users/users.module';
+import { OrdersModule } from 'src/orders/orders.module';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from 'src/http.exception.filter';
 
 @Module({
   imports: [
+    OrdersModule,
+    UsersModule,
     TypeOrmModule.forFeature([Order, OrderItem, Product, User]),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -36,9 +38,15 @@ import { OrderDB } from 'src/orders/orders.repo';
           strategy: process.env['STRATEGY'] || 'optimized' as const
         })
       })
-    })
+    }),
   ],
-  providers: [OrderResolver, OrderItemResolver, TestResolver, OrdersService, OrderDB],
+  providers: [
+    TestResolver,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter
+    },
+  ],
 })
 
 export class GraphQlModule { }
