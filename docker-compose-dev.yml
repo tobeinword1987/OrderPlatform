@@ -11,25 +11,6 @@ services:
       - seed
     env_file:
       - ./src/configuration/.env.compose.dev
-    # environment:
-      # - BASE_URL=http://localhost:3000
-      # - DB_HOST=xxx
-      # - DB_PORT=xxx
-      # - DB_USER=xxx
-      # - DB_PASSWORD=xxx
-      # - DB_NAME=xxx
-      # - NODE_ENV=prod
-      # - PORT=3000
-      # - STRATEGY=optimized
-      # - JWT_SECRET='xxx'
-      # - AWS_REGION=eu-central-1
-      # - AWS_S3_BUCKET=files-private
-      # - AWS_ACCESS_KEY_ID=xxx
-      # - AWS_SECRET_ACCESS_KEY=xxx
-      # - AWS_S3_ENDPOINT=http://localhost:9000
-      # - AWS_S3_FORCE_PATH_STYLE=true
-      # - AWS_CLOUDFRONT_URL=
-      # - FILES_PRESIGN_EXPIRES_IN_SEC=900
     ports:
       - "${PORT:-3000}:3000"
     networks:
@@ -123,6 +104,17 @@ services:
       mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
       echo 'minio bucket is ready';
       "
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=user1
+      - RABBITMQ_DEFAULT_PASS=pass1
+    ports:
+      - "5673:5672"
+      - "15673:15672"
 
 volumes:
   pgdata_files_module:

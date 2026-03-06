@@ -23,6 +23,7 @@ import { RefreshTokens } from './users/refreshTokens.entity';
 import { UsersRoles } from './users/usersRoles.entity';
 import { FileModule } from './files/file.module';
 import { UploadFile } from './files/file.entity';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { UploadFile } from './files/file.entity';
     AuditLogsModule,
     AuthModule,
     FileModule,
+    RabbitmqModule,
   ],
   controllers: [AppController],
   providers: [

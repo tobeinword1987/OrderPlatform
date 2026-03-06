@@ -101,6 +101,16 @@ services:
       mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
       echo 'minio bucket is ready';
       "
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=user1
+      - RABBITMQ_DEFAULT_PASS=pass1
+    ports:
+      - "5673:5672"
+      - "15673:15672"
 
 volumes:
   pgdata_files_module:
