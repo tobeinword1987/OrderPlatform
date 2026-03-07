@@ -1,24 +1,29 @@
+version: '3.9'
 services:
 
   app:
-    image: order-platform-prod-runner
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: order-platform-prod-distroless-runner
+    # restart: unless-stopped
+    # image: order-platform-prod-runner
     depends_on:
-      - postgres
-      - minio
-      - seed
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_started
+      seed:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     env_file:
-      - ./src/configuration/.env.compose.prod
+      - ./src/configuration/.env
     ports:
       - "${PORT:-3000}:3000"
     networks:
       - backend
 
-  migration:
+  migrate:
     image: order-platform-dev-runner
-    container_name: migration
+    container_name: migrate
     command: sh -c "npm run db:migrate"
     environment:
       - DB_HOST=postgres
@@ -26,7 +31,7 @@ services:
       - DB_USER=liudmyla
       - DB_PASSWORD=liudmyla
       - DB_NAME=liudmyla
-      - NODE_ENV=dev
+      - NODE_ENV=prod
     networks:
       - backend
     volumes:
@@ -46,14 +51,14 @@ services:
       - DB_USER=liudmyla
       - DB_PASSWORD=liudmyla
       - DB_NAME=liudmyla
-      - NODE_ENV=dev
+      - NODE_ENV=prod
     networks:
       - backend
     volumes:
       - ./src/migrations:/app/src/migrations
       - ./src/seeds:/app/src/seeds
     depends_on:
-      - migration
+      - migrate
 
   postgres:
     image: postgres:16
@@ -101,6 +106,7 @@ services:
       mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
       echo 'minio bucket is ready';
       "
+
   rabbitmq:
     image: rabbitmq:4-management
     container_name: rabbitmq
@@ -108,6 +114,13 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=user1
       - RABBITMQ_DEFAULT_PASS=pass1
+    networks:
+      - backend
+    healthcheck:
+        test: rabbitmq-diagnostics -q ping
+        interval: 3s
+        timeout: 10s
+        retries: 5
     ports:
       - "5673:5672"
       - "15673:15672"

@@ -16,24 +16,35 @@ COPY package.json .
 COPY package-lock.json .
 RUN npm ci --omit=dev
 
-FROM deps_dev AS build_dev
+FROM deps_dev AS build
 COPY tsconfig.json tsconfig.json
 COPY data.source.ts data.source.ts
 COPY src/ src/
 RUN npm run build
 
-FROM build_dev AS dev_runner
+FROM build AS dev
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:dev"]
 
-FROM gcr.io/distroless/nodejs${NODE_VERSION}-debian${DEBIAN_VERSION} AS prod_distrolles_runner
+FROM build AS prod
 ENV NODE_ENV=prod
 
-COPY --from=build_dev /app/dist ./dist
+COPY --from=build /app/dist ./dist
 COPY --from=deps_prod /app/node_modules ./node_modules
 COPY --from=deps_prod /app/package.json ./package.json
 COPY --from=deps_prod /app/package-lock.json ./package-lock.json
 
 EXPOSE 3000
+CMD ["npm", "start"]
+
+FROM gcr.io/distroless/nodejs${NODE_VERSION}-debian${DEBIAN_VERSION}:nonroot AS prod-distroless
+ENV NODE_ENV=prod
+
+EXPOSE 3000
+
+COPY --from=build /app/dist ./dist
+COPY --from=deps_prod /app/node_modules ./node_modules
+COPY --from=deps_prod /app/package.json ./package.json
+COPY --from=deps_prod /app/package-lock.json ./package-lock.json
 
 CMD ["dist/src/main.js"]

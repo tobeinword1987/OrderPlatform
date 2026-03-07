@@ -66,8 +66,6 @@ services:
       POSTGRES_USER: liudmyla
       POSTGRES_PASSWORD: liudmyla
       POSTGRES_DB: liudmyla
-    networks:
-      - backend
     volumes:
       - ./pgdata_files_module:/var/lib/postgresql/data
 
@@ -115,7 +113,6 @@ services:
     ports:
       - "5673:5672"
       - "15673:15672"
-
 volumes:
   pgdata_files_module:
   minio_files_module:

@@ -1,325 +1,69 @@
-# E-COMMERCE ORDER PLATFORM
-## Description
+# Please, use compose.yml for prod images and compose.dev.yml for dev images
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# List of commands I have used:
 
-## Project setup
+1. ## First, please cd  to the root of the project
 
-```bash
-$ npm install
-```
+2. Set BUILDKIT=1 It will allow you to run only steps you need during docker build command
 
-## Compile and run the project
+3. Prod distrolles image uses nonroot user from default. https://github.com/GoogleContainerTools/distroless#debian-12
 
-```bash
-# development
-$ npm run start
+- docker build --no-cache --target dev -t order-platform-dev-runner .
 
-# watch mode
-$ npm run start:dev
+- docker build --target dev -t order-platform-dev-runner .
 
-# production mode
-$ npm run start:prod
-```
+- docker build --target prod-distroless -t order-platform-prod-distroless-runner .
 
-## Run tests
+- docker build --target prod -t order-platform-prod-runner .
 
-```bash
-# unit tests
-$ npm run test
+- docker images --filter=reference='order-platform-*-runner:latest'
 
-# e2e tests
-$ npm run test:e2e
+- docker history order-platform-dev-runner
 
-# test coverage
-$ npm run test:cov
-```
+- docker history order-platform-prod-runner
 
-## Clean architecture and modularity
+- docker history order-platform-prod-distroless-runner
 
-There are main principles to build clean and good quality project with a clean and scalable architecture:
+- docker compose -f compose.yml up
 
-1) Domain Design Concern
-2) SOLID
-3) Separation of concerns
+- docker compose -f compose.dev.yml up
 
-Nest allows us to comply all of these principles. 
+- docker run order-platform-dev-runner whoami
 
-ORDER PLATFORM's core domains are based on separate modules that are responsible for specific goals, can depend on each other but their responsibilities are clearly separated from one another. This allows to scale them independently from each other.
+- docker compose -f compose.dev.yml run --rm migration
 
-ORDER PLATFORM's core modules: UsersModule, ProductsModule, OrdersModule, PaymentsModule.
+- docker compose -f compose.dev.yml run --rm seed
 
-# UsersModule 
+2. ## I added screeshots to the description of my homework in LMS
 
-UsersModule is the separate module, which is responsible for authorization, authentication and user's data.
+3. ## Results of some commands
 
-# ProductsModule
+ - $ docker images --filter=reference='order-platform-**-runner:latest'
 
-ProductsModule is the module which is responsible for processing products.
+You can see here that image size of app image that uses distroless OS image is less than dev and prod. It is because it uses distroless image, which is free of any unnecessary things like:
+- package manager, 
+- shell...
 
-# OrdersModule
+Distroless images include only necessary things like:
 
-OrdersModule depends on UsersModule and ProductsModule. It is responsible for all user's orders, including the quantity of ordered products, final price for each order, status of the order and so on.
-
-# PaymentsModule
-
-It can be separated into a distinct service, it shouldn't make system's workload too heavy. 
-
-It will use an external services (billing SaaS) to process payments and data that depends on it:
-- invoices;
-- subscriptions;
-- payment statuses
-
-# External services
-
-- Billing SaaS module
-- AWS
+- The application binary
+- Its runtime dependencies (e.g., libc, Java, Python)
+- Any explicitly required configuration or metadata
 
-# Add .env.dev to the configuration folder
 
-# Fill DB with test data
+IMAGE  ID   DISK USAGE   CONTENT SIZE
+order-platform-dev-runner:latest               0cd4c5035995   699MB   135MB
+order-platform-prod-distroless-runner:latest   a49707e823a0  356MB    62.2MB
+order-platform-prod-runner:latest              380d45e12327  872MB    153MB
 
-Run commands:
+- $  docker history order-platform-prod-distroless-runner
+IMAGE          CREATED          CREATED BY                                      SIZE      COMMENT
+a49707e823a0   15 minutes ago   CMD ["dist/src/main.js"]                        0B        buildkit.dockerfile.v0
+<missing>      15 minutes ago   EXPOSE [3000/tcp]                               0B        buildkit.dockerfile.v0
+<missing>      15 minutes ago   COPY /app/package-lock.json ./package-lock.j…   504kB     buildkit.dockerfile.v0
+<missing>      15 minutes ago   COPY /app/package.json ./package.json # buil…   8.19kB    buildkit.dockerfile.v0
+<missing>      15 minutes ago   COPY /app/node_modules ./node_modules # buil…   155MB     buildkit.dockerfile.v0
+<missing>      15 minutes ago   COPY /app/dist ./dist # buildkit                1.45MB    buildkit.dockerfile.v0
+<missing>      15 minutes ago   ENV NODE_ENV=prod                               0B        buildkit.dockerfile.v0
 
-- npm run db:generate
-- npm run db:migrate
-- npm run db:seed
-
-- npm run start:dev
-
-<!-- # Run Create order API
-POST http://localhost:3000/orders
-
-Use body for this:
-
-- 201:
-{
-    "idempotencyKey": "1000001",
-    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d5a1",
-    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
-    "products": 
-    [
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
-            "quantity": 1
-        },
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
-            "quantity": 2
-        }
-    ]
-}
-
-- You can try to do the same request with the same idempotency_key, the order will be returned
-
-- 400:
-{
-    "idempotencyKey": "1000002",
-    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d5a1",
-    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
-    "products": 
-    [
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
-            "quantity": 1
-        },
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
-            "quantity": 25
-        }
-    ]
-}
-
-- 404:
-{
-    "idempotencyKey": "1000003",
-    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d525",
-    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
-    "products": 
-    [
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
-            "quantity": 1
-        },
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
-            "quantity": 25
-        }
-    ]
-}
-
-- 500:
-{
-    "idempotencyKey": "1000004",
-    "userId": "0c6af838-fad5-4f6f-909d-d74886b1d5h5",
-    "deliveryAddress": "New delivery addredd, 3/2, loc. 5",
-    "products": 
-    [
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d9",
-            "quantity": 1
-        },
-        {
-            "productId": "0c6af838-fad5-4f6f-909d-d74886b1d5d8",
-            "quantity": 25
-        }
-    ]
-} -->
-
-<!-- GraphQl homework -->
-
-# GRAPHQL HOMEWORK
-
-# Run test endpoint
-
-POST http://localhost:3000/graphql
-
-{
-     test
-}
-
-# Run get orders without any filters endpoint
-
-POST http://localhost:3000/graphql
-
-{
-    orders
-        {
-            id
-            idempotency_key
-            user_id
-            delivery_address
-            order_status
-            created_at
-            updated_at
-            user {
-                id
-                first_name
-                last_name
-                address
-                phone_number
-                post_code
-            }
-            orderItems {
-                id
-                price_at_purchase
-                quantity
-                product_id
-                product {
-                    id
-                    category_id
-                    name
-                    quantity
-                }
-            }
-        }
-}
-
-# Run get orders endpoint with filters and pagination parameters for cursor pagination
-
-POST http://localhost:3000/graphql
-
-query ordersFiltered($filter: OrdersFilterInput!, $ordersPaginationInput: OrdersPaginationInput!)
-{
-    ordersFiltered( filter: $filter, ordersPaginationInput: $ordersPaginationInput )
-        {
-            orders {
-                id
-                idempotency_key
-                user_id
-                delivery_address
-                order_status
-                created_at
-                updated_at
-                user {
-                    id
-                    first_name
-                    last_name
-                    address
-                    phone_number
-                    post_code
-                }
-                orderItems {
-                    id
-                    price_at_purchase
-                    quantity
-                    product_id
-                    product {
-                        id
-                        category_id
-                        name
-                        quantity
-                    }
-                }
-        }
-        cursor {
-            createdAt
-            idTieBreaker
-        }
-        countOfPages
-    }
-}
-------------------------------------------------
-variables: 
-{
-    "filter" : { "status": "CREATED", "dateFrom": "2026-02-12T09:37:45.010Z", "dateTo": "2026-02-18T10:37:45.010Z"},
-
-    "ordersPaginationInput": {"limit": 2}
-}
-
-or, but set correct values of createdAt and idTieBreaker, because after db:seed these values will be changed
-
-{
-    "filter" : { "status": "CREATED", 
-        "dateFrom": "2026-02-12T09:37:45.010Z", 
-        "dateTo": "2026-02-18T10:37:45.010Z"
-        },
-    "ordersPaginationInput": {
-        "limit" : 2,
-        "createdAt":"2026-02-15T12:15:20.438Z", 
-        "idTieBreaker": "ff529ee8-7a8b-4457-a7bc-b04526853257"
-        }
-}
-
-# Optimization 1 + 1 + (....), additional DataLoader: (implemented for User, OrderItem and Product).
-
-All requests to all tables: OrderItem, Product and User were optimized with batch requests with the Dataloader strategy
-
-You can set in env file STRATEGY env
-
-In case of 'naive'
-
-You will see a lot of comments:
-- '---NAIVE---Request to OrderItem table'
-- '---NAIVE---Request to Product table'
-- '---NAIVE---Request to User table'
-
-If you set strategy: 'optimized'
-You will see only 3 requests to the database in comments:
-- '---OPTIMIZED---Request to OrderItem table'
-- '---OPTIMIZED---Request to Product table'
-- '---OPTIMIZED---Request to User table'
-
-LOGS FROM CONSOLE:
-
-In 'naive' case there are next logs from terminal:
-
----NAIVE---Request to User table
----NAIVE---Request to OrderItem table
----NAIVE---Request to User table
----NAIVE---Request to OrderItem table
----NAIVE---Request to User table
----NAIVE---Request to OrderItem table
----NAIVE---Request to Product table
----NAIVE---Request to Product table
----NAIVE---Request to Product table
----NAIVE---Request to Product table
----NAIVE---Request to Product table
-
-In 'optimized' case there are only 3 logs from terminal:
-
----OPTIMIZED---Request to User table
----OPTIMIZED---Request to OrderItem table
----OPTIMIZED---Request to Product table
-
-# ORDER_STATUS was added as enum
+4. Please use .env file for secrets. Change it for dev and prod testing.
