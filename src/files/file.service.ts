@@ -17,6 +17,7 @@ export class FileService {
     ) { }
 
     async getFileById(user: User, fileId: UUID) {
+        console.log('-----', fileId);
             const file = await this.fileRepository.findOneBy({ id: fileId });
             if (!file) {
                 throw new HttpException('File not found', HttpStatus.NOT_FOUND)
@@ -41,12 +42,16 @@ export class FileService {
 
     async completeUpload(user: User, fileId: UUID) {
             const file = await this.fileRepository.findOneBy({ id: fileId });
+
+            if(file?.userId !== user.id) {
+                throw new HttpException('User is not the owner of the file', HttpStatus.FORBIDDEN)
+            }
+
             if (!file) {
                 throw new HttpException('File not found', HttpStatus.NOT_FOUND)
             }
 
-            // const doesObjectExists = await this.s3Service.doesObjectExixts(file.key); //this.s3Service.doesObjectExixts doesn't work
-            const doesObjectExists = true;
+            const doesObjectExists = await this.s3Service.doesObjectExixts(file.key);
             if (doesObjectExists) {
                 const res = await this.fileRepository.update({ id: fileId }, { status: Status.READY });
                 console.log('****', res);
