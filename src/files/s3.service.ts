@@ -9,9 +9,11 @@ export class S3Service {
 
     private region: string;
     private readonly awsSdkClient: S3Client;
+    private readonly awsSdkClient2: S3Client;
     private readonly bucket: string;
     private readonly expiresInSec: number;
     private readonly awsEndpoint: string;
+    private readonly awsS3BucketEndpoint: string
     private readonly cloudFrontUrl: string;
     private readonly forcePathStyle: boolean;
     private readonly accessKeyId: string;
@@ -23,7 +25,8 @@ export class S3Service {
         this.region = this.configService.get('AWS_REGION') ?? 'eu-central-1';
         this.bucket = this.configService.get('AWS_S3_BUCKET') ?? 'files-private';
         this.expiresInSec = Number(this.configService.get('FILES_PRESIGN_EXPIRES_IN_SEC')) ?? 900;
-        this.awsEndpoint = this.configService.get('AWS_S3_ENDPOINT') ?? 'http://localhost:9000';
+        this.awsEndpoint = this.configService.get('AWS_S3_ENDPOINT') ?? 'http://minio:9000';
+        this.awsS3BucketEndpoint = this.configService.get('AWS_S3_BUCKET_ENDPOINT') ?? 'http://localhost:9000';
         this.forcePathStyle = Boolean(this.configService.get('AWS_S3_FORCE_PATH_STYLE')) ?? true;
         this.cloudFrontUrl = this.configService.get('AWS_CLOUDFRONT_URL') ?? 'http://localhost:9000';
         this.accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID') ?? 'minioadmin';
@@ -31,7 +34,7 @@ export class S3Service {
 
         const clientConfig: S3ClientConfig = {
             region: this.region,
-            forcePathStyle: this.forcePathStyle,
+            forcePathStyle: this.forcePathStyle
         };
 
         if (this.awsEndpoint) {
@@ -43,6 +46,11 @@ export class S3Service {
         }
 
         this.awsSdkClient = new S3Client(clientConfig);
+
+        this.awsSdkClient2 = new S3Client({
+            ...clientConfig,
+            endpoint: this.awsS3BucketEndpoint
+        });
     }
 
     async generatePresignedUrl(key: string, contentType: ContentType) {
@@ -52,7 +60,7 @@ export class S3Service {
             ContentType: contentType,
         });
 
-        const presigned = await getSignedUrl(this.awsSdkClient, command, {
+        const presigned = await getSignedUrl(this.awsSdkClient2, command, {
             expiresIn: this.expiresInSec,
         });
 
@@ -60,19 +68,17 @@ export class S3Service {
     }
 
     async doesObjectExixts(key: string) {
-        console.log(key, this.bucket);
         try {
             const fileMetadata = await this.awsSdkClient.send(new HeadObjectCommand({
                 Bucket: this.bucket,
                 Key: key
             }));
-            if(fileMetadata) {
+            if (fileMetadata) {
                 return true;
             } else {
                 return false
             }
         } catch (error) {
-            console.log(error);
             throw new HttpException('Request to bucket failed', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

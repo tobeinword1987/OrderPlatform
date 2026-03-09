@@ -1,69 +1,66 @@
-# Please, use compose.yml for prod images and compose.dev.yml for dev images
 
-# List of commands I have used:
+# Users domain was integrated
 
-1. ## First, please cd  to the root of the project
+User can:
+- upload file to the AWS3 storage with presigned url (@Post('presign')).
+  It will generate uploadUrl, which you then can use to upload file to the storage with necessary permissions;
+- check, that file exists in storage and set file status to "ready" 
+  (@Post('complete'));
+- set one of uploaded files as his avatar, llok User domain: (@Post('avatar')).
 
-2. Set BUILDKIT=1 It will allow you to run only steps you need during docker build command
+# Permissions (auth module)
 
-3. Prod distrolles image uses nonroot user from default. https://github.com/GoogleContainerTools/distroless#debian-12
+On every controller method I can add decorator Roles([]) with the allowed roles for this operation. User's role will be checked according to what roles user has and what roles are allowed to execute request (jwt-auth.guard.ts). Every role can has many scopes. And the DB structure has already existed. But I didn't use scopes in this app, just RBAC.
 
-- docker build --no-cache --target dev -t order-platform-dev-runner .
+Also main jwt-strategy is set to validate each request after user has logged in. 
 
-- docker build --target dev -t order-platform-dev-runner .
+There are 2 endpoints which allow you to aithorize and then to exchange access token with refresh token, if the first one will expired:
 
-- docker build --target prod-distroless -t order-platform-prod-distroless-runner .
+-   @Post('auth/login');
+-   @Post('auth/refresh')
 
-- docker build --target prod -t order-platform-prod-runner .
+# Public url for review
 
-- docker images --filter=reference='order-platform-*-runner:latest'
+It is generated in S3Service as string which contains from:
 
-- docker history order-platform-dev-runner
+ - `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`
 
-- docker history order-platform-prod-runner
+ or
 
-- docker history order-platform-prod-distroless-runner
+ - `${endpoint}/${this.bucket}/${key}`
 
-- docker compose -f compose.yml up
+ # Integration is with entity User and entity Files. This entity has avatarId.
 
-- docker compose -f compose.dev.yml up
+  @Column({ type: 'uuid', name: 'avatar_id', nullable: true })
+  avatarId: UUID;
 
-- docker run order-platform-dev-runner whoami
+  @OneToOne(
+    () => UploadFile,
+    file => file.user,
+    { nullable: true })
+  @JoinColumn({ name: 'avatar_id' })
+  avatar?: UploadFile;
 
-- docker compose -f compose.dev.yml run --rm migration
-
-- docker compose -f compose.dev.yml run --rm seed
-
-2. ## I added screeshots to the description of my homework in LMS
-
-3. ## Results of some commands
-
- - $ docker images --filter=reference='order-platform-**-runner:latest'
-
-You can see here that image size of app image that uses distroless OS image is less than dev and prod. It is because it uses distroless image, which is free of any unnecessary things like:
-- package manager, 
-- shell...
-
-Distroless images include only necessary things like:
-
-- The application binary
-- Its runtime dependencies (e.g., libc, Java, Python)
-- Any explicitly required configuration or metadata
+  @OneToMany(() => UploadFile, (file) => file.user, { nullable: true })
+  files?: UploadFile[];
 
 
-IMAGE  ID   DISK USAGE   CONTENT SIZE
-order-platform-dev-runner:latest               0cd4c5035995   699MB   135MB
-order-platform-prod-distroless-runner:latest   a49707e823a0  356MB    62.2MB
-order-platform-prod-runner:latest              380d45e12327  872MB    153MB
+  @Column({ type: 'uuid', name: 'user_id' })
+  userId: string;
 
-- $  docker history order-platform-prod-distroless-runner
-IMAGE          CREATED          CREATED BY                                      SIZE      COMMENT
-a49707e823a0   15 minutes ago   CMD ["dist/src/main.js"]                        0B        buildkit.dockerfile.v0
-<missing>      15 minutes ago   EXPOSE [3000/tcp]                               0B        buildkit.dockerfile.v0
-<missing>      15 minutes ago   COPY /app/package-lock.json ./package-lock.j…   504kB     buildkit.dockerfile.v0
-<missing>      15 minutes ago   COPY /app/package.json ./package.json # buil…   8.19kB    buildkit.dockerfile.v0
-<missing>      15 minutes ago   COPY /app/node_modules ./node_modules # buil…   155MB     buildkit.dockerfile.v0
-<missing>      15 minutes ago   COPY /app/dist ./dist # buildkit                1.45MB    buildkit.dockerfile.v0
-<missing>      15 minutes ago   ENV NODE_ENV=prod                               0B        buildkit.dockerfile.v0
+  @ManyToOne(() => User, (user) => user.files, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: User;
 
-4. Please use .env file for secrets. Change it for dev and prod testing.
+  One user can create many files and can set one of his own files as his avatar. There is an integration between User and Files entities. Look at fields:  
+  Files entity: userId, user
+  User entity: avatarId, files
+
+# Set avatar endpoint
+  
+   About your previous comment: У complete додати доменний attach (або чітко перебудувати flow так, щоб complete виконував вимогу statement щодо привʼязки).
+
+    I have separate endpoint where I do connection between Users and Files. It is in Users domain:
+    @Post('users/avatar')
+
+# Use compose.dev.yml for testing, set necessary envs in .env file.
