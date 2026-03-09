@@ -10,7 +10,7 @@ export class FileController {
     constructor(private fileService: FileService) { }
 
     @Roles(['user', 'admin'])
-    @Post('presigne')
+    @Post('presign')
     async getPresignedUrl(@Req() request: Request & { user?: User }, @Body() presignedBody: PresignedBody) {
         console.log('***', request.user);
         const { contentType, visibility, size } = presignedBody;

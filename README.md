@@ -2,11 +2,11 @@
 # Users domain was integrated
 
 User can:
-- upload file to the AWS3 storage with presigned url (@Post('presigne')).
+- upload file to the AWS3 storage with presigned url (@Post('presign')).
   It will generate uploadUrl, which you then can use to upload file to the storage with necessary permissions;
 - check, that file exists in storage and set file status to "ready" 
   (@Post('complete'));
-- set one of uploaded files as his avatar (@Post('avatar')).
+- set one of uploaded files as his avatar, llok User domain: (@Post('avatar')).
 
 # Permissions (auth module)
 
