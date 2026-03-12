@@ -7,7 +7,7 @@
 4) Processing of order is retried until max limit of retries will be reached. Set this limit in .env file in RABBITMQ_MAX_ATTEMPTS environment.
 5) If max limit of attempts is reached, message is published to the exchange `orders.dlq.exchange`. Then exchange binds it to the queue `orders.dlq.queue`
 
-## Швидкий старт
+## Quick start, fill .env file with your secrets
 ```bash
 cp .env.example .env
 docker build  --no-cache --target dev -t order-platform-dev-runner .
