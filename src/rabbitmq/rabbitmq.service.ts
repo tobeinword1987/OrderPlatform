@@ -5,13 +5,25 @@ import { ConfigService } from 'src/config-service';
 
 export type RabbitConsumeHandler = (msg: ConsumeMessage, channel: Channel) => Promise<void>;
 
+export enum queues {
+  ORDERS_PROCESS_QUEUE = 'orders.process.queue',
+  ORDERS_DLQ_QUEUE = 'orders.dlq.queue',
+  DOMAINS_EVENTS_QUEUE = 'domain.events.queue'
+}
+
+export const exchanges = {
+  'orders.process.queue': 'orders.process.exchange',
+  'orders.dlq.queue': 'orders.dlq.exchange',
+  'domain.events.queue': 'domain.events.exchange'
+}
+
 @Injectable()
-export class RabbitmqService implements OnModuleInit, OnModuleDestroy{
+export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RabbitmqService.name);
   private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) { }
 
   getChannel(): Channel {
     if (!this.channel) {
@@ -21,7 +33,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy{
   }
 
   async onModuleInit(): Promise<void> {
-    const url = this.configService.get('RABBITMQ_URL') ?? 'amqp://localhost:5673';
+    const url = this.configService.get('RABBITMQ_URL') ?? 'amqp://localhost:5672';
     const prefetch = Number(this.configService.get('RABBITMQ_PREFETCH') ?? '10');
 
     const client = await amqp.connect(url);
@@ -29,8 +41,6 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy{
 
     this.connection = client;
     this.channel = ch;
-
-    await ch.prefetch(prefetch);
 
     await this.assertInfrastructure();
 
@@ -48,32 +58,44 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy{
   private async assertInfrastructure(): Promise<void> {
     const ch = this.getChannel();
 
-    await ch.assertQueue('orders.process', { durable: true });
+    await ch.assertQueue(queues.ORDERS_PROCESS_QUEUE, { durable: true });
 
-    await ch.assertQueue('orders.dlq', { durable: true });
+    await ch.assertExchange(exchanges[queues.ORDERS_PROCESS_QUEUE], 'fanout', { durable: false });
 
-    await ch.assertQueue('domain.events', { durable: true });
+    await ch.bindQueue(queues.ORDERS_PROCESS_QUEUE, exchanges[queues.ORDERS_PROCESS_QUEUE], '');
+
+    await ch.assertQueue(queues.ORDERS_DLQ_QUEUE, { durable: true });
+
+    await ch.assertExchange(exchanges[queues.ORDERS_DLQ_QUEUE], 'fanout', { durable: false });
+
+    await ch.bindQueue(queues.ORDERS_DLQ_QUEUE, exchanges[queues.ORDERS_DLQ_QUEUE], '');
+
+    await ch.assertQueue(queues.DOMAINS_EVENTS_QUEUE, { durable: true });
+
+    await ch.assertExchange(exchanges[queues.DOMAINS_EVENTS_QUEUE], 'fanout', { durable: false });
+
+    await ch.bindQueue(queues.DOMAINS_EVENTS_QUEUE, exchanges[queues.DOMAINS_EVENTS_QUEUE], '');
   }
 
-  publishToQueue(
-    queue: string,
+  publishToExchange(
+    exchange: string,
     payload: unknown,
     options?: Options.Publish
   ): boolean {
     const ch = this.getChannel();
     const body = Buffer.from(JSON.stringify(payload));
-    console.log('222 ', payload);
 
-
-    return ch.sendToQueue(queue, body, {
+    const published = ch.publish(exchange, '', body, {
       contentType: 'application/json',
       persistent: true,
       ...options
     });
+
+    return published;
   }
 
   async consume(
-    queue: string,
+    queue: queues,
     handler: RabbitConsumeHandler,
     options?: Options.Consume
   ): Promise<void> {
@@ -82,7 +104,6 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy{
     await ch.consume(
       queue,
       async (msg) => {
-        console.log('~~~~~~~~~~', msg);
         if (!msg) {
           return;
         }
@@ -95,7 +116,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy{
           );
           try {
             ch.nack(msg, false, true);
-          } catch {}
+          } catch { }
         }
       },
       {

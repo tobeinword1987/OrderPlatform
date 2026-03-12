@@ -9,9 +9,10 @@ import { OrderDB } from './orders.repo';
 import { OrdersFilterInput, OrdersPaginationInput, PageResult } from './order.types.graphql';
 import { Order } from './order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, MoreThan, Repository } from 'typeorm';
-import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
+import { DataSource, EntityManager, LessThan, MoreThan, Repository } from 'typeorm';
+import { exchanges, queues, RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 import { UUID } from 'crypto';
+import { ProcessedMessage } from './processed.message.entity';
 
 @Injectable()
 export class OrdersService {
@@ -20,6 +21,8 @@ export class OrdersService {
   constructor(
     private orderDb: OrderDB,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(ProcessedMessage) private processedMessageRepository: Repository<ProcessedMessage>,
+    private datasource: DataSource,
     private rabbitmqService: RabbitmqService
   ) { }
 
@@ -37,7 +40,7 @@ export class OrdersService {
           attempt: 0,
           createdAt: (new Date()).toISOString()
         }
-        const res = this.rabbitmqService.publishToQueue('orders.process', message, { correlationId: createdOrder.id, messageId: createdOrder.id });
+        const res = this.rabbitmqService.publishToExchange(exchanges[queues.ORDERS_PROCESS_QUEUE], message, { correlationId: createdOrder.id, messageId: createdOrder.id });
         console.log('message was sent', res);
       }
 
@@ -51,12 +54,17 @@ export class OrdersService {
     }
   }
 
-  async updateOrderStatus(orderId: UUID, status: ORDER_STATUS) {
+  async updateOrderStatus(orderId: UUID, status: ORDER_STATUS, messageId: UUID) {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) {
       throw new HttpException(`There is no order with id ${orderId}`, HttpStatus.NOT_FOUND);
     }
-    await this.orderRepository.update({ id: orderId }, { orderStatus: status })
+    const message = await this.processedMessageRepository.findOneBy({ id: messageId });
+    if (message) return;
+    this.datasource.transaction(async (manager: EntityManager) => {
+      await manager.getRepository(Order).update({ id: orderId }, { orderStatus: status });
+      await manager.getRepository(ProcessedMessage).insert({ messageId, orderId, handler: 'Order proceed' });
+    })
   }
 
   async getOrdersByUserId(id: string) {
