@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,6 +15,7 @@ import { OrderItem } from './order.item.entity';
 import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ORDER_STATUS } from './order.dto';
 import type { UUID } from 'crypto';
+import { ProcessedMessage } from './processed.message.entity';
 
 registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 
@@ -60,4 +62,6 @@ export class Order {
   @Field(() => GraphQLISODateTime!, { name: 'updated_at' })
   updatedAt: Date;
 
+  @OneToOne(() => ProcessedMessage, (processedMessage) => processedMessage.order)
+  processedMessage: ProcessedMessage
 }

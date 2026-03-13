@@ -17,9 +17,10 @@ import { Role } from 'src/users/role.entity';
 import { RabbitmqModule } from 'src/rabbitmq/rabbitmq.module';
 import { OrdersWorkerService } from './orders.worker.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ProcessedMessage } from 'src/orders/processed.message.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Product, UsersRoles, Role]), RabbitmqModule,
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Product, ProcessedMessage, UsersRoles, Role]), RabbitmqModule,
   ClientsModule.register([
     {
       name: 'OrdersService',
