@@ -6,10 +6,14 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - postgres
-      - minio
-      - seed
-      - rabbitmq
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_started
+      seed:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - ./src/configuration/.env
     ports:
@@ -65,6 +69,8 @@ services:
       POSTGRES_USER: liudmyla
       POSTGRES_PASSWORD: liudmyla
       POSTGRES_DB: liudmyla
+    ports:
+      - 5433:5432
     networks:
       - backend
     volumes:
@@ -78,6 +84,8 @@ services:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
       MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
     command: server /data --console-address ":9001"
+    networks:
+      - backend
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -93,9 +101,11 @@ services:
       - minio
       - postgres
     restart: 'no'
+    networks:
+      - backend
     entrypoint: >
       /bin/sh -c "
-      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
+      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
         echo 'waiting for minio...';
         sleep 2;
       done;
@@ -113,6 +123,11 @@ services:
       - RABBITMQ_DEFAULT_PASS=pass1
     networks:
       - backend
+    healthcheck:
+        test: rabbitmq-diagnostics -q check_running
+        interval: 3s
+        timeout: 10s
+        retries: 5
     ports:
       - "5673:5672"
       - "15673:15672"

@@ -9,6 +9,7 @@
 /.nyc_output
 
 # dotenv environment variable files
+.env
 .env.*
 !.env.example
 
