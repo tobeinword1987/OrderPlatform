@@ -30,7 +30,7 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
     TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `./src/configuration/.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
+      envFilePath: `./.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -61,7 +61,7 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
     AuditLogsModule,
     AuthModule,
     FileModule,
-    RabbitmqModule,
+    RabbitmqModule
   ],
   controllers: [AppController],
   providers: [

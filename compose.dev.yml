@@ -5,17 +5,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
     depends_on:
       postgres:
         condition: service_started
       minio:
         condition: service_started
-      seed:
-        condition: service_started
       rabbitmq:
         condition: service_healthy
     env_file:
-      - ./src/configuration/.env
+      - ./.env
     ports:
       - "${PORT:-3000}:3000"
     networks:
@@ -25,9 +24,11 @@ services:
       - /app/node_modules
 
   migrate:
-    image: order-platform-dev-runner
-    container_name: migrate
-    command: sh -c "npm run db:migrate"
+    image: migrate
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -43,10 +44,14 @@ services:
       - postgres
     depends_on:
       - postgres
+      - app
 
   seed:
-    image: order-platform-dev-runner
-    command: sh -c "npm run db:seed"
+    image: seed
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seeds
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -60,17 +65,15 @@ services:
       - ./src/seeds:/app/src/seeds
     depends_on:
       - migrate
+      - app
 
   postgres:
     image: postgres:16
-    container_name: files-module-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: liudmyla
       POSTGRES_PASSWORD: liudmyla
       POSTGRES_DB: liudmyla
-    ports:
-      - 5433:5432
     networks:
       - backend
     volumes:
@@ -78,7 +81,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: files-module-minio
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
@@ -96,7 +98,6 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: files-module-minio-init
     depends_on:
       - minio
       - postgres
@@ -116,7 +117,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    container_name: rabbitmq
     restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=user1
@@ -131,6 +131,17 @@ services:
     ports:
       - "5673:5672"
       - "15673:15672"
+
+  payments-grpc:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    volumes:
+      - ./:/app
+    ports:
+      - "5021:5021"
+    command: sh -c "corepack enable && npm install && npm run start:payments:dev"
 
 volumes:
   pgdata_files_module:

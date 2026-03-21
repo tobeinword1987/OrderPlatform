@@ -1,0 +1,17 @@
+// payments/payments.proto
+syntax = "proto3";
+
+package payments;
+
+service PaymentsService {
+  rpc findOne (PaymentById) returns (Payment) {}
+}
+
+message PaymentById {
+  int32 id = 1;
+}
+
+message Payment {
+  int32 id = 1;
+  string name = 2;
+}
