@@ -22,11 +22,4 @@ export class UserResolver {
         const user = await this.usersService.findUserByLogin(login)
         return user;
     }
-
-    // @Mutation(() => UserWithTokens)
-    // @UseGuards(GqlLocalAuthGuard)
-    // async signIn(@CurrentUser() user: User, @Args('username') username: string, @Args('password') pass: string): Promise<{ user: { login: string, id: string }, accessToken: string, refresh_token: string }> {
-    //     console.log('###################', user);
-    //     return this.authService.login(user);
-    // }
 }

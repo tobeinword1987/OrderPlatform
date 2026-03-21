@@ -27,7 +27,8 @@ import { HttpExceptionFilter } from 'src/http.exception.filter';
       useFactory: (dtLoader: DtLoader) => ({
         path: '/graphql',
         graphiql: true,
-        autoSchemaFile: join(process.cwd(), '/graphql.gql'),
+        // autoSchemaFile: join(process.cwd(), '/graphql.gql'),
+        autoSchemaFile: true,
         sortSchema: true,
         definitions: {
           emitTypenameField: true,

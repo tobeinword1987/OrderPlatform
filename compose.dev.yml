@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - "${PORT:-3000}:3000"
+      - ${PORT}:${PORT}
     networks:
       - backend
     volumes:
@@ -29,13 +29,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: migrations
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=liudmyla
-      - DB_PASSWORD=liudmyla
-      - DB_NAME=liudmyla
-      - NODE_ENV=dev
+    env_file:
+      - ./.env
     networks:
       - backend
     volumes:
@@ -52,13 +47,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: seeds
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=liudmyla
-      - DB_PASSWORD=liudmyla
-      - DB_NAME=liudmyla
-      - NODE_ENV=dev
+    env_file:
+      - ./.env
     networks:
       - backend
     volumes:
@@ -70,10 +60,8 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: liudmyla
-      POSTGRES_PASSWORD: liudmyla
-      POSTGRES_DB: liudmyla
+    env_file:
+      - ./.env
     networks:
       - backend
     volumes:
@@ -88,9 +76,11 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - backend
+    env_file:
+      - ./.env
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - ${MINIO_EXT_PORT}:${MINIO_INT_PORT}
+      - ${MINIO_UI_EXT_PORT}:${MINIO_UI_INT_PORT}
     volumes:
       - minio_files_module:/data
     depends_on:
@@ -104,6 +94,8 @@ services:
     restart: 'no'
     networks:
       - backend
+    env_file:
+      - ./.env
     entrypoint: >
       /bin/sh -c "
       until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
@@ -123,24 +115,28 @@ services:
       - RABBITMQ_DEFAULT_PASS=pass1
     networks:
       - backend
+    env_file:
+      - ./.env
     healthcheck:
         test: rabbitmq-diagnostics -q check_running
         interval: 3s
         timeout: 10s
         retries: 5
     ports:
-      - "5673:5672"
-      - "15673:15672"
+      - ${RABBITMQ_EXT_PORT}:${RABBITMQ_INT_PORT}
+      - ${RABBITMQ_UI_EXT_PORT}:${RABBITMQ_UI_INT_PORT}
 
   payments-grpc:
     image: node:22-alpine
     working_dir: /app
     networks:
       - backend
+    env_file:
+      - ./.env
     volumes:
       - ./:/app
     ports:
-      - "5021:5021"
+      - ${GRPC_BIND_PORT}:${GRPC_BIND_PORT}
     command: sh -c "corepack enable && npm install && npm run start:payments:dev"
 
 volumes:
