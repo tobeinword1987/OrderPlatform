@@ -28,7 +28,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MzI5NDEwOSwiZXhwIjoxNzczMzgwNTA5fQ.GLmUTThmDpTkY9JZ9LbS1_EkxiQXrLNoOdhCyeGjueE",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDAwNjU4MCwiZXhwIjoxNzc0MDkyOTgwfQ.DGY3sjzIRfRr4kskU-yt7ojLVenyjiEQ0KOa9_WLw7E",
               "type": "string"
             }
           ]
@@ -53,6 +53,113 @@
           "port": "3000",
           "path": [
             "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/authorize",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDIwMzM0OSwiZXhwIjoxNzc0Mjg5NzQ5fQ.J5-E5PBOvjsp24upJgBbR6ovikrjet9TMet-NP6OR-Q",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": \"a1ccde64-2b84-4809-8f2a-0cb5b0732ebf\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders/authorize",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders",
+            "authorize"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/paymentStatus",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDAwNjU4MCwiZXhwIjoxNzc0MDkyOTgwfQ.DGY3sjzIRfRr4kskU-yt7ojLVenyjiEQ0KOa9_WLw7E",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"paymentId\": \"1eaae363-5a0d-49e4-be2b-40425978fbd8\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders/paymentStatus",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders",
+            "paymentStatus"
           ]
         }
       },
@@ -209,7 +316,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MjgwMDAyMiwiZXhwIjoxNzcyODg2NDIyfQ.3WncnkhbwB4rLKcMS1Pb_RSEw8-rFk1IY_8IjFwNQ_c",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDExNDg5OCwiZXhwIjoxNzc0MjAxMjk4fQ.mb1c6Thf8DXxem8MOdGs-PdIjgu9qTucLq7xJKn16rM",
               "type": "string"
             }
           ]
@@ -226,7 +333,7 @@
           }
         },
         "url": {
-          "raw": "http://localhost:3000/files/presigned",
+          "raw": "http://localhost:3000/files/presign",
           "protocol": "http",
           "host": [
             "localhost"
@@ -234,7 +341,7 @@
           "port": "3000",
           "path": [
             "files",
-            "presigned"
+            "presign"
           ]
         }
       },
@@ -322,7 +429,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MjE4ODE2NiwiZXhwIjoxNzcyMjc0NTY2fQ.5RU8bYg8vC1gbi5LOwabZtBC1WXT6ezdIhw7oAVMYT0",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDExNDg5OCwiZXhwIjoxNzc0MjAxMjk4fQ.mb1c6Thf8DXxem8MOdGs-PdIjgu9qTucLq7xJKn16rM",
               "type": "string"
             }
           ]
@@ -331,7 +438,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"fileId\": \"3c84bb7c-9128-4982-947e-dc1f240a098a\"\n}",
+          "raw": "{\n    \"fileId\": \"ff545775-8706-4227-a4b1-bab7608d4730\"\n}",
           "options": {
             "raw": {
               "language": "json"
