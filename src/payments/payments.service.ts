@@ -1,14 +1,35 @@
 import { Injectable } from "@nestjs/common";
-import type { PaymentById, Payment } from './payments.dto'
-import type { Metadata, ServerUnaryCall } from '@grpc/grpc-js';
+import { type PaymentPayload, type AuthorizedDataPayload, type PaymentData, PAYMENT_STATE } from './payments.dto'
+import { randomUUID, UUID } from "crypto";
+import { RpcException } from "@nestjs/microservices";
+import { status as GrpcStatus } from '@grpc/grpc-js';
 
 @Injectable()
 export class PaymentsService {
-  findOne(data: PaymentById, metadata: Metadata, call: ServerUnaryCall<any, any>): Payment | undefined {
-    const payments = [
-      { id: 1, name: 'John\'s payment' },
-      { id: 2, name: 'Doe\'s payment' },
-    ];
-    return payments.find(({ id, name }) => id === data.id);
+  private readonly ordersPaymentDataMap = new Map<string, { orderId: UUID, paymentId: UUID, status: PAYMENT_STATE }>();
+  private readonly idempoitencyKeyMap = new Map<string, { paymentId: UUID, status: PAYMENT_STATE }>();
+
+  authorize(data: AuthorizedDataPayload): PaymentData {
+    if (data.idempotencyKey && this.idempoitencyKeyMap.has(data.idempotencyKey)) {
+      return this.idempoitencyKeyMap.get(data.idempotencyKey)!;
+    }
+    const paymentId = randomUUID();
+    const status = PAYMENT_STATE.PAYMENT_AUTHORIZED;
+    this.idempoitencyKeyMap.set(data.idempotencyKey, { paymentId, status });
+    this.ordersPaymentDataMap.set(paymentId, { orderId: data.orderId, paymentId, status })
+    return {
+      paymentId,
+      status
+    }
+  }
+
+  getPaymentStatus(data: PaymentPayload): PaymentData {
+    if (!this.ordersPaymentDataMap.has(data.paymentId)) {
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Payment was not found'
+      });
+    }
+    return this.ordersPaymentDataMap.get(data.paymentId)!;
   }
 }

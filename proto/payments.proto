@@ -4,14 +4,27 @@ syntax = "proto3";
 package payments;
 
 service PaymentsService {
-  rpc findOne (PaymentById) returns (Payment) {}
-}
-
-message PaymentById {
-  int32 id = 1;
+  rpc getPaymentStatus (PaymentIdPayload) returns (PaymentData) {}
+  rpc authorize(AuthorizedPayload) returns (PaymentData) {}
 }
 
 message Payment {
   int32 id = 1;
   string name = 2;
+}
+
+message PaymentIdPayload {
+  string paymentId = 1;
+}
+
+message PaymentData {
+  string paymentId = 1;
+  string status = 2;
+}
+
+message AuthorizedPayload {
+    string orderId = 1;
+    float number = 2;
+    string currency = 3;
+    string idempotencyKey = 4;
 }

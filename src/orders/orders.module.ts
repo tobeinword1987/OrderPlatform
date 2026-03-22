@@ -20,6 +20,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ProcessedMessage } from 'src/orders/processed.message.entity'
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PaymentsGrpcClient } from './payments.grpc.client';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Product, ProcessedMessage, UsersRoles, Role]), RabbitmqModule,
@@ -44,6 +45,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     OrderItemResolver,
     OrdersService,
     OrdersWorkerService,
+    PaymentsGrpcClient,
     OrderDB,
     Repository<Order>,
     {
