@@ -41,13 +41,12 @@ export class OrdersWorkerService implements OnApplicationBootstrap, OnModuleInit
     const message = JSON.parse(msg.content.toString());
     const orderId = message.orderId;
     try {
-      // if (this.configService.get('RABBITMQ_SIMULATE_CONSUME_ERRORS') === 'true') {
-      //   throw new Error(`Simulated error when order status was updating`);
-      // }
+      if (this.configService.get('RABBITMQ_SIMULATE_CONSUME_ERRORS') === 'true') {
+        throw new Error(`Simulated error when order status was updating`);
+      }
       await this.orderService.updateOrderStatus(orderId, ORDER_STATUS.PROCEED, message.messageId);
       const payment = await firstValueFrom(this.getPayment());
       console.log('&*&*&*&*&*&*&*', payment);
-      console.log('&*&*&*&*&*&*&');
       ch.ack(msg);
     } catch (error) {
       console.log(error);

@@ -30,7 +30,8 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
     TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `./.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
+      // envFilePath: `./.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
+      envFilePath: './.env',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

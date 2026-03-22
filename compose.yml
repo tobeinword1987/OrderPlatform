@@ -80,8 +80,8 @@ services:
     networks:
       - backend
     ports:
-      - 9000:9000
-      - 9001:9001
+      - ${MINIO_EXT_PORT}:${MINIO_INT_PORT}
+      - ${MINIO_UI_EXT_PORT}:${MINIO_UI_INT_PORT}
     volumes:
       - minio_files_module:/data
     depends_on:

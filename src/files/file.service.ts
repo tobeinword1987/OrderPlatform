@@ -13,11 +13,11 @@ export class FileService {
 
     constructor(
         @InjectRepository(UploadFile) private fileRepository: Repository<UploadFile>,
+        @InjectRepository(User) private usersRepository: Repository<User>,
         private s3Service: S3Service
     ) { }
 
     async getFileById(user: User, fileId: UUID) {
-        console.log('-----', fileId);
             const file = await this.fileRepository.findOneBy({ id: fileId });
             if (!file) {
                 throw new HttpException('File not found', HttpStatus.NOT_FOUND)
@@ -53,6 +53,8 @@ export class FileService {
 
             const doesObjectExists = await this.s3Service.doesObjectExixts(file.key);
             if (doesObjectExists) {
+                await this.usersRepository.update({ id: user.id}, { avatarId: fileId });
+
                 const res = await this.fileRepository.update({ id: fileId }, { status: Status.READY });
                 console.log('****', res);
                 const fileCompleted = await this.fileRepository.findOneBy({ id: fileId });
