@@ -1,5 +1,5 @@
 
-# Homework_12_RabbitMq
+# Homework_14_GRPC
 
 1) copy .env.example to .env, set unnecessary envs
 2) docker compose -f compose.dev.yml up --build
@@ -41,15 +41,14 @@ curl --location --request GET 'http://localhost:3000/orders/paymentStatus' \
 
 8) proto file is in the ./proto/payments.proto in the root of project. It is used by both services: app and payments-grpc
 
-9) 
-## Limitations
+9) Limitations:
 
 - Orders owns the checkout call orchestration.
 - Payments owns the payment state and gRPC contract.
 - Interaction only through the gRPC client, without direct import of business   code.
 =======
 
-# Users domain was integrated
+## Users domain was integrated
 
 # Homework_9_Work_with_files_and_AWS_S3
 
@@ -60,7 +59,7 @@ User can:
   (@Post('complete'));
 - set one of uploaded files as his avatar, llok User domain: (@Post('avatar')).
 
-# Permissions (auth module)
+## Permissions (auth module)
 
 On every controller method I can add decorator Roles([]) with the allowed roles for this operation. User's role will be checked according to what roles user has and what roles are allowed to execute request (jwt-auth.guard.ts). Every role can has many scopes. And the DB structure has already existed. But I didn't use scopes in this app, just RBAC.
 
@@ -71,7 +70,7 @@ There are 2 endpoints which allow you to aithorize and then to exchange access t
 -   @Post('auth/login');
 -   @Post('auth/refresh')
 
-# Public url for review
+## Public url for review
 
 It is generated in S3Service as string which contains from:
 
@@ -81,7 +80,7 @@ It is generated in S3Service as string which contains from:
 
  - `${endpoint}/${this.bucket}/${key}`
 
- # Integration is with entity User and entity Files. This entity has avatarId.
+ ## Integration is with entity User and entity Files. This entity has avatarId.
 
   @Column({ type: 'uuid', name: 'avatar_id', nullable: true })
   avatarId: UUID;
@@ -108,19 +107,14 @@ It is generated in S3Service as string which contains from:
   Files entity: userId, user
   User entity: avatarId, files
 
-# Set avatar endpoint
-  
-   About your previous comment: У complete додати доменний attach (або чітко перебудувати flow так, щоб complete виконував вимогу statement щодо привʼязки).
-
-    I have separate endpoint where I do connection between Users and Files. It is in Users domain:
-    @Post('users/avatar')
+## Avatar is seted during complete endpoint
 
 # Homework_10_Docker_for_production
 
-# Use compose.dev.yml for testing, set necessary envs in .env file.
-# Please, use compose.yml for prod images and compose.dev.yml for dev images
+## Use compose.dev.yml for testing, set necessary envs in .env file.
+## Please, use compose.yml for prod images and compose.dev.yml for dev images
 
-# List of commands I have used:
+## List of commands I have used:
 
 1. ## First, please cd  to the root of the project
 
@@ -128,13 +122,17 @@ It is generated in S3Service as string which contains from:
 
 3. Prod distrolles image uses nonroot user from default. https://github.com/GoogleContainerTools/distroless#debian-12
 
-- docker build --no-cache --target dev -t order-platform-dev-runner .
+- copy .env.example to .env, set unnecessary envs
+- docker compose -f compose.dev.yml up --build
+    2 services will run at different ports:
+    - app on 3000
+    - payments-grpc on 5021
 
-- docker build --target dev -t order-platform-dev-runner .
+- docker compose -f compose.dev.yml run --rm seed
 
-- docker build --target prod-distroless -t order-platform-prod-distroless-runner .
+- docker compose -f compose.dev.yml run --rm migrate
 
-- docker build --target prod -t order-platform-prod-runner .
+docker compose -f compose.yml up --build
 
 - docker images --filter=reference='order-platform-*-runner:latest'
 
@@ -143,10 +141,6 @@ It is generated in S3Service as string which contains from:
 - docker history order-platform-prod-runner
 
 - docker history order-platform-prod-distroless-runner
-
-- docker compose -f compose.yml up
-
-- docker compose -f compose.dev.yml up
 
 - docker run order-platform-dev-runner whoami
 
