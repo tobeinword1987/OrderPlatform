@@ -13,6 +13,8 @@ import { DataSource, EntityManager, LessThan, MoreThan, Repository } from 'typeo
 import { exchanges, queues, RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 import { UUID } from 'crypto';
 import { ProcessedMessage } from './processed.message.entity';
+import { PaymentData, PaymentsGrpcClient } from './payments.grpc.client';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrdersService {
@@ -23,8 +25,22 @@ export class OrdersService {
     @InjectRepository(Order) private orderRepository: Repository<Order>,
     @InjectRepository(ProcessedMessage) private processedMessageRepository: Repository<ProcessedMessage>,
     private datasource: DataSource,
-    private rabbitmqService: RabbitmqService
+    private rabbitmqService: RabbitmqService,
+    private paymentsGrpcClient: PaymentsGrpcClient,
   ) { }
+
+  async authorize(orderId: UUID) {
+    const order = await this.orderRepository.findOneBy({ id: orderId });
+    if (!order) {
+      throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
+    }
+
+    return await firstValueFrom(this.paymentsGrpcClient.authorize({ orderId, amount: order.totalPriceAtPurchase, currency: 'pln', idempotencyKey: orderId })) as PaymentData;
+  }
+
+  async getPaymentStatus(paymentId: UUID) {
+    return await firstValueFrom(this.paymentsGrpcClient.getPaymentStatus({ paymentId }));
+  }
 
   async createOrder(order: NewOrderReq) {
     try {
@@ -80,6 +96,20 @@ export class OrdersService {
         throw new InternalServerErrorException('Getting orders for the user failed');
       } else {
         throw err;
+      }
+    }
+  }
+
+  async getOrderById(id: UUID) {
+    try {
+      const order = await this.orderRepository.findOneByOrFail({ id });
+      return order;
+    } catch (err) {
+      if (!(err instanceof HttpException)) {
+        console.log(err);
+        throw new InternalServerErrorException('Getting orders for the user failed');
+      } else {
+        throw new HttpException('Order was not found', HttpStatus.NOT_FOUND);
       }
     }
   }

@@ -54,8 +54,8 @@ services:
     volumes:
       - ./src/seeds:/app/src/seeds
     depends_on:
-      - migrate
       - app
+      - migrate
 
   postgres:
     image: postgres:16
@@ -64,6 +64,8 @@ services:
       - ./.env
     networks:
       - backend
+    ports:
+      - 5433:5432
     volumes:
       - ./pgdata_files_module:/var/lib/postgresql/data
 
