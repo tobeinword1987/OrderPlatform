@@ -6,9 +6,10 @@ import { Repository } from 'typeorm';
 import { ConfigService } from 'src/config-service';
 import { FileController } from './file.controller';
 import { UploadFile } from './file.entity';
+import { User } from 'src/users/user.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([UploadFile])],
+    imports: [TypeOrmModule.forFeature([UploadFile, User])],
     providers: [FileService, S3Service, Repository<UploadFile>, ConfigService],
     controllers: [FileController],
     exports: [ S3Service ]

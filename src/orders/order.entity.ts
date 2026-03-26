@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { OrderItem } from './order.item.entity';
-import { Field, GraphQLISODateTime, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Float, GraphQLISODateTime, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ORDER_STATUS } from './order.dto';
 import type { UUID } from 'crypto';
 import { ProcessedMessage } from './processed.message.entity';
@@ -44,6 +44,10 @@ export class Order {
   @Column({ type: 'uuid', name: 'user_id' })
   @Field(() => ID!, { name: 'user_id' })
   userId: string;
+
+  @Column({ type:'float', name: 'total_price_at_purchase', default: 0 })
+  @Field(() => Float!, { name: 'total_price_at_purchase' })
+  totalPriceAtPurchase: number;
 
   @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })

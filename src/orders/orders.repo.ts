@@ -10,6 +10,7 @@ import { User } from '../users/user.entity';
 export class OrderDB {
   constructor(private dataSource: DataSource) { }
   async createOrder(order: NewOrderReq) {
+    let totalPriceAtPurchase = 0;
     return await this.dataSource.transaction(async (manager) => {
       const orderRepository = manager.getRepository(Order);
       const orderItemRepository = manager.getRepository(OrderItem);
@@ -74,6 +75,7 @@ export class OrderDB {
             );
           }
           const rest = productDb.quantity - product.quantity;
+          totalPriceAtPurchase = totalPriceAtPurchase + productDb.price * product.quantity;
 
           if (rest < 0) {
             throw new HttpException(
@@ -109,6 +111,8 @@ export class OrderDB {
       );
 
       await orderItemRepository.insert(newOrders);
+
+      await orderRepository.update({ id: newOrder.id }, { totalPriceAtPurchase })
       const createdOrder = await orderRepository.findOne({
         where: { id: newOrder.id },
         relations: ['user', 'orderItems'],

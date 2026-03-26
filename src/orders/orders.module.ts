@@ -18,28 +18,34 @@ import { RabbitmqModule } from 'src/rabbitmq/rabbitmq.module';
 import { OrdersWorkerService } from './orders.worker.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ProcessedMessage } from 'src/orders/processed.message.entity'
+import { join } from 'path';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PaymentsGrpcClient } from './payments.grpc.client';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Product, ProcessedMessage, UsersRoles, Role]), RabbitmqModule,
-  ClientsModule.register([
-    {
-      name: 'OrdersService',
-      transport: Transport.RMQ,
-      options: {
-        urls: ['amqp://user1:pass1@localhost:5673'],
-        queue: 'orders.process',
-        queueOptions: {
-          durable: false
-        },
+    ClientsModule.registerAsync([
+      {
+        name: 'PAYMENTS_PACKAGE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: 'payments',
+            protoPath: join(process.cwd(), 'proto/payments.proto'),
+            url: configService.get<string>('PAYMENTS_GRPC_URL', 'localhost:5021')
+          },
+        })
       },
-    },
-  ]),
+    ]),
   ],
   providers: [
     OrderResolver,
     OrderItemResolver,
     OrdersService,
     OrdersWorkerService,
+    PaymentsGrpcClient,
     OrderDB,
     Repository<Order>,
     {

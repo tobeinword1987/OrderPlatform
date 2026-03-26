@@ -4,7 +4,7 @@ export class GenerateDb1773266008382 implements MigrationInterface {
     name = 'GenerateDb1773266008382'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TABLE "processed_message" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "order_id" uuid NOT NULL, "processed_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_c81e75762ece05b91bfecc6cf07" UNIQUE ("order_id"), CONSTRAINT "REL_c81e75762ece05b91bfecc6cf0" UNIQUE ("order_id"), CONSTRAINT "PK_8e3fd5041a92cfd8614379458c3" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "processed_message" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "order_id" uuid NOT NULL, "processed_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_8e3fd5041a92cfd8614379458c3" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE INDEX "Index_message_procesed_at" ON "processed_message" ("processed_at") `);
         await queryRunner.query(`CREATE INDEX "Index_message_order_id" ON "processed_message" ("order_id") `);
         await queryRunner.query(`ALTER TABLE "processed_message" ADD CONSTRAINT "FK_c81e75762ece05b91bfecc6cf07" FOREIGN KEY ("order_id") REFERENCES "order"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);

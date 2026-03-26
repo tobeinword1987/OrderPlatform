@@ -1,8 +1,8 @@
 import { S3Client, PutObjectCommand, S3ClientConfig, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { ConfigService } from "../config-service";
 import { ContentType } from "./s3.types";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class S3Service {
@@ -25,7 +25,7 @@ export class S3Service {
         this.region = this.configService.get('AWS_REGION') ?? 'eu-central-1';
         this.bucket = this.configService.get('AWS_S3_BUCKET') ?? 'files-private';
         this.expiresInSec = Number(this.configService.get('FILES_PRESIGN_EXPIRES_IN_SEC')) ?? 900;
-        this.awsEndpoint = this.configService.get('AWS_S3_ENDPOINT') ?? 'http://minio:9000';
+        this.awsEndpoint = this.configService.get('AWS_S3_ENDPOINT') || 'http://minio:9000';
         this.awsS3BucketEndpoint = this.configService.get('AWS_S3_BUCKET_ENDPOINT') ?? 'http://localhost:9000';
         this.forcePathStyle = Boolean(this.configService.get('AWS_S3_FORCE_PATH_STYLE')) ?? true;
         this.cloudFrontUrl = this.configService.get('AWS_CLOUDFRONT_URL') ?? 'http://localhost:9000';
@@ -79,6 +79,7 @@ export class S3Service {
                 return false
             }
         } catch (error) {
+            console.log(error);
             throw new HttpException('Request to bucket failed', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

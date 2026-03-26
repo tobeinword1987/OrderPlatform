@@ -1,37 +1,46 @@
-# Lesson 12: RabbitMQ queues + idempotency
+1) copy .env.example to .env, set unnecessary envs
+2) docker compose -f compose.dev.yml up --build
+    2 services will run at different ports:
+    - app on 3000
+    - payments-grpc on 5021
 
-- **Orders work queue**: 
-1) New order is created with order_status_enum `created`
-2) Message about order's processing is published to the exchange `orders.process.exchange`. 
-3) Exchange `orders.process.exchange` binds message to the queue `orders.process.queue`.  
-4) Processing of order is retried until max limit of retries will be reached. Set this limit in .env file in RABBITMQ_MAX_ATTEMPTS environment.
-5) If max limit of attempts is reached, message is published to the exchange `orders.dlq.exchange`. Then exchange binds it to the queue `orders.dlq.queue`
+3) docker compose -f compose.dev.yml run --rm seed
+4) Postman collection:
 
-## Quick start, fill .env file with your secrets
-```bash
-cp .env.example .env
-docker build  --no-cache --target dev -t order-platform-dev-runner .
-docker compose -f compose.dev.yml up 
-```
+    - `./postman/Order_Platform.postman_collection.json`
+5) Use for authorization, copy bearer token `accessToken` from response and set it in next requests.
 
-## Postman
-Please import collection:
-- `./postman_collection/Order_Platform.postman_collection.json`
+curl --location 'http://localhost:3000/auth/login' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikt5cnlsb19PcmxvdiIsImFkbWluIjp0cnVlLCJzY29wZSI6InJvYm90X2RyZWFtcyIsImlhdCI6MTc2OTE2Njc3MCwiZXhwIjoxNzc0MzUwNzcwLCJhdWQiOiJyX2Q6YXVkaWVuY2UiLCJpc3MiOiJyX2Q6aXNzdWVyIn0.N9xK5rqxfYSgxKrwyUm2RYMneAPD66g5uVQKeYm2TMA' \
+--data ' {
+    "username": "login1",
+    "password": "password1"
+}'
 
-RabbitMQ management UI:
-- http://localhost:15673 (login/pass: `user1` / `pass1`)
+6) Authorize payment
 
-## HOW YOU CAN CHECK:
+curl --location 'http://localhost:3000/orders/authorize' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data '{
+    "orderId": "0c6af838-fad5-4f6f-909d-d74886b1d5e2"
+}'
 
-### Orders queue (orders.process). Successfull scenarius
-1. `POST http://localhost:3000/auth/login`
-2. Copy accessToken from response and use it for the next request as (Bearer token)
-3. `POST http://localhost:3000/orders`
-4. In response you will get order with status created
-5. Wait for few seconds and repeat create order request. Status should be changed to the 'proceed'
+7) Use `paymentId` from the response of the curl request above. Call next curl, using that `paymentId` in body:
 
-### Retry + DLQ для orders. Unsuccessfull scenarius
-For testing you can set RABBITMQ_SIMULATE_CONSUME_ERRORS=true in .env file 
-This will throwing errors during handling message in consumer, message will be republished for 3 times and then message will be sent to the `orders.dlq.queue`
+curl --location --request GET 'http://localhost:3000/orders/paymentStatus' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data '{
+    "paymentId": "use here paymentId from response above"
+}'
 
-You can see it in RabbitMQ UI http://localhost:15673/ (Queues → `orders.dlq.queue`)
+8) proto file is in the ./proto/payments.proto in the root of project. It is used by both services: app and payments-grpc
+
+9) 
+## Limitations
+
+- Orders owns the checkout call orchestration.
+- Payments owns the payment state and gRPC contract.
+- Interaction only through the gRPC client, without direct import of business   code.

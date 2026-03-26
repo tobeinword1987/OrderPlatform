@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
-import { RabbitConsumeHandler, RabbitmqService, exchanges, queues } from 'src/rabbitmq/rabbitmq.service';
+import { RabbitmqService, exchanges, queues } from 'src/rabbitmq/rabbitmq.service';
 import { ORDER_STATUS } from './order.dto';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { OrdersService } from './orders.service';
@@ -8,10 +8,11 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class OrdersWorkerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(RabbitmqService.name);
+
   constructor(
+    private orderService: OrdersService,
     private rabbitmqService: RabbitmqService,
     private configService: ConfigService,
-    private orderService: OrdersService
   ) { }
 
   async onApplicationBootstrap() {
@@ -30,6 +31,7 @@ export class OrdersWorkerService implements OnApplicationBootstrap {
       await this.orderService.updateOrderStatus(orderId, ORDER_STATUS.PROCEED, message.messageId);
       ch.ack(msg);
     } catch (error) {
+      console.log(error);
       message.attempt = message.attempt + 1;
 
       if (message.attempt > this.configService.get('RABBITMQ_MAX_ATTEMPTS')) {
