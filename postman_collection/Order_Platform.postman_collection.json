@@ -1,0 +1,545 @@
+{
+  "info": {
+    "_postman_id": "a2b895a3-0466-484e-93b6-8039f0470dc8",
+    "name": "Order_Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "836851",
+    "_collection_link": "https://go.postman.co/collection/836851-a2b895a3-0466-484e-93b6-8039f0470dc8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "http://localhost:3000/orders",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDAwNjU4MCwiZXhwIjoxNzc0MDkyOTgwfQ.DGY3sjzIRfRr4kskU-yt7ojLVenyjiEQ0KOa9_WLw7E",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"idempotencyKey\": \"200011lgglls\",\n    \"userId\": \"0c6af838-fad5-4f6f-909d-d74886b1d5a1\",\n    \"deliveryAddress\": \"New delivery addredd, 3/2, loc. 5\",\n    \"products\": \n    [\n        {\n            \"productId\": \"0c6af838-fad5-4f6f-909d-d74886b1d5d9\",\n            \"quantity\": 1\n        },\n        {\n            \"productId\": \"0c6af838-fad5-4f6f-909d-d74886b1d5d8\",\n            \"quantity\": 2\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/authorize",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDIwMzM0OSwiZXhwIjoxNzc0Mjg5NzQ5fQ.J5-E5PBOvjsp24upJgBbR6ovikrjet9TMet-NP6OR-Q",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": \"a1ccde64-2b84-4809-8f2a-0cb5b0732ebf\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders/authorize",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders",
+            "authorize"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/paymentStatus",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDAwNjU4MCwiZXhwIjoxNzc0MDkyOTgwfQ.DGY3sjzIRfRr4kskU-yt7ojLVenyjiEQ0KOa9_WLw7E",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"paymentId\": \"1eaae363-5a0d-49e4-be2b-40425978fbd8\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders/paymentStatus",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders",
+            "paymentStatus"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/auth/login",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikt5cnlsb19PcmxvdiIsImFkbWluIjp0cnVlLCJzY29wZSI6InJvYm90X2RyZWFtcyIsImlhdCI6MTc2OTE2Njc3MCwiZXhwIjoxNzc0MzUwNzcwLCJhdWQiOiJyX2Q6YXVkaWVuY2UiLCJpc3MiOiJyX2Q6aXNzdWVyIn0.N9xK5rqxfYSgxKrwyUm2RYMneAPD66g5uVQKeYm2TMA",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": " {\n    \"username\": \"login1\",\n    \"password\": \"password1\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/auth/logout",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": " {\n    \"username\": \"login2\",\n    \"password\": \"password2\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/auth/log",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "auth",
+            "log"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Refresh token",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MTU2MTc2OSwiZXhwIjoxNzcxNTYxODI5fQ.6DZJI4g-Rrnx2ibAtj44H9X4CTV2wE88xurtnqpw9Qg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"refreshToken\": \"2e9c33d8f3d3d27fab73b8e11527ba0e8f711c8ee1b5cfb35225d6ea1b96d32d\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/auth/refresh",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "auth",
+            "refresh"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List users",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MTg0MTkxNywiZXhwIjoxNzcxODQxOTc3fQ.xvUxCjch6Yau4bmXVahRJye6CICebJivpYbFjQOYLwU",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:3000/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Post Presigned Url",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDExNDg5OCwiZXhwIjoxNzc0MjAxMjk4fQ.mb1c6Thf8DXxem8MOdGs-PdIjgu9qTucLq7xJKn16rM",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"contentType\": \"image/jpg\",\n    \"visibility\": \"public\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/files/presign",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "files",
+            "presign"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Presigned upload",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9000/files-private/users/0c6af838-fad5-4f6f-909d-d74886b1d5a1/avatars/8b609c58-b1b0-42b0-9f70-4e902712515a?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minioadmin%2F20260226%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20260226T113313Z&X-Amz-Expires=900&X-Amz-Signature=821a6be77f116cf9683c1b4122e13a1495c26dcaace54a25e0e7f4e897c651e9&X-Amz-SignedHeaders=content-type%3Bhost&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9000",
+          "path": [
+            "files-private",
+            "users",
+            "0c6af838-fad5-4f6f-909d-d74886b1d5a1",
+            "avatars",
+            "8b609c58-b1b0-42b0-9f70-4e902712515a"
+          ],
+          "query": [
+            {
+              "key": "X-Amz-Algorithm",
+              "value": "AWS4-HMAC-SHA256"
+            },
+            {
+              "key": "X-Amz-Content-Sha256",
+              "value": "UNSIGNED-PAYLOAD"
+            },
+            {
+              "key": "X-Amz-Credential",
+              "value": "minioadmin%2F20260226%2Feu-central-1%2Fs3%2Faws4_request"
+            },
+            {
+              "key": "X-Amz-Date",
+              "value": "20260226T113313Z"
+            },
+            {
+              "key": "X-Amz-Expires",
+              "value": "900"
+            },
+            {
+              "key": "X-Amz-Signature",
+              "value": "821a6be77f116cf9683c1b4122e13a1495c26dcaace54a25e0e7f4e897c651e9"
+            },
+            {
+              "key": "X-Amz-SignedHeaders",
+              "value": "content-type%3Bhost"
+            },
+            {
+              "key": "x-amz-checksum-crc32",
+              "value": "AAAAAA%3D%3D"
+            },
+            {
+              "key": "x-amz-sdk-checksum-algorithm",
+              "value": "CRC32"
+            },
+            {
+              "key": "x-id",
+              "value": "PutObject"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Complete file upload",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NDExNDg5OCwiZXhwIjoxNzc0MjAxMjk4fQ.mb1c6Thf8DXxem8MOdGs-PdIjgu9qTucLq7xJKn16rM",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fileId\": \"ff545775-8706-4227-a4b1-bab7608d4730\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/files/complete",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "files",
+            "complete"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get file by Id",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MzA2MDUxNSwiZXhwIjoxNzczMTQ2OTE1fQ.YrAt_kUpFzZ8OtzVCBbhnFeW7NFvPk0zpeiNDsbAmS8",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fileId\": \"29715fe4-8554-4902-9d2f-1974c2d0dfeb\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/files/29715fe4-8554-4902-9d2f-1974c2d0dfeb",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "files",
+            "29715fe4-8554-4902-9d2f-1974c2d0dfeb"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Set User Avatar",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MjE4NDIzMCwiZXhwIjoxNzcyMjcwNjMwfQ.5dYJkt217JIMR3r_yJR2ym4DFLd4UIRnsB9Ct5CmR9A",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fileId\": \"24fb3caa-6ec2-408d-834c-f60730c82041\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/users/avatar",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "users",
+            "avatar"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

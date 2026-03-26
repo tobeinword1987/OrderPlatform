@@ -9,9 +9,12 @@ import { OrderDB } from './orders.repo';
 import { OrdersFilterInput, OrdersPaginationInput, PageResult } from './order.types.graphql';
 import { Order } from './order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, MoreThan, Repository } from 'typeorm';
-import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
+import { DataSource, EntityManager, LessThan, MoreThan, Repository } from 'typeorm';
+import { exchanges, queues, RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 import { UUID } from 'crypto';
+import { ProcessedMessage } from './processed.message.entity';
+import { PaymentData, PaymentsGrpcClient } from './payments.grpc.client';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrdersService {
@@ -20,8 +23,24 @@ export class OrdersService {
   constructor(
     private orderDb: OrderDB,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
-    private rabbitmqService: RabbitmqService
+    @InjectRepository(ProcessedMessage) private processedMessageRepository: Repository<ProcessedMessage>,
+    private datasource: DataSource,
+    private rabbitmqService: RabbitmqService,
+    private paymentsGrpcClient: PaymentsGrpcClient,
   ) { }
+
+  async authorize(orderId: UUID) {
+    const order = await this.orderRepository.findOneBy({ id: orderId });
+    if (!order) {
+      throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
+    }
+
+    return await firstValueFrom(this.paymentsGrpcClient.authorize({ orderId, amount: order.totalPriceAtPurchase, currency: 'pln', idempotencyKey: orderId })) as PaymentData;
+  }
+
+  async getPaymentStatus(paymentId: UUID) {
+    return await firstValueFrom(this.paymentsGrpcClient.getPaymentStatus({ paymentId }));
+  }
 
   async createOrder(order: NewOrderReq) {
     try {
@@ -37,7 +56,7 @@ export class OrdersService {
           attempt: 0,
           createdAt: (new Date()).toISOString()
         }
-        const res = this.rabbitmqService.publishToQueue('orders.process', message, { correlationId: createdOrder.id, messageId: createdOrder.id });
+        const res = this.rabbitmqService.publishToExchange(exchanges[queues.ORDERS_PROCESS_QUEUE], message, { correlationId: createdOrder.id, messageId: createdOrder.id });
         console.log('message was sent', res);
       }
 
@@ -51,12 +70,17 @@ export class OrdersService {
     }
   }
 
-  async updateOrderStatus(orderId: UUID, status: ORDER_STATUS) {
+  async updateOrderStatus(orderId: UUID, status: ORDER_STATUS, messageId: UUID) {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) {
       throw new HttpException(`There is no order with id ${orderId}`, HttpStatus.NOT_FOUND);
     }
-    await this.orderRepository.update({ id: orderId }, { orderStatus: status })
+    const message = await this.processedMessageRepository.findOneBy({ id: messageId });
+    if (message) return;
+    this.datasource.transaction(async (manager: EntityManager) => {
+      await manager.getRepository(Order).update({ id: orderId }, { orderStatus: status });
+      await manager.getRepository(ProcessedMessage).insert({ messageId, orderId, handler: 'Order proceed' });
+    })
   }
 
   async getOrdersByUserId(id: string) {
@@ -72,6 +96,20 @@ export class OrdersService {
         throw new InternalServerErrorException('Getting orders for the user failed');
       } else {
         throw err;
+      }
+    }
+  }
+
+  async getOrderById(id: UUID) {
+    try {
+      const order = await this.orderRepository.findOneByOrFail({ id });
+      return order;
+    } catch (err) {
+      if (!(err instanceof HttpException)) {
+        console.log(err);
+        throw new InternalServerErrorException('Getting orders for the user failed');
+      } else {
+        throw new HttpException('Order was not found', HttpStatus.NOT_FOUND);
       }
     }
   }

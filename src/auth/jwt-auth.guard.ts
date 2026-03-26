@@ -1,5 +1,6 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ContextType, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IS_PUBLIC_KEY } from 'src/decorators/public';
@@ -31,7 +32,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             return false;
         }
 
-        const { user } = context.switchToHttp().getRequest();
+        const { user } = this.getRequest(context);
 
         const roles = this.reflector.get(Roles, context.getHandler());
         if (!roles) {
@@ -42,6 +43,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             return await this.matchRoles(roles, userId);
         }
         return true;
+    }
+
+    // Check, is it REST or GraphQL request, use required one
+    getRequest(context: ExecutionContext) {
+        if (context.getType<ContextType | 'graphql'>() === 'graphql') {
+            return GqlExecutionContext.create(context).getContext().req;
+        }
+        return context.switchToHttp().getRequest();
     }
 
     async matchRoles(roles: string[], userId: string) {

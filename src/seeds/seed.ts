@@ -44,6 +44,7 @@ type SeedOrder = {
   deliveryAddress: string;
   orderStatus: ORDER_STATUS;
   userId: string;
+  totalPriceAtPurchase: number,
   createdAt: Date;
   updatedAt: Date;
 };
@@ -334,6 +335,7 @@ for (let i = 0; i < 6000; i++) {
         'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
       orderStatus: ORDER_STATUS.CREATED,
       userId: users[Math.floor(Math.random() * 3)].id,
+      totalPriceAtPurchase: 12.5,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -349,6 +351,7 @@ orders.push(
       'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
     orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a3',
+    totalPriceAtPurchase: 12.5,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -359,6 +362,7 @@ orders.push(
       'Ukraine, Cherkasy, Taraask street, building 11, loc. 11, 85-796',
     orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a2',
+    totalPriceAtPurchase: 12.5,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -369,6 +373,7 @@ orders.push(
       'Ukraine, Cherkasy, Taraask street, building 10, loc. 166, 85-796',
     orderStatus: ORDER_STATUS.CREATED,
     userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a1',
+    totalPriceAtPurchase: 12.5,
     createdAt: new Date(),
     updatedAt: new Date(),
   },

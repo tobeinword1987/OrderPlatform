@@ -4,33 +4,33 @@ services:
   app:
     image: order-platform-prod-distroless-runner
     # image: order-platform-prod-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod-distroless
+      # target: prod
     depends_on:
       postgres:
         condition: service_started
       minio:
         condition: service_started
-      seed:
-        condition: service_started
       rabbitmq:
         condition: service_healthy
     env_file:
-      - ./src/configuration/.env
+      - ./.env
     ports:
-      - "${PORT:-3000}:3000"
+      - ${PORT}:${PORT}
     networks:
       - backend
 
   migrate:
-    image: order-platform-dev-runner
-    container_name: migrate
-    command: sh -c "npm run db:migrate"
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=liudmyla
-      - DB_PASSWORD=liudmyla
-      - DB_NAME=liudmyla
-      - NODE_ENV=prod
+    image: migrate
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    env_file:
+      - ./.env
     networks:
       - backend
     volumes:
@@ -40,17 +40,16 @@ services:
       - postgres
     depends_on:
       - postgres
+      - app
 
   seed:
-    image: order-platform-dev-runner
-    command: sh -c "npm run db:seed"
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=liudmyla
-      - DB_PASSWORD=liudmyla
-      - DB_NAME=liudmyla
-      - NODE_ENV=prod
+    image: seed
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seeds
+    env_file:
+      - ./.env
     networks:
       - backend
     volumes:
@@ -58,15 +57,13 @@ services:
       - ./src/seeds:/app/src/seeds
     depends_on:
       - migrate
+      - app
 
   postgres:
     image: postgres:16
-    container_name: files-module-postgres
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: liudmyla
-      POSTGRES_PASSWORD: liudmyla
-      POSTGRES_DB: liudmyla
+    env_file:
+      - ./.env
     networks:
       - backend
     volumes:
@@ -74,8 +71,9 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: files-module-minio
     restart: unless-stopped
+    env_file:
+      - ./.env
     environment:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
       MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
@@ -83,8 +81,8 @@ services:
     networks:
       - backend
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - ${MINIO_EXT_PORT}:${MINIO_INT_PORT}
+      - ${MINIO_UI_EXT_PORT}:${MINIO_UI_INT_PORT}
     volumes:
       - minio_files_module:/data
     depends_on:
@@ -92,13 +90,14 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: files-module-minio-init
     depends_on:
       - minio
       - postgres
     restart: 'no'
     networks:
       - backend
+    env_file:
+      - ./.env
     entrypoint: >
       /bin/sh -c "
       until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
@@ -112,21 +111,35 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    container_name: rabbitmq
     restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=user1
       - RABBITMQ_DEFAULT_PASS=pass1
     networks:
       - backend
+    env_file:
+      - ./.env
     healthcheck:
         test: rabbitmq-diagnostics -q check_running
         interval: 3s
         timeout: 10s
         retries: 5
     ports:
-      - "5673:5672"
-      - "15673:15672"
+      - ${RABBITMQ_EXT_PORT}:${RABBITMQ_INT_PORT}
+      - ${RABBITMQ_UI_EXT_PORT}:${RABBITMQ_UI_INT_PORT}
+
+  payments-grpc:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/app
+    ports:
+      - ${GRPC_BIND_PORT}:${GRPC_BIND_PORT}
+    command: sh -c "corepack enable && npm install && npm run start:payments:dev"
 
 volumes:
   pgdata_files_module:
