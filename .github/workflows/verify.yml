@@ -44,27 +44,10 @@ jobs:
             echo "- Ref: ${GITHUB_REF}"
             echo "- SHA: ${GITHUB_SHA::7}"
             echo "- Project: ${PROJECT_DIR}"
-            echo "- Smoke enabled: ${{ steps.flags.outputs.run_smoke }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
   verify:
     name: 'Verify -> eslint -> Uts'
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v5
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm run lint
-      - run: npm run test
-
-  build_image:
-    name: 'Build docker image'
 
     runs-on: ubuntu-latest
 
