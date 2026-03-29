@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from './config-service';
-import * as test from '@types/jest';
+import * as _test from '@types/jest';
 
 describe('ConfigService', () => {
   let provider: ConfigService;
