@@ -1,10 +1,77 @@
 name: Node.js CI
 
 on: [push, pull_request]
+  workflow_dispatch:
+    inputs:
+      note:
+        description: Manual run note
+        type: string
+        required: false
+        default: Lecture demo run
+
+concurrency:
+  group: lesson16-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  PROJECT_DIR: 16_Kubernetes_Basics/orders-api-on-minikube
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  build:
+  context:
+    name: Context / trigger metadata
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - name: Print trigger context
+        run: |
+          echo "event=${GITHUB_EVENT_NAME}"
+          echo "ref=${GITHUB_REF}"
+          echo "actor=${GITHUB_ACTOR}"
+          echo "note=${{ github.event.inputs.note || 'n/a' }}"
+
+      - id: meta
+        name: Compute metadata
+        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Write context summary
+        run: |
+          {
+            echo "## Lesson 16 quality gate"
+            echo "- Event: ${GITHUB_EVENT_NAME}"
+            echo "- Ref: ${GITHUB_REF}"
+            echo "- SHA: ${GITHUB_SHA::7}"
+            echo "- Project: ${PROJECT_DIR}"
+            echo "- Smoke enabled: ${{ steps.flags.outputs.run_smoke }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  verify:
     name: 'Verify -> eslint -> Uts'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm run lint
+      - run: npm run test
+
+  build_image:
+    name: 'Build docker image'
 
     runs-on: ubuntu-latest
 
