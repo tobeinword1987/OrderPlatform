@@ -1,11 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
+import '@types/jest';
+import { FileModule } from 'src/files/file.module';
 
 describe('Users', () => {
   let provider: UsersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [FileModule],
       providers: [UsersService],
     }).compile();
 

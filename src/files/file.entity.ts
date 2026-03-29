@@ -30,10 +30,22 @@ export class UploadFile {
   @Column({ name: 'size', nullable: true })
   size?: number;
 
-  @Column({ type: 'enum', enum: Status, enumName: 'file_status', default: Status.PENDING, name: 'status' })
+  @Column({
+    type: 'enum',
+    enum: Status,
+    enumName: 'file_status',
+    default: Status.PENDING,
+    name: 'status',
+  })
   status: Status;
 
-  @Column({ type: 'enum', enum: Visibility, enumName: 'file_visibility', default: Visibility.PRIVATE, name: 'visibility' })
+  @Column({
+    type: 'enum',
+    enum: Visibility,
+    enumName: 'file_visibility',
+    default: Visibility.PRIVATE,
+    name: 'visibility',
+  })
   visibility: Visibility;
 
   @ManyToOne(() => User, (user) => user.files, { onDelete: 'CASCADE' })

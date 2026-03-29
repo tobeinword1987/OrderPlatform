@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
@@ -22,11 +22,11 @@ import { Role } from 'src/users/role.entity';
       inject: [ConfigService],
       useFactory: (conf: ConfigService) => ({
         secret: conf.get('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' }
+        signOptions: { expiresIn: '1d' },
       }),
-    })
+    }),
   ],
   providers: [AuthService, JwtStrategy, LogInStrategy],
   exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

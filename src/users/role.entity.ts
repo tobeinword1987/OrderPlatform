@@ -15,17 +15,15 @@ import { User } from './user.entity';
 @Index('Index_role_unique', ['role'], { unique: true })
 export class Role {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID!)
+  @Field(() => ID, { nullable: false })
   id: string;
 
   @Column({ name: 'role' })
-  @Field(() => String!, { name: 'role' })
+  @Field(() => String, { name: 'role', nullable: false })
   role: string;
 
-  @ManyToMany(
-  () => Scope,
-  scope => scope.roles) //optional
-  @JoinTable(
+  @ManyToMany(() => Scope, (scope) => scope.roles) //optional
+  @JoinTable()
   //   {
   //   name: 'role_to_scope',
   //   joinColumn: {
@@ -37,12 +35,8 @@ export class Role {
   //     referencedColumnName: 'id',
   //   },
   // }
-)
   scopes?: Scope[];
 
-  @ManyToMany(
-    () => User,
-    user => user.roles,
-  )
+  @ManyToMany(() => User, (user) => user.roles)
   users: User[];
 }
