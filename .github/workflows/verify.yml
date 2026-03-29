@@ -1,9 +1,10 @@
 name: Node.js CI
 
-on: [push]
+on: [push, merge]
 
 jobs:
   build:
+    name: 'Verify -> eslint -> Uts'
 
     runs-on: ubuntu-latest
 
