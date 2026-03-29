@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
 import { Order } from 'src/orders/order.entity';
 import { OrderItem } from 'src/orders/order.item.entity';
 import { Product } from 'src/products/product.entity';
@@ -36,18 +35,17 @@ import { HttpExceptionFilter } from 'src/http.exception.filter';
         },
         context: () => ({
           loaders: dtLoader.createLoaders(),
-          strategy: process.env['STRATEGY'] || 'optimized' as const
-        })
-      })
+          strategy: process.env['STRATEGY'] || ('optimized' as const),
+        }),
+      }),
     }),
   ],
   providers: [
     TestResolver,
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter
+      useClass: HttpExceptionFilter,
     },
   ],
 })
-
-export class GraphQlModule { }
+export class GraphQlModule {}

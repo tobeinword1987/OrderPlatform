@@ -24,7 +24,9 @@ export class OrdersController {
 
   @Roles(['admin', 'user'])
   @Get('paymentStatus')
-  async getPaymentStatus(@Body('paymentId') paymentId: UUID): Promise<PaymentData> {
+  async getPaymentStatus(
+    @Body('paymentId') paymentId: UUID,
+  ): Promise<PaymentData> {
     return await this.ordersService.getPaymentStatus(paymentId);
   }
 }

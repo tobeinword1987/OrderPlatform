@@ -16,7 +16,10 @@ export class UsersController {
 
   @Roles(['user', 'admin'])
   @Post('/avatar')
-  setAvatar(@Req() request: Request & { user?: User }, @Body('fileId') fileId: UUID) {
+  setAvatar(
+    @Req() request: Request & { user?: User },
+    @Body('fileId') fileId: UUID,
+  ) {
     return this.usersService.setAvatarId(request.user as User, fileId);
   }
 }

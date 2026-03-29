@@ -14,13 +14,20 @@ import { UploadFile } from '../files/file.entity';
 import { FileModule } from 'src/files/file.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UploadFile, User, Role, RolesToScopes, Scope, RefreshTokens, UsersRoles]), FileModule],
-  controllers: [UsersController],
-  providers: [
-    Repository<User>,
-    UsersService,
-    UserResolver,
+  imports: [
+    TypeOrmModule.forFeature([
+      UploadFile,
+      User,
+      Role,
+      RolesToScopes,
+      Scope,
+      RefreshTokens,
+      UsersRoles,
+    ]),
+    FileModule,
   ],
-  exports: [UsersService]
+  controllers: [UsersController],
+  providers: [Repository<User>, UsersService, UserResolver],
+  exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

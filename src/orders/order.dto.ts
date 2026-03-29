@@ -3,29 +3,29 @@ import { User } from '../users/user.dto';
 import { OrderItem } from './order.item.dto';
 
 export type OrderProcessedMessage = {
-  messageId: UUID,
-  orderId: UUID,
-  createdAt: string,
-  attempt: number
-}
+  messageId: UUID;
+  orderId: UUID;
+  createdAt: string;
+  attempt: number;
+};
 
 export type OrdersFilterInput = {
-  status?: ORDER_STATUS,
-  dateFrom?:Date,
-  dateTo?: Date
-}
+  status?: ORDER_STATUS;
+  dateFrom?: Date;
+  dateTo?: Date;
+};
 
 export type OrdersPaginationInput = {
-  limit: number,
-  offset: number
-}
+  limit: number;
+  offset: number;
+};
 
 export enum ORDER_STATUS {
   CREATED = 'created',
   PROCEED = 'proceed',
   UPDATED = 'updated',
   IN_PROGRESS = 'in_progress',
-  CLOSED = 'closed'
+  CLOSED = 'closed',
 }
 
 export class Order {

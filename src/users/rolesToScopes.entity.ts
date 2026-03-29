@@ -15,28 +15,22 @@ import { Scope } from './scope.entity';
 @Index('Index_role_scope_unique', ['roleId', 'scopeId'], { unique: true })
 export class RolesToScopes {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID!)
+  @Field(() => ID, { nullable: false })
   id: string;
 
   @Column({ name: 'role_id' })
-  @Field(() => String!, { name: 'role_id' })
+  @Field(() => String, { name: 'role_id', nullable: false })
   roleId: string;
 
   @Column({ name: 'scope_id' })
-  @Field(() => String!, { name: 'scope_id' })
+  @Field(() => String, { name: 'scope_id', nullable: false })
   scopeId: string;
 
-  @ManyToOne(
-    () => Scope,
-    scope => scope.roles
-  )
+  @ManyToOne(() => Scope, (scope) => scope.roles)
   @JoinColumn([{ name: 'scope_id', referencedColumnName: 'id' }])
   scopes: Scope[];
 
-  @ManyToOne(
-    () => Role,
-    role => role.scopes
-  )
+  @ManyToOne(() => Role, (role) => role.scopes)
   @JoinColumn([{ name: 'role_id', referencedColumnName: 'id' }])
   roles: Role[];
 }

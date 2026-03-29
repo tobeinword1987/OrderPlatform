@@ -1,4 +1,3 @@
-import { User } from '../users/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -29,7 +28,9 @@ export class ProcessedMessage {
   @Column({ name: 'handler', nullable: true })
   handler: string;
 
-  @OneToOne(() => Order, (order) => order.processedMessage, { onDelete: 'CASCADE' })
+  @OneToOne(() => Order, (order) => order.processedMessage, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'order_id', referencedColumnName: 'id' })
   order: Order;
 

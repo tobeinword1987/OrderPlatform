@@ -9,9 +9,9 @@ import { UploadFile } from './file.entity';
 import { User } from 'src/users/user.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([UploadFile, User])],
-    providers: [FileService, S3Service, Repository<UploadFile>, ConfigService],
-    controllers: [FileController],
-    exports: [ S3Service ]
+  imports: [TypeOrmModule.forFeature([UploadFile, User])],
+  providers: [FileService, S3Service, Repository<UploadFile>, ConfigService],
+  controllers: [FileController],
+  exports: [S3Service],
 })
-export class FileModule { }
+export class FileModule {}

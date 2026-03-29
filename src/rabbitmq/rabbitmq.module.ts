@@ -4,7 +4,7 @@ import { ConfigService } from 'src/config-service';
 
 @Global()
 @Module({
-    providers: [RabbitmqService, ConfigService],
-    exports: [RabbitmqService]
+  providers: [RabbitmqService, ConfigService],
+  exports: [RabbitmqService],
 })
-export class RabbitmqModule { }
+export class RabbitmqModule {}
