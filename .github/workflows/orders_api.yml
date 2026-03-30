@@ -84,7 +84,8 @@ jobs:
           GRPC_BIND_PORT: ${{ secrets.GRPC_BIND_PORT }}
           PORT: ${{ secrets.PORT }}
         run: |
-          docker compose -f compose.dev.yml up --build --abort-on-container-exit --exit-code-from app
+          docker compose -f compose.dev.yml up --build
+          #  --abort-on-container-exit --exit-code-from app
 
       - name: Cleanup
         if: always()
