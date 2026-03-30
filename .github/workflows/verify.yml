@@ -121,7 +121,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: "liudmylapopova/orders_api:${{ needs.context.outputs.short_sha }}""
+          tags: "liudmylapopova/orders_api:${{ needs.context.outputs.short_sha }}"
           # labels: "orders_api:${{ needs.context.outputs.short_sha }}"
 
       - name: Generate artifact attestation
