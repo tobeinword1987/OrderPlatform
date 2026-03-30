@@ -109,7 +109,8 @@ jobs:
           images: my-docker-hub-namespace/my-docker-hub-repository
 
       - name: print what I have
-        run: echo ${{ steps.meta.outputs.tags }}/${{ steps.meta.outputs.labels }}
+        run: |
+          echo ${{ steps.meta.outputs.tags }}/${{ steps.meta.outputs.labels }}
 
       - name: Build and push Docker image
         id: push
