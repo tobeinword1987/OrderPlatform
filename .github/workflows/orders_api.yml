@@ -82,7 +82,7 @@ jobs:
           RABBITMQ_UI_EXT_PORT: ${{ secrets.RABBITMQ_UI_EXT_PORT }}
           RABBITMQ_UI_INT_PORT: ${{ secrets.RABBITMQ_UI_INT_PORT }}
           GRPC_BIND_PORT: ${{ secrets.GRPC_BIND_PORT }}
-          PORT: ${{ secrets.PORT }}
+          # PORT: ${{ secrets.PORT }}
         run: |
           docker compose -f compose.dev.yml up --build
           #  --abort-on-container-exit --exit-code-from app
