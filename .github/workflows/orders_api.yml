@@ -66,8 +66,8 @@ jobs:
     needs:
       - context
       - verify
-    environment:
-      name: dev
+    environment: dev
+      # name: dev
     steps:
       - uses: actions/checkout@v4
 
