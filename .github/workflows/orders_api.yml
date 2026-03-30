@@ -99,9 +99,7 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_S3_ENDPOINT=
           AWS_S3_FORCE_PATH_STYLE: ${{ secrets.AWS_S3_FORCE_PATH_STYLE }}
-          AWS_CLOUDFRONT_URL=
           FILES_PRESIGN_EXPIRES_IN_SEC: ${{ secrets.FILES_PRESIGN_EXPIRES_IN_SEC }}
           RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
           RABBITMQ_PREFETCH: ${{ secrets.RABBITMQ_PREFETCH }}
