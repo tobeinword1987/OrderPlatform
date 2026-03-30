@@ -73,15 +73,15 @@ jobs:
 
       - name: Build and run tests
         env:
-          MINIO_EXT_PORT: ${{ secrets.MINIO_EXT_PORT }}
-          MINIO_INT_PORT: ${{ secrets.MINIO_INT_PORT }}
-          MINIO_UI_EXT_PORT: ${{ secrets.MINIO_UI_EXT_PORT }}
-          MINIO_UI_INT_PORT: ${{ secrets.MINIO_UI_INT_PORT }}
-          RABBITMQ_EXT_PORT: ${{ secrets.RABBITMQ_EXT_PORT }}
-          RABBITMQ_INT_PORT: ${{ secrets.RABBITMQ_INT_PORT }}
-          RABBITMQ_UI_EXT_PORT: ${{ secrets.RABBITMQ_UI_EXT_PORT }}
-          RABBITMQ_UI_INT_PORT: ${{ secrets.RABBITMQ_UI_INT_PORT }}
-          GRPC_BIND_PORT: ${{ secrets.GRPC_BIND_PORT }}
+          MINIO_EXT_PORT: ${{ vars.MINIO_EXT_PORT }}
+          MINIO_INT_PORT: ${{ vars.MINIO_INT_PORT }}
+          MINIO_UI_EXT_PORT: ${{ vars.MINIO_UI_EXT_PORT }}
+          MINIO_UI_INT_PORT: ${{ vars.MINIO_UI_INT_PORT }}
+          RABBITMQ_EXT_PORT: ${{ vars.RABBITMQ_EXT_PORT }}
+          RABBITMQ_INT_PORT: ${{ vars.RABBITMQ_INT_PORT }}
+          RABBITMQ_UI_EXT_PORT: ${{ vars.RABBITMQ_UI_EXT_PORT }}
+          RABBITMQ_UI_INT_PORT: ${{ vars.RABBITMQ_UI_INT_PORT }}
+          GRPC_BIND_PORT: ${{ vars.GRPC_BIND_PORT }}
           PORT: ${{ vars.PORT }}
         run: |
           docker compose -f compose.dev.yml up --build
