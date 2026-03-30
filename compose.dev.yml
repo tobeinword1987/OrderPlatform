@@ -14,9 +14,10 @@ services:
       rabbitmq:
         condition: service_healthy
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     ports:
-      - "3000:3000"
+      - ${PORT}:${PORT}
     networks:
       - backend
     volumes:
@@ -30,7 +31,8 @@ services:
       dockerfile: Dockerfile
       target: migrations
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     networks:
       - backend
     volumes:
@@ -48,7 +50,8 @@ services:
       dockerfile: Dockerfile
       target: seeds
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     networks:
       - backend
     volumes:
@@ -61,7 +64,8 @@ services:
     image: postgres:16
     restart: unless-stopped
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     networks:
       - backend
     ports:
@@ -73,7 +77,8 @@ services:
     image: minio/minio:latest
     restart: unless-stopped
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     environment:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
       MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
@@ -97,7 +102,8 @@ services:
     networks:
       - backend
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     entrypoint: >
       /bin/sh -c "
       until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
@@ -118,7 +124,8 @@ services:
     networks:
       - backend
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     healthcheck:
         test: rabbitmq-diagnostics -q check_running
         interval: 3s
@@ -134,7 +141,8 @@ services:
     networks:
       - backend
     env_file:
-      - ./.env
+      - path: ./.env
+        required: false
     volumes:
       - ./:/app
     ports:
