@@ -67,8 +67,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build and run tests
-        with:
-          username: ${{ secrets.RABBITMQ_EXT_PORT }}
+        env:
+          RABBITMQ_EXT_PORT: ${{ secrets.RABBITMQ_EXT_PORT }}
         run: |
           docker compose -f compose.dev.yml up --build --abort-on-container-exit --exit-code-from app
 
