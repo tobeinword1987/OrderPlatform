@@ -15,8 +15,8 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
-    ports:
-      - 3000:3000
+    # ports:
+    #   - ${PORT}:${PORT}
     networks:
       - backend
     volumes:
