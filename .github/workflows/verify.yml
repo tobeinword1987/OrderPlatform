@@ -106,7 +106,7 @@ jobs:
     needs:
       - context
       - verify
-      - docker_preview
+      - push_to_registry
     steps:
       - name: Publish final summary
         run: |
@@ -114,6 +114,6 @@ jobs:
             echo "## Final status"
             echo "- Context: ${{ needs.context.result }}"
             echo "- Verify: ${{ needs.verify.result }}"
-            echo "- Docker preview: ${{ needs.docker_preview.result }}"
+            echo "- Push to registry: ${{ needs.push_to_registry.result }}"
             echo "- Image tag: orders-api:${{ needs.context.outputs.short_sha }}"
           } >> "$GITHUB_STEP_SUMMARY"
