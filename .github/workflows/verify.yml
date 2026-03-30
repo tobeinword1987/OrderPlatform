@@ -106,7 +106,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: liudmylapopova/orders_api:v1
+          images: liudmylapopova/orders_api
 
       - name: print what I have
         run: |
