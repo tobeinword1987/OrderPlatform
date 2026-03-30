@@ -70,7 +70,16 @@ jobs:
 
       - name: Build and run tests
         env:
+          MINIO_EXT_PORT: ${{ secrets.MINIO_EXT_PORT }}
+          MINIO_INT_PORT: ${{ secrets.MINIO_INT_PORT }}
+          MINIO_UI_EXT_PORT: ${{ secrets.MINIO_UI_EXT_PORT }}
+          MINIO_UI_INT_PORT: ${{ secrets.MINIO_UI_INT_PORT }}
           RABBITMQ_EXT_PORT: ${{ secrets.RABBITMQ_EXT_PORT }}
+          RABBITMQ_INT_PORT: ${{ secrets.RABBITMQ_INT_PORT }}
+          RABBITMQ_UI_EXT_PORT: ${{ secrets.RABBITMQ_UI_EXT_PORT }}
+          RABBITMQ_UI_INT_PORT: ${{ secrets.RABBITMQ_UI_INT_PORT }}
+          GRPC_BIND_PORT: ${{ secrets.GRPC_BIND_PORT }}
+          PORT: ${{ secrets.PORT }}
         run: |
           docker compose -f compose.dev.yml up --build --abort-on-container-exit --exit-code-from app
 
