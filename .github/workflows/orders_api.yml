@@ -82,6 +82,7 @@ jobs:
     needs:
       - context
       - verify
+      - integration
     permissions:
       packages: write
       contents: read
