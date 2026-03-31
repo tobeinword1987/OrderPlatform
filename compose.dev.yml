@@ -17,11 +17,11 @@ services:
       - path: ./.env
         required: false
     environment:
-      - DB_HOST: ${DB_HOST}
-      - DB_PORT: ${DB_PORT}
-      - DB_USER: ${DB_USER}
-      - DB_PASSWORD: ${DB_PASSWORD}
-      - DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - ${PORT}:${PORT}
     networks:
@@ -40,11 +40,11 @@ services:
       - path: ./.env
         required: false
     environment:
-      - DB_HOST: ${DB_HOST}
-      - DB_PORT: ${DB_PORT}
-      - DB_USER: ${DB_USER}
-      - DB_PASSWORD: ${DB_PASSWORD}
-      - DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     networks:
       - backend
     volumes:
@@ -65,11 +65,12 @@ services:
       - path: ./.env
         required: false
     environment:
-      - DB_HOST: ${DB_HOST}
-      - DB_PORT: ${DB_PORT}
-      - DB_USER: ${DB_USER}
-      - DB_PASSWORD: ${DB_PASSWORD}
-      - DB_NAME: ${DB_NAME}
+      environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     networks:
       - backend
     volumes:
