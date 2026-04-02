@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Roles } from '../../src/decorators/roles.decorator';
 import { FileService } from './file.service';
-import { User } from 'src/users/user.entity';
+import { User } from '../../src/users/user.entity';
 import type { PresignedBody } from './file.dto';
 import type { UUID } from 'crypto';
 

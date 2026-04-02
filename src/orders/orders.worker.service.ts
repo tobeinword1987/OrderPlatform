@@ -3,7 +3,7 @@ import {
   RabbitmqService,
   exchanges,
   queues,
-} from 'src/rabbitmq/rabbitmq.service';
+} from '../../src/rabbitmq/rabbitmq.service';
 import { ORDER_STATUS, OrderProcessedMessage } from './order.dto';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { OrdersService } from './orders.service';
@@ -17,7 +17,7 @@ export class OrdersWorkerService implements OnApplicationBootstrap {
     private orderService: OrdersService,
     private rabbitmqService: RabbitmqService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async onApplicationBootstrap() {
     await this.rabbitmqService.consume(

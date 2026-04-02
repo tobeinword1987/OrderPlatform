@@ -7,17 +7,17 @@ import { OrdersController } from './orders.controller';
 import { OrderDB } from './orders.repo';
 import { OrderResolver } from './order.resolver';
 import { OrderItemResolver } from './order.item.resolver';
-import { User } from 'src/users/user.entity';
-import { Product } from 'src/products/product.entity';
+import { User } from '../../src/users/user.entity';
+import { Product } from '../../src/products/product.entity';
 import { Repository } from 'typeorm';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { UsersRoles } from 'src/users/usersRoles.entity';
-import { Role } from 'src/users/role.entity';
-import { RabbitmqModule } from 'src/rabbitmq/rabbitmq.module';
+import { JwtAuthGuard } from '../../src/auth/jwt-auth.guard';
+import { UsersRoles } from '../../src/users/usersRoles.entity';
+import { Role } from '../../src/users/role.entity';
+import { RabbitmqModule } from '../../src/rabbitmq/rabbitmq.module';
 import { OrdersWorkerService } from './orders.worker.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ProcessedMessage } from 'src/orders/processed.message.entity';
+import { ProcessedMessage } from '../../src/orders/processed.message.entity';
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentsGrpcClient } from './payments.grpc.client';
@@ -69,4 +69,4 @@ import { PaymentsGrpcClient } from './payments.grpc.client';
   controllers: [OrdersController],
   exports: [OrderResolver, OrderItemResolver, OrderDB],
 })
-export class OrdersModule {}
+export class OrdersModule { }

@@ -1,26 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
-import { UsersModule } from './../src/users/users.module';
-
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, UsersModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Ecommerce Order Platform');
+  it('/ (GET)', async () => {
+    const res = await fetch('http:/localhost:3000/');
+    expect(res.status).toBe(200);
+    const message = await res.json();
+    expect(message).toEqual({ msg: 'Ecommerce Order Platform' })
   });
 });

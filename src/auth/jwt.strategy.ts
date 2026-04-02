@@ -2,10 +2,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefreshTokens } from 'src/users/refreshTokens.entity';
+import { RefreshTokens } from '../../src/users/refreshTokens.entity';
 import { Repository } from 'typeorm';
-import { hashdata } from 'src/utils/helper';
-import { User } from 'src/users/user.entity';
+import { hashdata } from '../../src/utils/helper';
+import { User } from '../../src/users/user.entity';
 import { UUID } from 'crypto';
 
 @Injectable()

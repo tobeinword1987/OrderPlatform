@@ -65,11 +65,11 @@ export class Order {
   @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   @Field(() => User, { nullable: false })
-  user: User;
+  user?: User;
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
   @Field(() => [OrderItem])
-  orderItems: OrderItem[];
+  orderItems?: OrderItem[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   @Field(() => GraphQLISODateTime, { name: 'created_at', nullable: false })
@@ -83,5 +83,5 @@ export class Order {
     () => ProcessedMessage,
     (processedMessage) => processedMessage.order,
   )
-  processedMessage: ProcessedMessage;
+  processedMessage?: ProcessedMessage;
 }

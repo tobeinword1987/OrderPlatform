@@ -6,12 +6,12 @@ import { Product } from '../products/product.entity';
 import { Category } from '../categories/category.entity';
 import { OrderItem } from '../orders/order.item.entity';
 import { Repository } from 'typeorm';
-import { ORDER_STATUS } from 'src/orders/order.dto';
-import { Role } from 'src/users/role.entity';
-import { RolesToScopes } from 'src/users/rolesToScopes.entity';
-import { UsersRoles } from 'src/users/usersRoles.entity';
-import { Scope } from 'src/users/scope.entity';
-import { hashdata } from 'src/utils/helper';
+import { ORDER_STATUS } from '../../src/orders/order.dto';
+import { Role } from '../../src/users/role.entity';
+import { RolesToScopes } from '../../src/users/rolesToScopes.entity';
+import { UsersRoles } from '../../src/users/usersRoles.entity';
+import { Scope } from '../../src/users/scope.entity';
+import { hashdata } from '../../src/utils/helper';
 
 type SeedRole = {
   id: string;

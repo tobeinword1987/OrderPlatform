@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Roles } from '../../src/decorators/roles.decorator';
 import { Request } from 'express';
 import type { UUID } from 'crypto';
 

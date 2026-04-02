@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Channel, ChannelModel, ConsumeMessage, Options } from 'amqplib';
 import * as amqp from 'amqplib';
-import { ConfigService } from 'src/config-service';
+import { ConfigService } from '../../src/config-service';
 
 export type RabbitConsumeHandler = (
   msg: ConsumeMessage,

@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { UUID } from 'crypto';
-import { UploadFile } from 'src/files/file.entity';
-import { S3Service } from 'src/files/s3.service';
-import { Status } from 'src/files/file.dto';
+import { UploadFile } from '../../src/files/file.entity';
+import { S3Service } from '../../src/files/s3.service';
+import { Status } from '../../src/files/file.dto';
 
 @Injectable()
 export class UsersService {

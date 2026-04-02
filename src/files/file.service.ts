@@ -1,4 +1,4 @@
-import { User } from 'src/users/user.entity';
+import { User } from '../../src/users/user.entity';
 import { Status, Visibility } from './file.dto';
 import { randomUUID, UUID } from 'node:crypto';
 import { DataSource, EntityManager, Repository } from 'typeorm';

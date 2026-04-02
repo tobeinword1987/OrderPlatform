@@ -4,9 +4,9 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UUID } from 'crypto';
-import { IS_PUBLIC_KEY } from 'src/decorators/public';
-import { Roles } from 'src/decorators/roles.decorator';
-import { UsersRoles } from 'src/users/usersRoles.entity';
+import { IS_PUBLIC_KEY } from '../../src/decorators/public';
+import { Roles } from '../../src/decorators/roles.decorator';
+import { UsersRoles } from '../../src/users/usersRoles.entity';
 import { In, Repository } from 'typeorm';
 
 interface User1 {

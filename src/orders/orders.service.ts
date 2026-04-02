@@ -24,7 +24,7 @@ import {
   exchanges,
   queues,
   RabbitmqService,
-} from 'src/rabbitmq/rabbitmq.service';
+} from '../../src/rabbitmq/rabbitmq.service';
 import { UUID } from 'crypto';
 import { ProcessedMessage } from './processed.message.entity';
 import { PaymentsGrpcClient } from './payments.grpc.client';

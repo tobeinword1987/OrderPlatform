@@ -8,9 +8,9 @@ import {
 } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from 'src/orders/order.entity';
-import { OrderItem } from 'src/orders/order.item.entity';
-import { User } from 'src/users/user.entity';
+import { Order } from '../../src/orders/order.entity';
+import { OrderItem } from '../../src/orders/order.item.entity';
+import { User } from '../../src/users/user.entity';
 import { Repository } from 'typeorm';
 import DataLoader from 'dataloader';
 import { ORDER_STATUS } from './order.dto';
@@ -18,9 +18,9 @@ import {
   OrdersFilterInput,
   OrdersPaginationInput,
   PageResult,
-} from 'src/orders/order.types.graphql';
-import { OrdersService } from 'src/orders/orders.service';
-import { Roles } from 'src/decorators/roles.decorator';
+} from '../../src/orders/order.types.graphql';
+import { OrdersService } from '../../src/orders/orders.service';
+import { Roles } from '../../src/decorators/roles.decorator';
 
 registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 
@@ -32,7 +32,7 @@ export class OrderResolver {
     private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(User) private userRepository: Repository<User>,
     private orderService: OrdersService,
-  ) {}
+  ) { }
 
   @Query(() => [Order])
   @Roles(['user', 'admin'])

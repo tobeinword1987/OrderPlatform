@@ -11,7 +11,7 @@ import { RefreshTokens } from './refreshTokens.entity';
 import { UserResolver } from './user.resolver';
 import { Repository } from 'typeorm';
 import { UploadFile } from '../files/file.entity';
-import { FileModule } from 'src/files/file.module';
+import { FileModule } from '../../src/files/file.module';
 
 @Module({
   imports: [

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import DataLoader from 'dataloader';
-import { OrderItem } from 'src/orders/order.item.entity';
-import { Product } from 'src/products/product.entity';
-import { User } from 'src/users/user.entity';
+import { OrderItem } from '../../../src/orders/order.item.entity';
+import { Product } from '../../../src/products/product.entity';
+import { User } from '../../../src/users/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class DtLoader {
     private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
-  ) {}
+  ) { }
 
   createLoaders() {
     return {
