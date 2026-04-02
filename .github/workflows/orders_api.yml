@@ -111,7 +111,7 @@ jobs:
           PAYMENTS_GRPC_URL: ${{ secrets.PAYMENTS_GRPC_URL }}
         run: |
           npm install jest
-          
+
           docker compose -f compose.dev.yml up --build -d
 
           npm run test:e2e
