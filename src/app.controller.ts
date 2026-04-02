@@ -32,7 +32,7 @@ export class AppController {
 
   @Public()
   @Get()
-  async getMessage(): Promise<{ msg: string }> {
-    return await this.appService.getHello();
+  getMessage(): { msg: string } {
+    return this.appService.getHello();
   }
 }
