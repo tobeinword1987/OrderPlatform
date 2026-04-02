@@ -7,4 +7,4 @@ import { ConfigService } from '../../src/config-service';
   providers: [RabbitmqService, ConfigService],
   exports: [RabbitmqService],
 })
-export class RabbitmqModule { }
+export class RabbitmqModule {}

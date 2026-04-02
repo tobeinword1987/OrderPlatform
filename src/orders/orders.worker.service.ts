@@ -17,7 +17,7 @@ export class OrdersWorkerService implements OnApplicationBootstrap {
     private orderService: OrdersService,
     private rabbitmqService: RabbitmqService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async onApplicationBootstrap() {
     await this.rabbitmqService.consume(

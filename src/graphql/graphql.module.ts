@@ -48,4 +48,4 @@ import { HttpExceptionFilter } from '../../src/http.exception.filter';
     },
   ],
 })
-export class GraphQlModule { }
+export class GraphQlModule {}

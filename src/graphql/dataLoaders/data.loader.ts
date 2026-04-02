@@ -13,7 +13,7 @@ export class DtLoader {
     private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Product) private productRepository: Repository<Product>,
-  ) { }
+  ) {}
 
   createLoaders() {
     return {

@@ -10,4 +10,4 @@ import { Product } from '../../../src/products/product.entity';
   providers: [DtLoader],
   exports: [DtLoader],
 })
-export class DataLoaderModule { }
+export class DataLoaderModule {}

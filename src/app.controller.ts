@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LogInAuthGuard } from './auth/log.in.guard';
@@ -17,7 +10,7 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(
     private authService: AuthService,
-    private appService: AppService
+    private appService: AppService,
   ) {}
 
   @UseGuards(LogInAuthGuard)
@@ -40,6 +33,6 @@ export class AppController {
   @Public()
   @Get()
   async getMessage(): Promise<{ msg: string }> {
-    return this.appService.getHello();
+    return await this.appService.getHello();
   }
 }

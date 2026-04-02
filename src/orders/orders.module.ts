@@ -69,4 +69,4 @@ import { PaymentsGrpcClient } from './payments.grpc.client';
   controllers: [OrdersController],
   exports: [OrderResolver, OrderItemResolver, OrderDB],
 })
-export class OrdersModule { }
+export class OrdersModule {}

@@ -3,12 +3,8 @@ import { OrdersService } from './orders.service';
 import { Order } from './order.entity';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UUID } from 'crypto';
-import { NewOrderReq, ORDER_STATUS } from './order.dto';
 
 describe('OrdersController', () => {
-  let orderService: OrdersService;
-//   let orderService1: OrdersService;
   let orderController: OrdersController;
 
   const order = {
@@ -47,21 +43,20 @@ describe('OrdersController', () => {
           useValue: {
             createOrder: jest
               .fn()
-              .mockImplementation((newOrderReq: NewOrderReq) => Promise.resolve(order))
+              .mockImplementation(() => Promise.resolve(order)),
           },
         },
         {
-        provide: getRepositoryToken(Order),
-        useValue: {
-            findOneBy: jest
-                .fn()
-                .mockImplementation((id: {id: UUID}) => { return 'La la la' })
-        }
-      }
+          provide: getRepositoryToken(Order),
+          useValue: {
+            findOneBy: jest.fn().mockImplementation(() => {
+              return 'La la la';
+            }),
+          },
+        },
       ],
     }).compile();
 
-    orderService = moduleRef.get(OrdersService);
     orderController = moduleRef.get(OrdersController);
 
     // jest
@@ -70,7 +65,6 @@ describe('OrdersController', () => {
     //     return order;
     //   });
   });
-
 
   it('Should call orderService method to create order', async () => {
     const createdOrder = await orderController.createOrder(newOrderReq);

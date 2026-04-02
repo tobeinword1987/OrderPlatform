@@ -32,7 +32,7 @@ export class OrderResolver {
     private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(User) private userRepository: Repository<User>,
     private orderService: OrdersService,
-  ) { }
+  ) {}
 
   @Query(() => [Order])
   @Roles(['user', 'admin'])

@@ -29,4 +29,4 @@ import { Role } from '../../src/users/role.entity';
   providers: [AuthService, JwtStrategy, LogInStrategy],
   exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

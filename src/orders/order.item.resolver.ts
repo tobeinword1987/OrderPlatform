@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 export class OrderItemResolver {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<OrderItem>,
-  ) { }
+  ) {}
 
   @ResolveField(() => Product)
   async product(
