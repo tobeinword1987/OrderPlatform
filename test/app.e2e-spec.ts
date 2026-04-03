@@ -5,6 +5,6 @@ describe('AppController (e2e)', () => {
     const res = await fetch(`${baseUrl}/`);
     expect(res.status).toBe(200);
     const message = await res.json();
-    expect(message).toEqual({ msg: 'Ecommerce Order Platform' });
+    expect(message).toEqual({ msg: 'Ecommerce Order Platform1' });
   }, 60*1000);
 });
