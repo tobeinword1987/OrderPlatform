@@ -1,6 +1,25 @@
 version: '3.9'
 services:
 
+  integration_tests:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      INTEGRATION_TESTS_URL: 'http://app:${PORT}'
+    depends_on:
+      - app
+      - seed
+      - migrate
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: sh -c "npm install jest && npm run test:e2e"
+
   app:
     image: order-platform-prod-distroless-runner
     # image: order-platform-prod-runner
@@ -182,7 +201,7 @@ services:
       RABBITMQ_EXT_PORT: ${RABBITMQ_EXT_PORT}
       RABBITMQ_INT_PORT: ${RABBITMQ_INT_PORT}
       RABBITMQ_UI_EXT_PORT: ${RABBITMQ_UI_EXT_PORT}
-      RABBITMQ_UI_INT_PORT: ${DB_NARABBITMQ_UI_INT_PORTME}
+      RABBITMQ_UI_INT_PORT: ${RABBITMQ_UI_INT_PORT}
     healthcheck:
         test: rabbitmq-diagnostics -q check_running
         interval: 3s

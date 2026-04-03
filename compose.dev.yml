@@ -9,14 +9,15 @@ services:
       - path: ./.env
         required: false
     environment:
-      BASE_URL: ${BASE_URL}
+      INTEGRATION_TESTS_URL: 'http://app:${PORT}'
     depends_on:
       - app
       - seed
       - migrate
     volumes:
       - ./:/app
-    command: sh -c "npm run test:e2e"
+      - /app/node_modules
+    command: sh -c "npm install jest && npm run test:e2e"
 
   app:
     image: order-platform-dev-runner
@@ -197,7 +198,7 @@ services:
       RABBITMQ_EXT_PORT: ${RABBITMQ_EXT_PORT}
       RABBITMQ_INT_PORT: ${RABBITMQ_INT_PORT}
       RABBITMQ_UI_EXT_PORT: ${RABBITMQ_UI_EXT_PORT}
-      RABBITMQ_UI_INT_PORT: ${DB_NARABBITMQ_UI_INT_PORTME}
+      RABBITMQ_UI_INT_PORT: ${RABBITMQ_UI_INT_PORT}
     healthcheck:
         test: rabbitmq-diagnostics -q check_running
         interval: 3s
