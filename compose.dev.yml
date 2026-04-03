@@ -16,8 +16,6 @@ services:
       - migrate
     volumes:
       - ./:/app
-    ports:
-      - ${GRPC_BIND_PORT}:${GRPC_BIND_PORT}
     command: sh -c "npm run test:e2e"
 
   app:
