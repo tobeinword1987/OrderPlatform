@@ -4,7 +4,7 @@ describe('Orders (e2e)', () => {
   it('should return existing Order', async () => {
     let response;
 
-    response = await fetch('http://localhost:3000/auth/login', {
+    response = await fetch('http://app:3000/auth/login', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -25,7 +25,7 @@ describe('Orders (e2e)', () => {
       updatedAt: expect.any(String),
     };
 
-    response = await fetch('http://localhost:3000/orders', {
+    response = await fetch('http://app:3000/orders', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
