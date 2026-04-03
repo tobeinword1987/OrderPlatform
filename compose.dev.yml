@@ -17,7 +17,7 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
-    command: sh -c "npm install jest && npm run test:e2e"
+    command: sh -c "npm install jest && npm run test:e2e && echo 'Done' && exit 0"
 
   app:
     image: order-platform-dev-runner
@@ -94,6 +94,7 @@ services:
     depends_on:
       - postgres
       - app
+    command: sh -c "echo 'Done' && exit 0"
 
   seed:
     image: seed
@@ -115,9 +116,12 @@ services:
       - backend
     volumes:
       - ./src/seeds:/app/src/seeds
+      - /app/node_modules
     depends_on:
-      - app
-      - migrate
+      app:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
 
   postgres:
     image: postgres:16
@@ -182,6 +186,7 @@ services:
       mc mb --ignore-existing local/${AWS_S3_BUCKET:-files-private};
       mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
       echo 'minio bucket is ready';
+      echo 'Done' && exit 0
       "
 
   rabbitmq:
