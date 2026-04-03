@@ -1,8 +1,8 @@
-import { timeout } from "rxjs";
+const baseUrl = process.env['BASE_URL'] || 'http://localhost:3000/'
 
 describe('AppController (e2e)', () => {
   it('/ (GET)', async () => {
-    const res = await fetch('http://app:3000/');
+    const res = await fetch(`${baseUrl}/`);
     expect(res.status).toBe(200);
     const message = await res.json();
     expect(message).toEqual({ msg: 'Ecommerce Order Platform' });

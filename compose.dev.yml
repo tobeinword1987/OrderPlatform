@@ -1,5 +1,25 @@
 services:
 
+  integration_tests:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      BASE_URL: ${BASE_URL}
+    depends_on:
+      - app
+      - seed
+      - migrate
+    volumes:
+      - ./:/app
+    ports:
+      - ${GRPC_BIND_PORT}:${GRPC_BIND_PORT}
+    command: sh -c "npm run test:e2e"
+
   app:
     image: order-platform-dev-runner
     build:

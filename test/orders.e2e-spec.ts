@@ -1,10 +1,12 @@
 import { testUserDB, existingOrderDB } from './test_constants';
 
+const baseUrl = process.env['BASE_URL'] || 'http://localhost:3000/'
+
 describe('Orders (e2e)', () => {
   it('should return existing Order', async () => {
     let response;
 
-    response = await fetch('http://app:3000/auth/login', {
+    response = await fetch(`${baseUrl}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -25,7 +27,7 @@ describe('Orders (e2e)', () => {
       updatedAt: expect.any(String),
     };
 
-    response = await fetch('http://app:3000/orders', {
+    response = await fetch(`${baseUrl}/orders`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
