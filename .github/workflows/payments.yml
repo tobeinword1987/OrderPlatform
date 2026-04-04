@@ -1,6 +1,8 @@
 name: Node.js CI
 
-on: [push1]
+on:
+  pull_request:
+    types: [opened, reopened]
 
 concurrency:
   group: payments-${{ github.ref }}

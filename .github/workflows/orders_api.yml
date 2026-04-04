@@ -1,6 +1,8 @@
 name: Order API
 
-on: [push1]
+on:
+  pull_request:
+    types: [opened, reopened]
 
 concurrency:
   group: orders_api-${{ github.ref }}
