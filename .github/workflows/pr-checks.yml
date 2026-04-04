@@ -65,6 +65,5 @@ jobs:
     needs:
       - context
       - verify
-    with: ${{ inputs.environment }}
     uses: .github/workflows/integration_test.yml
     secrets: inherit
