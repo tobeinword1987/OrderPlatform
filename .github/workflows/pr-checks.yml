@@ -65,5 +65,5 @@ jobs:
     needs:
       - context
       - verify
-    uses: .github/workflows/integration_test.yml
+    uses: integration_test.yml
     secrets: inherit
