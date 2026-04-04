@@ -5,9 +5,9 @@ on:
   workflow_call:
     inputs:
       environment:
-      description: current environment
-      required: true
-      default: dev
+        description: current environment
+        required: true
+        default: dev
 
 jobs:
   integration:
