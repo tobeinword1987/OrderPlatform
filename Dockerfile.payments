@@ -36,7 +36,7 @@ COPY --from=deps_prod /app/node_modules ./node_modules
 COPY --from=deps_prod /app/package.json ./package.json
 COPY --from=deps_prod /app/package-lock.json ./package-lock.json
 
-EXPOSE 3000
+EXPOSE 5021
 CMD ["dist/src/payments/main.js"]
 
 FROM gcr.io/distroless/nodejs${NODE_VERSION}-debian${DEBIAN_VERSION}:nonroot AS prod-distroless

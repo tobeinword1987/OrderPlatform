@@ -1,0 +1,47 @@
+name: BUILD_AND_STAGE
+
+on: [push, pull_request]
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PROJECT_DIR: "./"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pr-checks:
+    uses: ./.github/workflows/pr-checks.yml
+    secrets: inherit
+
+  build_order_api:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile
+      service: orders_api
+      short_sha: ${{ needs.pr-check.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-check.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-check.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  build_payments:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile.payments
+      serviceName: payments
+      short_sha: ${{ needs.pr-check.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-check.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-check.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit

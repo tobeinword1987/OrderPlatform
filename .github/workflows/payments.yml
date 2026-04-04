@@ -90,7 +90,7 @@ jobs:
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
-          file: ./Dockerfile_payments
+          file: ./Dockerfile.payments
           push: true
           tags: "liudmylapopova/payments:${{ needs.context.outputs.short_sha }}"
 

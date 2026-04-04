@@ -1,6 +1,13 @@
 name: PR-CHECK
 
-on: [push, pull_request]
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: current environment
+        required: false
+        type: string
+        default: dev
 
 concurrency:
   group: pr-check-${{ github.ref }}
@@ -23,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       short_sha: ${{ steps.meta.outputs.short_sha }}
+      contextResult: ${{ steps.context.result }}
     steps:
       - name: Print trigger context
         run: |
@@ -47,8 +55,9 @@ jobs:
 
   verify:
     name: 'Verify -> eslint -> Uts'
-
     runs-on: ubuntu-latest
+    outputs:
+      verifyResult: ${{ steps.verify.result }}
 
     steps:
       - uses: actions/checkout@v5
@@ -65,5 +74,6 @@ jobs:
     needs:
       - context
       - verify
+    with: ${{ inputs.environment }}
     uses: ./.github/workflows/integration_test.yml
     secrets: inherit
