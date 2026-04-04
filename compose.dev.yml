@@ -94,7 +94,7 @@ services:
     depends_on:
       - postgres
       - app
-    command: sh -c "echo 'Migrate Done' && exit 0"
+    # command: sh -c "echo 'Migrate Done' && exit 0"
 
   seed:
     image: seed
@@ -122,7 +122,7 @@ services:
         condition: service_started
       migrate:
         condition: service_completed_successfully
-    command: sh -c "echo 'Seed Done' && exit 0"
+    # command: sh -c "echo 'Seed Done' && exit 0"
 
   postgres:
     image: postgres:16
