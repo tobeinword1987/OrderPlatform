@@ -1,6 +1,6 @@
 name: PR-CHECK
 
-on: [push]
+on: [push, merge]
 
 concurrency:
   group: pr-check-${{ github.ref }}
