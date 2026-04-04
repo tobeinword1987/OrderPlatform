@@ -95,7 +95,6 @@ services:
     depends_on:
       - postgres
       - app
-    command: sh -c "echo 'Done' && exit 0"
 
   seed:
     image: seed

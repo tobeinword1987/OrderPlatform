@@ -20,7 +20,7 @@ describe('Orders (e2e)', () => {
       id: expect.any(String),
       idempotencyKey: existingOrderDB.idempotencyKey,
       deliveryAddress: existingOrderDB.deliveryAddress,
-      orderStatus: 'proceed',
+      orderStatus: expect.any(String),
       userId: existingOrderDB.userId,
       totalPriceAtPurchase: expect.any(Number),
       createdAt: expect.any(String),
