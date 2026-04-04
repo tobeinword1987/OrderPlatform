@@ -1,11 +1,13 @@
 name: Integration tests
 description: Install dependencies and run lesson 16 project verification steps.
 
-inputs:
-  environment:
-    description: current environment
-    required: true
-    default: dev
+on:
+  workflow_call:
+    inputs:
+      environment:
+      description: current environment
+      required: true
+      default: dev
 
 jobs:
   integration:
