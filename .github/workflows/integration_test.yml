@@ -1,5 +1,5 @@
 name: Integration tests
-description: Install dependencies and run lesson 16 project verification steps.
+description: Run integration tests
 
 on:
   workflow_call:
@@ -13,9 +13,6 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-latest
-    needs:
-      - context
-      - verify
     environment:
       name: ${{ inputs.environment }}
     steps:
