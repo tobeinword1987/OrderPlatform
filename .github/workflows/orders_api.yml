@@ -1,6 +1,6 @@
 name: Order API
 
-on: [push]
+on: [push1]
 
 concurrency:
   group: orders_api-${{ github.ref }}

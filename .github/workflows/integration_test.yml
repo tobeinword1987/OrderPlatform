@@ -1,0 +1,62 @@
+name: Integration tests
+description: Install dependencies and run lesson 16 project verification steps.
+
+inputs:
+  environment:
+    description: current environment
+    required: true
+    default: dev
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    needs:
+      - context
+      - verify
+    environment:
+      name: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run tests
+        env:
+          MINIO_EXT_PORT: ${{ vars.MINIO_EXT_PORT }}
+          MINIO_INT_PORT: ${{ vars.MINIO_INT_PORT }}
+          MINIO_UI_EXT_PORT: ${{ vars.MINIO_UI_EXT_PORT }}
+          MINIO_UI_INT_PORT: ${{ vars.MINIO_UI_INT_PORT }}
+          RABBITMQ_EXT_PORT: ${{ vars.RABBITMQ_EXT_PORT }}
+          RABBITMQ_INT_PORT: ${{ vars.RABBITMQ_INT_PORT }}
+          RABBITMQ_UI_EXT_PORT: ${{ vars.RABBITMQ_UI_EXT_PORT }}
+          RABBITMQ_UI_INT_PORT: ${{ vars.RABBITMQ_UI_INT_PORT }}
+          GRPC_BIND_PORT: ${{ vars.GRPC_BIND_PORT }}
+          PORT: ${{ vars.PORT }}
+          BASE_URL: ${{ secrets.BASE_URL }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          STRATEGY: ${{ secrets.STRATEGY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_FORCE_PATH_STYLE: ${{ secrets.AWS_S3_FORCE_PATH_STYLE }}
+          FILES_PRESIGN_EXPIRES_IN_SEC: ${{ secrets.FILES_PRESIGN_EXPIRES_IN_SEC }}
+          RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
+          RABBITMQ_PREFETCH: ${{ secrets.RABBITMQ_PREFETCH }}
+          RABBITMQ_MAX_ATTEMPTS: ${{ secrets.RABBITMQ_MAX_ATTEMPTS }}
+          GRPC_MIN_TIMEOUT_RESPONSE_MS: ${{ secrets.GRPC_MIN_TIMEOUT_RESPONSE_MS }}
+          GRPC_MAX_TIMEOUT_RESPONSE_MS: ${{ secrets.GRPC_MAX_TIMEOUT_RESPONSE_MS }}
+          GRPC_MAX_COUNT_RETRIES: ${{ secrets.GRPC_MAX_COUNT_RETRIES }}
+          RABBITMQ_SIMULATE_CONSUME_ERRORS: ${{ secrets.RABBITMQ_SIMULATE_CONSUME_ERRORS }}
+          PAYMENTS_GRPC_URL: ${{ secrets.PAYMENTS_GRPC_URL }}
+        run: |
+          docker compose -f compose.dev.yml build && docker compose -f compose.dev.yml up --abort-on-container-exit integration_tests \
+          --exit-code-from integration_tests \
+          && docker compose -f compose.dev.yml down
