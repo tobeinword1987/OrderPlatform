@@ -1,9 +1,7 @@
 name: PR-CHECK
 
-on:
-  - push
-  - pull_request:
-    types: [opened, reopened]
+on: [push, pull_request]
+  types: [opened, reopened]
 
 concurrency:
   group: pr-check-${{ github.ref }}
