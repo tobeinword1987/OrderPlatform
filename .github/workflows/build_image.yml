@@ -70,8 +70,6 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
-      - context
-      - verify
       - push_to_registry
     steps:
       - name: Publish final summary
