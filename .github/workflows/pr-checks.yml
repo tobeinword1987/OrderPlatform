@@ -9,21 +9,6 @@ on:
         type: string
         default: dev
 
-concurrency:
-  group: pr-check-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
-env:
-  NODE_VERSION: "22"
-  PROJECT_DIR: "./"
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
   context:
     name: Context / trigger metadata
@@ -74,6 +59,7 @@ jobs:
     needs:
       - context
       - verify
-    with: ${{ inputs.environment }}
+    with:
+      environment: ${{ inputs.environment }}
     uses: ./.github/workflows/integration_test.yml
     secrets: inherit
