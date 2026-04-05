@@ -23,6 +23,7 @@ defaults:
 jobs:
   pr-checks:
     uses: ./.github/workflows/pr-checks.yml
+    env: inherit
     secrets: inherit
 
   build_order_api:

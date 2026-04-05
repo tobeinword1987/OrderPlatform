@@ -12,9 +12,9 @@ on:
       short_sha:
         value: ${{ jobs.context.outputs.short_sha }}
       contextResult:
-        value: ${{ jobs.context.outputs.contextResult }}
+        value: ${{ jobs.context.result }}
       verifyResult:
-        value: ${{ jobs.verify.outputs.verifyResult }}
+        value: ${{ jobs.verify.result }}
 
 jobs:
   context:
