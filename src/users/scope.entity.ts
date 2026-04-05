@@ -13,16 +13,13 @@ import { Role } from './role.entity';
 @Index('Index_scope_unique', ['scope'], { unique: true })
 export class Scope {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID!)
+  @Field(() => ID, { nullable: false })
   id: string;
 
   @Column({ name: 'scope' })
-  @Field(() => String!, { name: 'scope' })
+  @Field(() => String, { name: 'scope', nullable: false })
   scope: string;
 
-  @ManyToMany(
-    () => Role,
-    role => role.scopes,
-  )
+  @ManyToMany(() => Role, (role) => role.scopes)
   roles: Role[];
 }

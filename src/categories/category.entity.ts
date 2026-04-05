@@ -6,14 +6,14 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 @ObjectType()
 export class Category {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID!)
+  @Field(() => ID, { nullable: false })
   id: string;
 
   @Column()
-  @Field(() => String!)
+  @Field(() => String, { nullable: false })
   name: string;
 
   @OneToMany(() => Product, (product) => product.category)
-  @Field(() => [Product]!)
+  @Field(() => [Product], { nullable: false })
   products: Product[];
 }

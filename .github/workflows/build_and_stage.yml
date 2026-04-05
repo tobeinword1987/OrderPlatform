@@ -1,0 +1,76 @@
+name: BUILD_AND_STAGE
+
+on: [push, pull_request]
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  packages: write
+  contents: read
+  attestations: write
+  id-token: write
+
+env:
+  NODE_VERSION: "22"
+  PROJECT_DIR: "./"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pr-checks:
+    uses: ./.github/workflows/pr-checks.yml
+    secrets: inherit
+
+  build_order_api:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile
+      serviceName: orders_api
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  build_payments:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile.payments
+      serviceName: payments
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  migrate:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile
+      tag: migrations
+      serviceName: migrate
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+    seed:
+      needs:
+        - pr-checks
+      with:
+        dockerFile: ./Dockerfile
+        tag: seed
+        serviceName: seed
+        short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+        verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+        contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+      uses: ./.github/workflows/build_image.yml
+      secrets: inherit
