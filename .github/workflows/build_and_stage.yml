@@ -48,3 +48,29 @@ jobs:
       contextResult: ${{ needs.pr-checks.outputs.contextResult }}
     uses: ./.github/workflows/build_image.yml
     secrets: inherit
+
+  migrate:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile
+      tag: migrations
+      serviceName: migrate
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+    seeds:
+      needs:
+        - pr-checks
+      with:
+        dockerFile: ./Dockerfile
+        tag: seeds
+        serviceName: seeds
+        short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+        verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+        contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+      uses: ./.github/workflows/build_image.yml
+      secrets: inherit

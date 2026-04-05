@@ -1,0 +1,277 @@
+---
+# Source: rabbitmq/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-rmq-rabbitmq
+  namespace: default
+  labels:
+    helm.sh/chart: rabbitmq-0.1.18
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+    app.kubernetes.io/version: "4.2.5"
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: false
+---
+# Source: rabbitmq/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-rmq-rabbitmq
+  namespace: default
+  labels:
+    helm.sh/chart: rabbitmq-0.1.18
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+    app.kubernetes.io/version: "4.2.5"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  rabbitmq-password: "cGFzczE="
+  rabbitmq-erlang-cookie: "cDBxODRXSHlIYkNZSlIxRnE3MkJ4bTVRV2VtSEZBbW0="
+---
+# Source: rabbitmq/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-rmq-rabbitmq-config
+  namespace: default
+  labels:
+    helm.sh/chart: rabbitmq-0.1.18
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+    app.kubernetes.io/version: "4.2.5"
+    app.kubernetes.io/managed-by: Helm
+data:
+  enabled_plugins: |-
+    [rabbitmq_management,rabbitmq_prometheus].
+  rabbitmq.conf: |-
+    default_vhost = /
+    loopback_users = none
+    listeners.tcp.default = 5672
+    management.tcp.port = 15672
+    log.console = true
+    log.console.level = info
+---
+# Source: rabbitmq/templates/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-rmq-rabbitmq-headless
+  namespace: default
+  labels:
+    helm.sh/chart: rabbitmq-0.1.18
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+    app.kubernetes.io/version: "4.2.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+    - name: dist
+      port: 25672
+      targetPort: dist
+    - name: http-stats
+      port: 15672
+      targetPort: stats
+    - name: epmd
+      port: 4369
+      targetPort: epmd
+  selector:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+  publishNotReadyAddresses: true
+---
+# Source: rabbitmq/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-rmq-rabbitmq
+  namespace: default
+  labels:
+    helm.sh/chart: rabbitmq-0.1.18
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+    app.kubernetes.io/version: "4.2.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+    - name: dist
+      port: 25672
+      targetPort: dist
+    - name: http-stats
+      port: 15672
+      targetPort: stats
+    - name: epmd
+      port: 4369
+      targetPort: epmd
+  selector:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+---
+# Source: rabbitmq/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-rmq-rabbitmq
+  namespace: default
+  labels:
+    helm.sh/chart: rabbitmq-0.1.18
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/instance: my-rmq
+    app.kubernetes.io/version: "4.2.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq
+      app.kubernetes.io/instance: my-rmq
+  serviceName: my-rmq-rabbitmq-headless
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: rabbitmq-0.1.18
+        app.kubernetes.io/name: rabbitmq
+        app.kubernetes.io/instance: my-rmq
+        app.kubernetes.io/version: "4.2.5"
+        app.kubernetes.io/managed-by: Helm
+      annotations:
+        checksum/config: 9f5c23bbb14839f8a9c8caab8f82c47dbb07eb93245ae2769c450de54ec18ff7
+        checksum/secret: 6a6555876b5bb1c9c09c1eedf32ef983e82f583582100ed554892403ba87a31d
+    spec:
+      serviceAccountName: my-rmq-rabbitmq
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: "OnRootMismatch"
+      initContainers:
+        - name: volume-permissions
+          image: ghcr.io/kubelauncher/rabbitmq@sha256:dc9388ee7c1e74184546379caa9ab8e087e3c232201f807aa3d2f3ee1cc30196
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-c", "chown -R 1001:1001 /data/rabbitmq/data"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /data/rabbitmq/data
+      containers:
+        - name: rabbitmq
+          image: ghcr.io/kubelauncher/rabbitmq@sha256:dc9388ee7c1e74184546379caa9ab8e087e3c232201f807aa3d2f3ee1cc30196
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: "user1"
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: my-rmq-rabbitmq
+                  key: rabbitmq-password
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: my-rmq-rabbitmq
+                  key: rabbitmq-erlang-cookie
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: RABBITMQ_NODE_NAME
+              value: "rabbit@$(POD_NAME).my-rmq-rabbitmq-headless.default.svc.cluster.local"
+          ports:
+            - name: amqp
+              containerPort: 5672
+            - name: dist
+              containerPort: 25672
+            - name: stats
+              containerPort: 15672
+            - name: epmd
+              containerPort: 4369
+          startupProbe:
+            tcpSocket:
+              port: amqp
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+            successThreshold: 1
+          livenessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - ping
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 20
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - check_running
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 20
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data/rabbitmq/data
+            - name: config
+              mountPath: /etc/rabbitmq/rabbitmq.conf
+              subPath: rabbitmq.conf
+            - name: config
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
+      volumes:
+        - name: config
+          configMap:
+            name: my-rmq-rabbitmq-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: rabbitmq
+          app.kubernetes.io/instance: my-rmq
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
