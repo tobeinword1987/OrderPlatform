@@ -7,7 +7,10 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  packages: write
   contents: read
+  attestations: write
+  id-token: write
 
 env:
   NODE_VERSION: "22"
@@ -25,11 +28,6 @@ jobs:
   build_order_api:
     needs:
       - pr-checks
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
     with:
       dockerFile: ./Dockerfile
       serviceName: orders_api
