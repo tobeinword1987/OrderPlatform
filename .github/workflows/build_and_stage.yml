@@ -25,6 +25,11 @@ jobs:
   build_order_api:
     needs:
       - pr-checks
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
     with:
       dockerFile: ./Dockerfile
       serviceName: orders_api
