@@ -62,13 +62,13 @@ jobs:
     uses: ./.github/workflows/build_image.yml
     secrets: inherit
 
-    seeds:
+    seed:
       needs:
         - pr-checks
       with:
         dockerFile: ./Dockerfile
-        tag: seeds
-        serviceName: seeds
+        tag: seed
+        serviceName: seed
         short_sha: ${{ needs.pr-checks.outputs.short_sha }}
         verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
         contextResult: ${{ needs.pr-checks.outputs.contextResult }}
