@@ -34,11 +34,6 @@ jobs:
   push_to_registry:
     name: Build and push Docker image to Docker Hub
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5
@@ -56,7 +51,7 @@ jobs:
           context: .
           file: ${{ inputs.dockerFile }}
           push: true
-          tags: "liudmylapopova/${{ inputs.serviceName }}:${{ needs.context.outputs.short_sha }}"
+          tags: "liudmylapopova/${{ inputs.serviceName }}:${{ inputs.short_sha }}"
 
       - name: Generate artifact attestation
         uses: actions/attest@v4
