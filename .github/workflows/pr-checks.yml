@@ -8,6 +8,13 @@ on:
         required: false
         type: string
         default: dev
+    outputs:
+      short_sha:
+        value: ${{ jobs.context.outputs.short_sha }}
+      contextResult:
+        value: ${{ jobs.context.outputs.contextResult }}
+      verifyResult:
+        value: ${{ jobs.verify.outputs.verifyResult }}
 
 jobs:
   context:
