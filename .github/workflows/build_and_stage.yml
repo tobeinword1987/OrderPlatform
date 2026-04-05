@@ -27,7 +27,7 @@ jobs:
       - pr-checks
     with:
       dockerFile: ./Dockerfile
-      service: orders_api
+      serviceName: orders_api
       short_sha: ${{ needs.pr-check.outputs.short_sha }}
       verifyResult: ${{ needs.pr-check.outputs.verifyResult }}
       contextResult: ${{ needs.pr-check.outputs.contextResult }}
