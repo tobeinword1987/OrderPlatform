@@ -31,9 +31,9 @@ jobs:
     with:
       dockerFile: ./Dockerfile
       serviceName: orders_api
-      short_sha: ${{ needs.pr-check.outputs.short_sha }}
-      verifyResult: ${{ needs.pr-check.outputs.verifyResult }}
-      contextResult: ${{ needs.pr-check.outputs.contextResult }}
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
     uses: ./.github/workflows/build_image.yml
     secrets: inherit
 
@@ -43,8 +43,8 @@ jobs:
     with:
       dockerFile: ./Dockerfile.payments
       serviceName: payments
-      short_sha: ${{ needs.pr-check.outputs.short_sha }}
-      verifyResult: ${{ needs.pr-check.outputs.verifyResult }}
-      contextResult: ${{ needs.pr-check.outputs.contextResult }}
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
     uses: ./.github/workflows/build_image.yml
     secrets: inherit
