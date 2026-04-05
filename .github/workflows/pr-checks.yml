@@ -16,6 +16,9 @@ on:
       verifyResult:
         value: ${{ jobs.verify.result }}
 
+env:
+  PROJECT_DIR: "./"
+
 jobs:
   context:
     name: Context / trigger metadata
