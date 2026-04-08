@@ -1,4 +1,5 @@
 name: PROD
+description: Deploy to prod
 
 on:
   workflow_dispatch:
@@ -8,6 +9,10 @@ on:
         required: false
         type: string
         default: prod
+
+concurrency:
+  group: deploy-prod-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   packages: write
@@ -40,7 +45,7 @@ jobs:
       - name: get current image tag
         id: getTag
         run: |
-          image=$(kubectl get deployment app -n stage -o jsonpath="{..image}")
+          image=$(kubectl get deployment app -n dev -o jsonpath="{..image}")
           tag=${image##*:}
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
 

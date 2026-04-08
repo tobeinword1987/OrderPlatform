@@ -1,5 +1,5 @@
-name: Integration tests
-description: Run integration tests
+name: Build and Push Image
+description: Build and push Docker image to Docker Hub
 
 on:
   workflow_call:
