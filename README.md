@@ -181,3 +181,19 @@ a49707e823a0   15 minutes ago   CMD ["dist/src/main.js"]                        
 <missing>      15 minutes ago   ENV NODE_ENV=prod                               0B        buildkit.dockerfile.v0
 
 4. Please use .env file for secrets. Change it for dev and prod testing.
+
+# Homework 17 CI/CD на GitHub Actions
+
+1. Run eslint, UTS and e2e test on every push: https://github.com/tobeinword1987/OrderPlatform/actions/runs/24154873082
+
+2. Build image, push to the dockerhub and automatically deploy to the stage env on merge: https://github.com/tobeinword1987/OrderPlatform/actions/runs/24155767816
+
+3. Manual deploy on prod (images are got from dockerhub, tag is got from the stage k8s namespace): https://github.com/tobeinword1987/OrderPlatform/actions/runs/24156251429
+
+
+Note:
+I use as stage environment on github actions - "dev" environment. As prod environment - "prod" environment
+
+On kubernetes the same, I deployed to 2 namespaces: "dev" and "prod". You can see it from screenshots in LMS.
+
+I used dockerhub for images and minikube for local deploy with the self-host runner on github actions.

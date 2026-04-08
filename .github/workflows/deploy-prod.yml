@@ -38,6 +38,9 @@ jobs:
     secrets: inherit
 
   get_tag:
+    needs:
+      - pr-checks
+      - create_k8s_secrets
     runs-on: self-hosted
     outputs:
       tag: ${{ steps.getTag.outputs.tag }}
