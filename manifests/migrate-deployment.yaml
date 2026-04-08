@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+spec:
+  template:
+    spec:
+      containers:
+        - name: migrate
+          envFrom:
+            - secretRef:
+                name: app-secret
+          image: liudmylapopova/migrations:IMAGE_TAG
+      restartPolicy: Never

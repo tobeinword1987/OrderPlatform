@@ -17,33 +17,33 @@ import {
 @Index('Index_product_category_id', ['categoryId'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID!)
+  @Field(() => ID, { nullable: false })
   id: string;
 
   @Column()
-  @Field(() => String!)
+  @Field(() => String, { nullable: false })
   name: string;
 
   @Column({ type: 'uuid', name: 'category_id' })
-  @Field(() => ID!, { name: 'category_id' })
+  @Field(() => ID, { name: 'category_id', nullable: false })
   categoryId: string;
 
   @Column({ type: 'float' })
-  @Field(() => Number!)
+  @Field(() => Number, { nullable: false })
   price: number;
 
   @Column()
-  @Field(() => Number!)
+  @Field(() => Number, { nullable: false })
   quantity: number;
 
   @ManyToOne(() => Category, (category) => category.products, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'category_id' })
-  @Field(() => Category!)
+  @Field(() => Category, { nullable: false })
   category: Category;
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
-  @Field(() => [OrderItem]!)
+  @Field(() => [OrderItem], { nullable: false })
   orderItems: OrderItem[];
 }

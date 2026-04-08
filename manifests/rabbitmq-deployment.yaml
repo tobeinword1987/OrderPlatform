@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.dev.yml convert
+    kompose.version: 1.38.0 (HEAD)
+  labels:
+    io.kompose.service: rabbitmq
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: rabbitmq
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f compose.dev.yml convert
+        kompose.version: 1.38.0 (HEAD)
+      labels:
+        io.kompose.service: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          envFrom:
+            - secretRef:
+                name: app-secret
+          image: rabbitmq:4-management
+          livenessProbe:
+            tcpSocket:
+              port: 5672
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          ports:
+            - containerPort: 5672
+              protocol: TCP
+            - containerPort: 15672
+              protocol: TCP
+      restartPolicy: Always

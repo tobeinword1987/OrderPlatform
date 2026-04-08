@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed
+spec:
+  template:
+    spec:
+      containers:
+        - envFrom:
+            - secretRef:
+                name: app-secret
+          image: liudmylapopova/seeds:IMAGE_TAG
+          name: seed
+      restartPolicy: Never

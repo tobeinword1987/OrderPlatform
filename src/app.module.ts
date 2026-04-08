@@ -37,7 +37,7 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
       inject: [ConfigService],
       extraProviders: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
-        toRetry: (err: any) => true,
+        toRetry: (_err: any) => true,
         type: 'postgres',
         host: cfg.get('DB_HOST'),
         port: Number(cfg.get('DB_PORT')),
@@ -51,7 +51,17 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
         migrations: [],
         migrationsTableName: 'migrationsHistory',
         migrationsTransactionMode: 'all',
-        entities: [User, Category, UploadFile, Order, OrderItem, Product, Role, RefreshTokens, UsersRoles],
+        entities: [
+          User,
+          Category,
+          UploadFile,
+          Order,
+          OrderItem,
+          Product,
+          Role,
+          RefreshTokens,
+          UsersRoles,
+        ],
       }),
     }),
     OrdersModule,
@@ -62,7 +72,7 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
     AuditLogsModule,
     AuthModule,
     FileModule,
-    RabbitmqModule
+    RabbitmqModule,
   ],
   controllers: [AppController],
   providers: [
@@ -70,8 +80,8 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
     ConfigService,
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter
+      useClass: HttpExceptionFilter,
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

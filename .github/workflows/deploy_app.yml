@@ -1,0 +1,176 @@
+name: Deploy App
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: current environment
+        required: false
+        type: string
+        default: dev
+      short_sha:
+        description: short commit SHA for image tags
+        required: true
+        type: string
+    secrets:
+      MINIO_EXT_PORT:
+      MINIO_INT_PORT:
+      MINIO_UI_EXT_PORT:
+      MINIO_UI_INT_PORT:
+      RABBITMQ_EXT_PORT:
+      RABBITMQ_INT_PORT:
+      RABBITMQ_UI_EXT_PORT:
+      RABBITMQ_UI_INT_PORT:
+      GRPC_BIND_PORT:
+      PORT:
+      BASE_URL:
+      DB_HOST:
+      DB_PORT:
+      DB_USER:
+      DB_PASSWORD:
+      DB_NAME:
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+      POSTGRES_DB:
+      NODE_ENV:
+      STRATEGY:
+      JWT_SECRET:
+      AWS_REGION:
+      AWS_S3_BUCKET:
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_S3_FORCE_PATH_STYLE:
+      FILES_PRESIGN_EXPIRES_IN_SEC:
+      RABBITMQ_URL:
+      RABBITMQ_PREFETCH:
+      RABBITMQ_MAX_ATTEMPTS:
+      GRPC_MIN_TIMEOUT_RESPONSE_MS:
+      GRPC_MAX_TIMEOUT_RESPONSE_MS:
+      GRPC_MAX_COUNT_RETRIES:
+      RABBITMQ_SIMULATE_CONSUME_ERRORS:
+      PAYMENTS_GRPC_URL:
+      MINIO_ROOT_PASSWORD:
+      MINIO_ROOT_USER:
+      RABBITMQ_DEFAULT_PASS:
+      RABBITMQ_DEFAULT_USER:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/secrets.yml
+    with:
+      environment: ${{ inputs.environment }}
+    secrets:
+      MINIO_EXT_PORT: ${{ vars.MINIO_EXT_PORT }}
+      MINIO_INT_PORT: ${{ vars.MINIO_INT_PORT }}
+      MINIO_UI_EXT_PORT: ${{ vars.MINIO_UI_EXT_PORT }}
+      MINIO_UI_INT_PORT: ${{ vars.MINIO_UI_INT_PORT }}
+      RABBITMQ_EXT_PORT: ${{ vars.RABBITMQ_EXT_PORT }}
+      RABBITMQ_INT_PORT: ${{ vars.RABBITMQ_INT_PORT }}
+      RABBITMQ_UI_EXT_PORT: ${{ vars.RABBITMQ_UI_EXT_PORT }}
+      RABBITMQ_UI_INT_PORT: ${{ vars.RABBITMQ_UI_INT_PORT }}
+      GRPC_BIND_PORT: ${{ vars.GRPC_BIND_PORT }}
+      PORT: ${{ vars.PORT }}
+      BASE_URL: ${{ secrets.BASE_URL }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      STRATEGY: ${{ secrets.STRATEGY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_FORCE_PATH_STYLE: ${{ secrets.AWS_S3_FORCE_PATH_STYLE }}
+      FILES_PRESIGN_EXPIRES_IN_SEC: ${{ secrets.FILES_PRESIGN_EXPIRES_IN_SEC }}
+      RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
+      RABBITMQ_PREFETCH: ${{ secrets.RABBITMQ_PREFETCH }}
+      RABBITMQ_MAX_ATTEMPTS: ${{ secrets.RABBITMQ_MAX_ATTEMPTS }}
+      GRPC_MIN_TIMEOUT_RESPONSE_MS: ${{ secrets.GRPC_MIN_TIMEOUT_RESPONSE_MS }}
+      GRPC_MAX_TIMEOUT_RESPONSE_MS: ${{ secrets.GRPC_MAX_TIMEOUT_RESPONSE_MS }}
+      GRPC_MAX_COUNT_RETRIES: ${{ secrets.GRPC_MAX_COUNT_RETRIES }}
+      RABBITMQ_SIMULATE_CONSUME_ERRORS: ${{ secrets.RABBITMQ_SIMULATE_CONSUME_ERRORS }}
+      PAYMENTS_GRPC_URL: ${{ secrets.PAYMENTS_GRPC_URL }}
+      MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
+      MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
+      RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_DEFAULT_PASS }}
+      RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_DEFAULT_USER }}
+
+  deploy-app:
+    needs: deploy
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set image tags
+        run: |
+          TAG="${{ inputs.short_sha }}"
+          sed -i'' -e "s|image: liudmylapopova/orders_api:.*|image: liudmylapopova/orders_api:${TAG}|" manifests/app-deployment.yaml
+          sed -i'' -e "s|image: liudmylapopova/payments:.*|image: liudmylapopova/payments:${TAG}|" manifests/payments-grpc-deployment.yaml
+          sed -i'' -e "s|image: liudmylapopova/migrations:.*|image: liudmylapopova/migrations:${TAG}|" manifests/migrate-deployment.yaml
+          sed -i'' -e "s|image: liudmylapopova/seeds:.*|image: liudmylapopova/seeds:${TAG}|" manifests/seed-deployment.yaml
+
+      - name: Deploy app
+        run: |
+          kubectl config set-context --current --namespace=${{ inputs.environment }}
+          kubectl create namespace ${{ inputs.environment }} --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl apply -f manifests/postgres-deployment.yaml
+          kubectl apply -f manifests/postgres-service.yaml
+          kubectl rollout restart deployment postgres
+          kubectl rollout status deployment postgres
+
+          kubectl apply -f manifests/rabbitmq-deployment.yaml
+          kubectl apply -f manifests/rabbitmq-service.yaml
+          kubectl rollout restart deployment rabbitmq
+          kubectl rollout status deployment rabbitmq
+
+          kubectl apply -f manifests/minio-deployment.yaml
+          kubectl apply -f manifests/minio-service.yaml
+          kubectl apply -f manifests/minio-files-module-persistentvolumeclaim.yaml
+          kubectl rollout restart deployment minio
+          kubectl rollout status deployment minio
+
+          kubectl apply -f manifests/minio-init-pod.yaml
+
+          kubectl apply -f manifests/app-deployment.yaml
+          kubectl apply -f manifests/app-service.yaml
+          kubectl rollout restart deployment app
+          kubectl rollout status deployment app
+
+          kubectl apply -f manifests/payments-grpc-deployment.yaml
+          kubectl apply -f manifests/payments-grpc-service.yaml
+          kubectl rollout restart deployment payments-grpc
+          kubectl rollout status deployment payments-grpc
+
+      - name: Run migrate Job
+        run: |
+          kubectl delete job migrate -n ${{ inputs.environment }} --ignore-not-found
+          kubectl apply -f manifests/migrate-deployment.yaml -n ${{ inputs.environment }}
+          kubectl wait --for=condition=complete job/migrate -n ${{ inputs.environment }} --timeout=600s || kubectl logs -n ${{ inputs.environment }} -l app=migrate --tail=100
+
+      - name: Run seed Job
+        run: |
+          kubectl delete job seed -n ${{ inputs.environment }} --ignore-not-found
+          kubectl apply -f manifests/seed-deployment.yaml -n ${{ inputs.environment }}
+          kubectl wait --for=condition=complete job/seed -n ${{ inputs.environment }} --timeout=600s || kubectl logs -n ${{ inputs.environment }} -l app=seed --tail=100
+
+      - name: Run e2e tests
+        run: |
+          kubectl port-forward deployment/app 3000:3000 &
+          echo "Waiting for app to be ready..."
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:3000/ > /dev/null 2>&1; then
+              echo "App is ready!"
+              break
+            fi
+            echo "Attempt $i/30 - not ready yet..."
+            sleep 5
+          done
+          npm ci
+          npm run test:e2e

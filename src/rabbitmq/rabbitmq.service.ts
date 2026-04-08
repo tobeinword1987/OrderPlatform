@@ -1,21 +1,29 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import type { Channel, ChannelModel, ConsumeMessage, Options } from 'amqplib';
 import * as amqp from 'amqplib';
-import { ConfigService } from 'src/config-service';
+import { ConfigService } from '../../src/config-service';
 
-export type RabbitConsumeHandler = (msg: ConsumeMessage, channel: Channel) => Promise<void>;
+export type RabbitConsumeHandler = (
+  msg: ConsumeMessage,
+  channel: Channel,
+) => Promise<void>;
 
 export enum queues {
   ORDERS_PROCESS_QUEUE = 'orders.process.queue',
   ORDERS_DLQ_QUEUE = 'orders.dlq.queue',
-  DOMAINS_EVENTS_QUEUE = 'domain.events.queue'
+  DOMAINS_EVENTS_QUEUE = 'domain.events.queue',
 }
 
 export const exchanges = {
   'orders.process.queue': 'orders.process.exchange',
   'orders.dlq.queue': 'orders.dlq.exchange',
-  'domain.events.queue': 'domain.events.exchange'
-}
+  'domain.events.queue': 'domain.events.exchange',
+};
 
 @Injectable()
 export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
@@ -23,7 +31,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
   private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
 
-  constructor(private readonly configService: ConfigService) { }
+  constructor(private readonly configService: ConfigService) {}
 
   getChannel(): Channel {
     if (!this.channel) {
@@ -33,8 +41,11 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    const url = this.configService.get('RABBITMQ_URL') ?? 'amqp://localhost:5672';
-    const prefetch = Number(this.configService.get('RABBITMQ_PREFETCH') ?? '10');
+    const url =
+      this.configService.get('RABBITMQ_URL') ?? 'amqp://localhost:5672';
+    const prefetch = Number(
+      this.configService.get('RABBITMQ_PREFETCH') ?? '10',
+    );
 
     const client = await amqp.connect(url);
     const ch = await client.createChannel();
@@ -60,27 +71,45 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
 
     await ch.assertQueue(queues.ORDERS_PROCESS_QUEUE, { durable: true });
 
-    await ch.assertExchange(exchanges[queues.ORDERS_PROCESS_QUEUE], 'fanout', { durable: false });
+    await ch.assertExchange(exchanges[queues.ORDERS_PROCESS_QUEUE], 'fanout', {
+      durable: false,
+    });
 
-    await ch.bindQueue(queues.ORDERS_PROCESS_QUEUE, exchanges[queues.ORDERS_PROCESS_QUEUE], '');
+    await ch.bindQueue(
+      queues.ORDERS_PROCESS_QUEUE,
+      exchanges[queues.ORDERS_PROCESS_QUEUE],
+      '',
+    );
 
     await ch.assertQueue(queues.ORDERS_DLQ_QUEUE, { durable: true });
 
-    await ch.assertExchange(exchanges[queues.ORDERS_DLQ_QUEUE], 'fanout', { durable: false });
+    await ch.assertExchange(exchanges[queues.ORDERS_DLQ_QUEUE], 'fanout', {
+      durable: false,
+    });
 
-    await ch.bindQueue(queues.ORDERS_DLQ_QUEUE, exchanges[queues.ORDERS_DLQ_QUEUE], '');
+    await ch.bindQueue(
+      queues.ORDERS_DLQ_QUEUE,
+      exchanges[queues.ORDERS_DLQ_QUEUE],
+      '',
+    );
 
     await ch.assertQueue(queues.DOMAINS_EVENTS_QUEUE, { durable: true });
 
-    await ch.assertExchange(exchanges[queues.DOMAINS_EVENTS_QUEUE], 'fanout', { durable: false });
+    await ch.assertExchange(exchanges[queues.DOMAINS_EVENTS_QUEUE], 'fanout', {
+      durable: false,
+    });
 
-    await ch.bindQueue(queues.DOMAINS_EVENTS_QUEUE, exchanges[queues.DOMAINS_EVENTS_QUEUE], '');
+    await ch.bindQueue(
+      queues.DOMAINS_EVENTS_QUEUE,
+      exchanges[queues.DOMAINS_EVENTS_QUEUE],
+      '',
+    );
   }
 
   publishToExchange(
     exchange: string,
     payload: unknown,
-    options?: Options.Publish
+    options?: Options.Publish,
   ): boolean {
     const ch = this.getChannel();
     const body = Buffer.from(JSON.stringify(payload));
@@ -88,7 +117,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
     const published = ch.publish(exchange, '', body, {
       contentType: 'application/json',
       persistent: true,
-      ...options
+      ...options,
     });
 
     return published;
@@ -97,32 +126,30 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
   async consume(
     queue: queues,
     handler: RabbitConsumeHandler,
-    options?: Options.Consume
+    options?: Options.Consume,
   ): Promise<void> {
     const ch = this.getChannel();
 
     await ch.consume(
       queue,
-      async (msg) => {
+      (msg) => {
         if (!msg) {
           return;
         }
         try {
-          await handler(msg, ch);
+          handler(msg, ch);
         } catch (err) {
           this.logger.error(
             `Unhandled consumer error (queue=${queue})`,
-            (err as Error)?.stack ?? String(err)
+            (err as Error)?.stack ?? String(err),
           );
-          try {
-            ch.nack(msg, false, true);
-          } catch { }
+          ch.nack(msg, false, true);
         }
       },
       {
         noAck: false,
-        ...options
-      }
+        ...options,
+      },
     );
   }
 }
