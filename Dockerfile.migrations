@@ -1,0 +1,23 @@
+ARG NODE_VERSION="20"
+ARG DEBIAN_VERSION="12"
+
+FROM node:${NODE_VERSION}-alpine AS base
+RUN adduser -D appuser
+USER appuser
+WORKDIR /app
+
+FROM base AS deps_dev
+COPY package.json .
+COPY package-lock.json .
+RUN npm ci
+
+FROM deps_dev AS build
+COPY tsconfig.json tsconfig.json
+COPY data.source.ts data.source.ts
+COPY proto/ proto/
+COPY src/ src/
+RUN npm run build
+
+FROM build AS migrations
+EXPOSE 3000
+CMD ["npm", "run", "db:migrate"]

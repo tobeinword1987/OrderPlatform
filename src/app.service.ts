@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Ecommerce Order Platform';
+  getHello(): { msg: string } {
+    return { msg: 'Ecommerce Order Platform' };
   }
 }

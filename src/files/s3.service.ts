@@ -1,112 +1,131 @@
-import { S3Client, PutObjectCommand, S3ClientConfig, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { ContentType } from "./s3.types";
-import { ConfigService } from "@nestjs/config";
+import {
+  S3Client,
+  PutObjectCommand,
+  S3ClientConfig,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ContentType } from './s3.types';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class S3Service {
+  private region: string;
+  private readonly awsSdkClient: S3Client;
+  private readonly awsSdkClient2: S3Client;
+  private readonly bucket: string;
+  private readonly expiresInSec: number;
+  private readonly awsEndpoint: string;
+  private readonly awsS3BucketEndpoint: string;
+  private readonly cloudFrontUrl: string;
+  private readonly forcePathStyle: boolean;
+  private readonly accessKeyId: string;
+  private readonly secretAccessKey: string;
 
-    private region: string;
-    private readonly awsSdkClient: S3Client;
-    private readonly awsSdkClient2: S3Client;
-    private readonly bucket: string;
-    private readonly expiresInSec: number;
-    private readonly awsEndpoint: string;
-    private readonly awsS3BucketEndpoint: string
-    private readonly cloudFrontUrl: string;
-    private readonly forcePathStyle: boolean;
-    private readonly accessKeyId: string;
-    private readonly secretAccessKey: string;
+  constructor(private readonly configService: ConfigService) {
+    this.region = this.configService.get('AWS_REGION') ?? 'eu-central-1';
+    this.bucket = this.configService.get('AWS_S3_BUCKET') ?? 'files-private';
+    this.expiresInSec =
+      Number(this.configService.get('FILES_PRESIGN_EXPIRES_IN_SEC')) || 900;
+    this.awsEndpoint =
+      this.configService.get('AWS_S3_ENDPOINT') || 'http://minio:9000';
+    this.awsS3BucketEndpoint =
+      this.configService.get('AWS_S3_BUCKET_ENDPOINT') ??
+      'http://localhost:9000';
+    this.forcePathStyle =
+      Boolean(this.configService.get('AWS_S3_FORCE_PATH_STYLE')) || true;
+    this.cloudFrontUrl =
+      this.configService.get('AWS_CLOUDFRONT_URL') ?? 'http://localhost:9000';
+    this.accessKeyId =
+      this.configService.get('AWS_ACCESS_KEY_ID') ?? 'minioadmin';
+    this.secretAccessKey =
+      this.configService.get('AWS_SECRET_ACCESS_KEY') ?? 'minioadmin';
 
-    constructor(
-        private readonly configService: ConfigService,
-    ) {
-        this.region = this.configService.get('AWS_REGION') ?? 'eu-central-1';
-        this.bucket = this.configService.get('AWS_S3_BUCKET') ?? 'files-private';
-        this.expiresInSec = Number(this.configService.get('FILES_PRESIGN_EXPIRES_IN_SEC')) ?? 900;
-        this.awsEndpoint = this.configService.get('AWS_S3_ENDPOINT') || 'http://minio:9000';
-        this.awsS3BucketEndpoint = this.configService.get('AWS_S3_BUCKET_ENDPOINT') ?? 'http://localhost:9000';
-        this.forcePathStyle = Boolean(this.configService.get('AWS_S3_FORCE_PATH_STYLE')) ?? true;
-        this.cloudFrontUrl = this.configService.get('AWS_CLOUDFRONT_URL') ?? 'http://localhost:9000';
-        this.accessKeyId = this.configService.get('AWS_ACCESS_KEY_ID') ?? 'minioadmin';
-        this.secretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY') ?? 'minioadmin';
+    const clientConfig: S3ClientConfig = {
+      region: this.region,
+      forcePathStyle: this.forcePathStyle,
+    };
 
-        const clientConfig: S3ClientConfig = {
-            region: this.region,
-            forcePathStyle: this.forcePathStyle
-        };
-
-        if (this.awsEndpoint) {
-            clientConfig.endpoint = this.awsEndpoint;
-        }
-
-        if (this.accessKeyId && this.secretAccessKey) {
-            clientConfig.credentials = { accessKeyId: this.accessKeyId, secretAccessKey: this.secretAccessKey };
-        }
-
-        this.awsSdkClient = new S3Client(clientConfig);
-
-        this.awsSdkClient2 = new S3Client({
-            ...clientConfig,
-            endpoint: this.awsS3BucketEndpoint
-        });
+    if (this.awsEndpoint) {
+      clientConfig.endpoint = this.awsEndpoint;
     }
 
-    async generatePresignedUrl(key: string, contentType: ContentType) {
-        const command = new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: key,
-            ContentType: contentType,
-        });
-
-        const presigned = await getSignedUrl(this.awsSdkClient2, command, {
-            expiresIn: this.expiresInSec,
-        });
-
-        return { presigned, expiresInSec: this.expiresInSec };
+    if (this.accessKeyId && this.secretAccessKey) {
+      clientConfig.credentials = {
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey,
+      };
     }
 
-    async doesObjectExixts(key: string) {
-        try {
-            const fileMetadata = await this.awsSdkClient.send(new HeadObjectCommand({
-                Bucket: this.bucket,
-                Key: key
-            }));
-            if (fileMetadata) {
-                return true;
-            } else {
-                return false
-            }
-        } catch (error) {
-            console.log(error);
-            throw new HttpException('Request to bucket failed', HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    this.awsSdkClient = new S3Client(clientConfig);
+
+    this.awsSdkClient2 = new S3Client({
+      ...clientConfig,
+      endpoint: this.awsS3BucketEndpoint,
+    });
+  }
+
+  async generatePresignedUrl(key: string, contentType: ContentType) {
+    const command = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    const presigned = await getSignedUrl(this.awsSdkClient2, command, {
+      expiresIn: this.expiresInSec,
+    });
+
+    return { presigned, expiresInSec: this.expiresInSec };
+  }
+
+  async doesObjectExixts(key: string) {
+    try {
+      const fileMetadata = await this.awsSdkClient.send(
+        new HeadObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+      if (fileMetadata) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        'Request to bucket failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  buildPublicUrl(key: string): string {
+    if (this.cloudFrontUrl) {
+      return `${this.cloudFrontUrl}/${key}`;
     }
 
-    buildPublicUrl(key: string): string {
-        if (this.cloudFrontUrl) {
-            return `${this.cloudFrontUrl}/${key}`;
-        }
+    if (this.awsEndpoint) {
+      const endpoint =
+        this.trimTrailingSlash(this.awsEndpoint) ?? this.awsEndpoint;
 
-        if (this.awsEndpoint) {
-            const endpoint = this.trimTrailingSlash(this.awsEndpoint) ?? this.awsEndpoint;
+      if (this.forcePathStyle) {
+        return `${endpoint}/${this.bucket}/${key}`;
+      }
 
-            if (this.forcePathStyle) {
-                return `${endpoint}/${this.bucket}/${key}`;
-            }
-
-            return `${endpoint}/${key}`;
-        }
-
-        return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+      return `${endpoint}/${key}`;
     }
 
-    private trimTrailingSlash(input?: string): string | undefined {
-        if (!input) {
-            return input;
-        }
+    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+  }
 
-        return input.replace(/\/+$/, '');
+  private trimTrailingSlash(input?: string): string | undefined {
+    if (!input) {
+      return input;
     }
+
+    return input.replace(/\/+$/, '');
+  }
 }

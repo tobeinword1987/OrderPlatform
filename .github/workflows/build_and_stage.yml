@@ -1,0 +1,94 @@
+name: BUILD_AND_STAGE
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  packages: write
+  contents: read
+  attestations: write
+  id-token: write
+
+env:
+  NODE_VERSION: "22"
+  PROJECT_DIR: "./"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pr-checks:
+    uses: ./.github/workflows/pr-checks.yml
+    secrets: inherit
+
+  build_order_api:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile
+      serviceName: orders_api
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  build_payments:
+    needs:
+      - pr-checks
+    with:
+      dockerFile: ./Dockerfile.payments
+      serviceName: payments
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  migrations:
+    needs:
+      - pr-checks
+      - build_order_api
+    with:
+      dockerFile: ./Dockerfile.migrations
+      serviceName: migrations
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  seeds:
+    needs:
+      - pr-checks
+      - build_order_api
+      - migrations
+    with:
+      dockerFile: ./Dockerfile.seeds
+      serviceName: seeds
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+      verifyResult: ${{ needs.pr-checks.outputs.verifyResult }}
+      contextResult: ${{ needs.pr-checks.outputs.contextResult }}
+    uses: ./.github/workflows/build_image.yml
+    secrets: inherit
+
+  create_k8s_secrets:
+    uses: ./.github/workflows/secrets.yml
+    secrets: inherit
+
+  deploy_to_stage:
+    needs:
+      - pr-checks
+      - seeds
+      - build_payments
+    with:
+      short_sha: ${{ needs.pr-checks.outputs.short_sha }}
+    uses: ./.github/workflows/deploy_app.yml
+    secrets: inherit

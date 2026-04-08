@@ -8,7 +8,7 @@ import { User } from '../users/user.entity';
 
 @Injectable()
 export class OrderDB {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
   async createOrder(order: NewOrderReq) {
     let totalPriceAtPurchase = 0;
     return await this.dataSource.transaction(async (manager) => {
@@ -33,7 +33,7 @@ export class OrderDB {
       });
       console.log(orderExist);
       if (orderExist) {
-        console.log('sequential')
+        console.log('sequential');
         return orderExist;
       }
       // This is made for testing unique concurrency race, it can be commented
@@ -46,11 +46,17 @@ export class OrderDB {
           deliveryAddress: order.deliveryAddress,
           idempotencyKey: order.idempotencyKey,
         });
-      } catch (error) {
-        if (!error.message.includes('duplicate key value violates unique constraint')) {
-          throw new Error(error)
+      } catch (err: any) {
+        const error = err as { message: string };
+        if (
+          error.message &&
+          !error.message.includes(
+            'duplicate key value violates unique constraint',
+          )
+        ) {
+          throw new Error((err as Error)?.stack ?? String(err));
         }
-        console.log('parallel')
+        console.log('parallel');
 
         return await this.dataSource.getRepository(Order).findOneBy({
           idempotencyKey: order.idempotencyKey,
@@ -75,7 +81,8 @@ export class OrderDB {
             );
           }
           const rest = productDb.quantity - product.quantity;
-          totalPriceAtPurchase = totalPriceAtPurchase + productDb.price * product.quantity;
+          totalPriceAtPurchase =
+            totalPriceAtPurchase + productDb.price * product.quantity;
 
           if (rest < 0) {
             throw new HttpException(
@@ -112,7 +119,10 @@ export class OrderDB {
 
       await orderItemRepository.insert(newOrders);
 
-      await orderRepository.update({ id: newOrder.id }, { totalPriceAtPurchase })
+      await orderRepository.update(
+        { id: newOrder.id },
+        { totalPriceAtPurchase },
+      );
       const createdOrder = await orderRepository.findOne({
         where: { id: newOrder.id },
         relations: ['user', 'orderItems'],
@@ -124,15 +134,18 @@ export class OrderDB {
   async getOrdersByUserId(id: string) {
     try {
       const userOrders = await this.dataSource
-        .createQueryBuilder(Order, "order")
-        .leftJoinAndSelect("order.user", "user")
-        .where("order.user_id = :id", { id })
-        .andWhere("user.address = :address", { address: 'Ukraine, Cherkasy, Taraskova street, building 10, loc. 166, 85-796' })
-        .getMany()
+        .createQueryBuilder(Order, 'order')
+        .leftJoinAndSelect('order.user', 'user')
+        .where('order.user_id = :id', { id })
+        .andWhere('user.address = :address', {
+          address:
+            'Ukraine, Cherkasy, Taraskova street, building 10, loc. 166, 85-796',
+        })
+        .getMany();
 
       return userOrders;
     } catch (error) {
-      throw new Error(error);
+      throw new Error((error as Error)?.stack ?? String(error));
     }
   }
 }

@@ -1,0 +1,284 @@
+services:
+
+  integration_tests:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      INTEGRATION_TESTS_URL: 'http://app:${PORT}'
+    depends_on:
+      - app
+      - seed
+      - migrate
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: sh -c "npm install jest && npm run test:e2e && echo 'Done' && exit 0"
+
+  app:
+    image: order-platform-dev-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    depends_on:
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      BASE_URL: ${BASE_URL}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      STRATEGY: ${STRATEGY}
+      JWT_SECRET: ${JWT_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
+      AWS_S3_FORCE_PATH_STYLE: ${AWS_S3_FORCE_PATH_STYLE}
+      AWS_CLOUDFRONT_URL: ${AWS_CLOUDFRONT_URL}
+      FILES_PRESIGN_EXPIRES_IN_SEC: ${FILES_PRESIGN_EXPIRES_IN_SEC}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_PREFETCH: ${RABBITMQ_PREFETCH}
+      RABBITMQ_MAX_ATTEMPTS: ${RABBITMQ_MAX_ATTEMPTS}
+      GRPC_MIN_TIMEOUT_RESPONSE_MS: ${GRPC_MIN_TIMEOUT_RESPONSE_MS}
+      GRPC_MAX_TIMEOUT_RESPONSE_MS: ${GRPC_MAX_TIMEOUT_RESPONSE_MS}
+      GRPC_MAX_COUNT_RETRIES: ${GRPC_MAX_COUNT_RETRIES}
+      RABBITMQ_SIMULATE_CONSUME_ERRORS: ${RABBITMQ_SIMULATE_CONSUME_ERRORS}
+      PAYMENTS_GRPC_URL: ${PAYMENTS_GRPC_URL}
+    ports:
+      - ${PORT}:${PORT}
+    networks:
+      - backend
+    volumes:
+      - ./:/app
+      - /app/node_modules
+
+  migrate_old:
+    image: migrate
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    networks:
+      - backend
+    volumes:
+      - ./src/migrations:/app/src/migrations
+    links:
+      - postgres
+    depends_on:
+      - postgres
+      - app
+
+  migrate:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    depends_on:
+      - postgres
+      - app
+    volumes:
+      - ./:/app
+      - ./src/migrations:/app/src/migrations
+      - /app/node_modules
+    command: sh -c "npm run db:migrate"
+
+  seed_old:
+    image: seed
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seeds
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    networks:
+      - backend
+    volumes:
+      - ./src/seeds:/app/src/seeds
+      - /app/node_modules
+    depends_on:
+      app:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+
+  seed:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    volumes:
+      - ./:/app
+      - ./src/seeds:/app/src/seeds
+      - /app/node_modules
+    depends_on:
+      app:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_PORT: ${DB_PORT}
+    networks:
+      - backend
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    volumes:
+      - ./pgdata_files_module:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      MINIO_INT_PORT: ${MINIO_INT_PORT}
+      MINIO_EXT_PORT: ${MINIO_EXT_PORT}
+      MINIO_UI_EXT_PORT: ${MINIO_UI_EXT_PORT}
+      MINIO_UI_INT_PORT: ${MINIO_UI_INT_PORT}
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    networks:
+      - backend
+    ports:
+      - ${MINIO_EXT_PORT}:${MINIO_INT_PORT}
+      - ${MINIO_UI_EXT_PORT}:${MINIO_UI_INT_PORT}
+    volumes:
+      - minio_files_module:/data
+    depends_on:
+      - postgres
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+      - postgres
+    restart: 'no'
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do
+        echo 'waiting for minio...';
+        sleep 2;
+      done;
+      mc mb --ignore-existing local/${AWS_S3_BUCKET:-files-private};
+      mc anonymous set none local/${AWS_S3_BUCKET:-files-private};
+      echo 'minio bucket is ready';
+      echo 'Minio-init Done' && exit 0
+      "
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      RABBITMQ_DEFAULT_USER: user1
+      RABBITMQ_DEFAULT_PASS: pass1
+      RABBITMQ_EXT_PORT: ${RABBITMQ_EXT_PORT}
+      RABBITMQ_INT_PORT: ${RABBITMQ_INT_PORT}
+      RABBITMQ_UI_EXT_PORT: ${RABBITMQ_UI_EXT_PORT}
+      RABBITMQ_UI_INT_PORT: ${RABBITMQ_UI_INT_PORT}
+    healthcheck:
+        test: rabbitmq-diagnostics -q check_running
+        interval: 3s
+        timeout: 10s
+        retries: 5
+    ports:
+      - ${RABBITMQ_EXT_PORT}:${RABBITMQ_INT_PORT}
+      - ${RABBITMQ_UI_EXT_PORT}:${RABBITMQ_UI_INT_PORT}
+
+  payments-grpc:
+    image: node:22-alpine
+    working_dir: /app
+    networks:
+      - backend
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      GRPC_BIND_PORT: ${GRPC_BIND_PORT}
+    volumes:
+      - ./:/app
+    ports:
+      - ${GRPC_BIND_PORT}:${GRPC_BIND_PORT}
+    command: sh -c "corepack enable && npm install && npm run start:payments:dev"
+
+volumes:
+  pgdata_files_module:
+  minio_files_module:
+
+networks:
+  backend: {}

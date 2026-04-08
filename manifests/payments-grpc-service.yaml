@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.dev.yml convert
+    kompose.version: 1.38.0 (HEAD)
+  labels:
+    io.kompose.service: payments-grpc
+  name: payments-grpc
+spec:
+  ports:
+    - name: "5021"
+      port: 5021
+      targetPort: 5021
+  selector:
+    io.kompose.service: payments-grpc

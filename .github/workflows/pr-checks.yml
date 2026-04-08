@@ -1,0 +1,78 @@
+name: PR-CHECK
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_call:
+    inputs:
+      environment:
+        description: current environment
+        required: false
+        type: string
+        default: dev
+    outputs:
+      short_sha:
+        value: ${{ jobs.context.outputs.short_sha }}
+      contextResult:
+        value: ${{ jobs.context.result }}
+      verifyResult:
+        value: ${{ jobs.verify.result }}
+
+env:
+  PROJECT_DIR: "./"
+
+jobs:
+  context:
+    name: Context / trigger metadata
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+      contextResult: ${{ steps.context.result }}
+    steps:
+      - name: Print trigger context
+        run: |
+          echo "event=${GITHUB_EVENT_NAME}"
+          echo "ref=${GITHUB_REF}"
+          echo "actor=${GITHUB_ACTOR}"
+          echo "note=${{ github.event.inputs.note || 'n/a' }}"
+
+      - id: meta
+        name: Compute metadata
+        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Write context summary
+        run: |
+          {
+            echo "## pr-check"
+            echo "- Event: ${GITHUB_EVENT_NAME}"
+            echo "- Ref: ${GITHUB_REF}"
+            echo "- SHA: ${GITHUB_SHA::7}"
+            echo "- Project: ${PROJECT_DIR}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  verify:
+    name: 'Verify -> eslint -> Uts'
+    runs-on: ubuntu-latest
+    outputs:
+      verifyResult: ${{ steps.verify.result }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm run lint
+      - run: npm run test
+
+  integration:
+    needs:
+      - context
+      - verify
+    with:
+      environment: ${{ inputs.environment || 'dev' }}
+    uses: ./.github/workflows/integration_test.yml
+    secrets: inherit

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { OrdersService } from './orders.service';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Roles } from '../../src/decorators/roles.decorator';
 import type { UUID } from 'crypto';
 import type { PaymentData } from './payments.grpc.client';
 
@@ -24,7 +24,9 @@ export class OrdersController {
 
   @Roles(['admin', 'user'])
   @Get('paymentStatus')
-  async getPaymentStatus(@Body('paymentId') paymentId: UUID): Promise<PaymentData> {
+  async getPaymentStatus(
+    @Body('paymentId') paymentId: UUID,
+  ): Promise<PaymentData> {
     return await this.ordersService.getPaymentStatus(paymentId);
   }
 }

@@ -23,11 +23,11 @@ COPY proto/ proto/
 COPY src/ src/
 RUN npm run build
 
-FROM build as seeds
+FROM build AS seeds
 EXPOSE 3000
 CMD ["npm", "run", "db:seed"]
 
-FROM build as migrations
+FROM build AS migrations
 EXPOSE 3000
 CMD ["npm", "run", "db:migrate"]
 

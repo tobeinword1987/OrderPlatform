@@ -1,0 +1,56 @@
+name: PROD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: current environment
+        required: false
+        type: string
+        default: prod
+
+permissions:
+  packages: write
+  contents: read
+  attestations: write
+  id-token: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pr-checks:
+    uses: ./.github/workflows/pr-checks.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  create_k8s_secrets:
+    uses: ./.github/workflows/secrets.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  get_tag:
+    runs-on: self-hosted
+    outputs:
+      tag: ${{ steps.getTag.outputs.tag }}
+    steps:
+      - name: get current image tag
+        id: getTag
+        run: |
+          image=$(kubectl get deployment app -n stage -o jsonpath="{..image}")
+          tag=${image##*:}
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+  deploy_to_prod:
+    needs:
+      - pr-checks
+      - create_k8s_secrets
+      - get_tag
+    with:
+      environment: prod
+      short_sha: ${{ needs.get_tag.outputs.tag }}
+    uses: ./.github/workflows/deploy_app.yml
+    secrets: inherit

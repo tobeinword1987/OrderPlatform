@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-grpc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-grpc
+  template:
+    metadata:
+      labels:
+        app: payments-grpc
+    spec:
+      containers:
+        - name: payments-grpc
+          image: liudmylapopova/payments:IMAGE_TAG
+          ports:
+            - containerPort: 5021
+          envFrom:
+            - secretRef:
+                name: app-secret
