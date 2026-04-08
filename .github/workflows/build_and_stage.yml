@@ -1,4 +1,5 @@
 name: BUILD_AND_STAGE
+description: Build and stage
 
 on:
   push:
@@ -6,7 +7,7 @@ on:
       - main
 
 concurrency:
-  group: pr-check-${{ github.ref }}
+  group: build-and-stage-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
