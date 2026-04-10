@@ -42,6 +42,9 @@ import { PaymentsGrpcClient } from './payments.grpc.client';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.GRPC,
           options: {
+            tlsOptions: {
+              ca: [configService.get<string>('GRPC_TLS_CERT')],
+            },
             package: 'payments',
             protoPath: join(process.cwd(), 'proto/payments.proto'),
             url: configService.get<string>(

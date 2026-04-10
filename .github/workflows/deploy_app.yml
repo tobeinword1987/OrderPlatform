@@ -53,6 +53,8 @@ on:
       MINIO_ROOT_USER:
       RABBITMQ_DEFAULT_PASS:
       RABBITMQ_DEFAULT_USER:
+      GRPC_TLS_CERT:
+      GRPC_TLS_KEY:
 
 jobs:
   deploy:
@@ -100,6 +102,8 @@ jobs:
       MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
       RABBITMQ_DEFAULT_PASS: ${{ secrets.RABBITMQ_DEFAULT_PASS }}
       RABBITMQ_DEFAULT_USER: ${{ secrets.RABBITMQ_DEFAULT_USER }}
+      GRPC_TLS_CERT: ${{ secrets.GRPC_TLS_CERT }}
+      GRPC_TLS_KEY: ${{ secrets.GRPC_TLS_KEY }}
 
   deploy-app:
     needs: deploy
