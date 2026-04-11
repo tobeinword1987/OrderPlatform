@@ -3,6 +3,7 @@ import { OrdersService } from './orders.service';
 import { Order } from './order.entity';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 describe('OrdersController', () => {
   let orderController: OrdersController;
@@ -36,6 +37,7 @@ describe('OrdersController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [ThrottlerModule.forRoot()],
       controllers: [OrdersController],
       providers: [
         {
