@@ -2,10 +2,6 @@
 
 • Access Control / Roles / Scopes;
 
-
-
-• Transport Security / TLS;
-
 • Input surface / Abuse protection;
 
 • Logging / Auditability.
@@ -26,6 +22,14 @@
         - update k8s secret
         - restart deployment for the service where secret was updated)
 
-2) 
+2) TLS was added to the payment service.
+Requests to the order-api service are public, but to the payments service is internal and it is also saved with TLS. cert and key are saved in github secrets.
 
+3) Rate limiting
+    Next requests have rate limiting:
+    - @Post('auth/refresh');  - "medium" reate limiting
+    - @Post('auth/login'); - "medium" reate limiting
+    -  @Post('/orders/authorize') - "short" reate limiting
+
+These endpoints are the most risky. Payments and authorization.
 

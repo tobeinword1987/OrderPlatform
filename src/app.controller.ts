@@ -5,6 +5,7 @@ import { LogInAuthGuard } from './auth/log.in.guard';
 import { Public } from './decorators/public';
 import { User } from './users/user.entity';
 import { AppService } from './app.service';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller()
 export class AppController {
@@ -13,14 +14,16 @@ export class AppController {
     private appService: AppService,
   ) {}
 
-  @UseGuards(LogInAuthGuard)
+  @UseGuards(ThrottlerGuard, LogInAuthGuard)
+  @Throttle({ medium: {} })
   @Public()
   @Post('auth/login')
   async login(@Req() request: Request & { user: User }) {
     return this.authService.login(request.user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(ThrottlerGuard, JwtAuthGuard)
+  @Throttle({ medium: {} })
   @Post('auth/refresh')
   async refreshToken(
     @Req() request: Request & { user: User },

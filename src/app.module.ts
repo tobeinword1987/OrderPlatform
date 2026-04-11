@@ -24,9 +24,22 @@ import { UsersRoles } from './users/usersRoles.entity';
 import { FileModule } from './files/file.module';
 import { UploadFile } from './files/file.entity';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000,
+        limit: 3,
+      },
+      {
+        name: 'medium',
+        ttl: 10000,
+        limit: 3
+      }
+    ]),
     TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
