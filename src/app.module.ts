@@ -32,7 +32,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       {
         name: 'short',
         ttl: 1000,
-        limit: 3,
+        limit: 20,
       },
       {
         name: 'medium',
@@ -43,7 +43,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
     TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: `./.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
       envFilePath: './.env',
     }),
     TypeOrmModule.forRootAsync({
@@ -60,7 +59,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
         ssl: cfg.get('DB_SSL') ? { rejectUnauthorized: false } : undefined,
         autoLoadEntities: true,
         synchronize: false,
-        migrationsRun: true,
+        migrationsRun: false,
         migrations: [],
         migrationsTableName: 'migrationsHistory',
         migrationsTransactionMode: 'all',

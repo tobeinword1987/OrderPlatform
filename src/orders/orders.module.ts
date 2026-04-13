@@ -21,10 +21,12 @@ import { ProcessedMessage } from '../../src/orders/processed.message.entity';
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentsGrpcClient } from './payments.grpc.client';
+import { AuditLog } from 'src/auditLogs/auditLog.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      AuditLog,
       Order,
       OrderItem,
       User,

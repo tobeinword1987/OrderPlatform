@@ -1,0 +1,40 @@
+{
+  "info": {
+    "_postman_id": "98d478a1-503a-49b3-a0ee-cf267875303e",
+    "name": "GraphQL",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "836851",
+    "_collection_link": "https://go.postman.co/collection/836851-98d478a1-503a-49b3-a0ee-cf267875303e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "http://localhost:3000/graphql",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "# {\n#     orders\n#         {\n#             id\n#             idempotency_key\n#             user_id\n#             delivery_address\n#             order_status\n#             created_at\n#             updated_at\n#             user {\n#                 id\n#                 first_name\n#                 last_name\n#                 address\n#                 phone_number\n#                 post_code\n#             }\n#             orderItems {\n#                 id\n#                 price_at_purchase\n#                 quantity\n#                 product_id\n#                 product {\n#                     id\n#                     category_id\n#                     name\n#                     quantity\n#                 }\n#             }\n#         }\n# }\n\n# query ordersFiltered($filter: OrdersFilterInput!, $ordersPaginationInput: OrdersPaginationInput!)\n# {\n#     ordersFiltered( filter: $filter, ordersPaginationInput: $ordersPaginationInput )\n#         {\n#             orders {\n#                 id\n#                 idempotency_key\n#                 user_id\n#                 delivery_address\n#                 order_status\n#                 created_at\n#                 updated_at\n#                 user {\n#                     id\n#                     first_name\n#                     last_name\n#                     address\n#                     phone_number\n#                     post_code\n#                 }\n#                 orderItems {\n#                     id\n#                     price_at_purchase\n#                     quantity\n#                     product_id\n#                     product {\n#                         id\n#                         category_id\n#                         name\n#                         quantity\n#                     }\n#                 }\n#         }\n#         cursor {\n#             createdAt\n#             idTieBreaker\n#         }\n#         countOfPages\n#     }\n# }\n\n# query getName($id: DD)\n# {\n#     test(id: $id)\n# }\n\n# {\n#     test\n# }\n",
+            "variables": "{\n    \"filter\" : { \"status\": \"CREATED\"\n        },\n    \"ordersPaginationInput\": {\n        \"limit\" : 3,\n        \"createdAt\": \"2026-02-15T12:15:20.438Z\",\n        \"idTieBreaker\": \"fef08633-ce8b-437a-9107-0853e798dac5\"\n        }\n}"
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/graphql",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

@@ -95,12 +95,6 @@ export class GenerateDb1772098907075 implements MigrationInterface {
       `CREATE UNIQUE INDEX "Index_token_unique" ON "refresh_token" ("token") `,
     );
     await queryRunner.query(
-      `CREATE TABLE "audit_log" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "log" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_07fefa57f7f5ab8fc3f52b3ed0b" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "Index_audit_log_created_at" ON "audit_log" ("created_at") `,
-    );
-    await queryRunner.query(
       `CREATE TABLE "user_roles_role" ("userId" uuid NOT NULL, "roleId" uuid NOT NULL, CONSTRAINT "PK_b47cd6c84ee205ac5a713718292" PRIMARY KEY ("userId", "roleId"))`,
     );
     await queryRunner.query(
@@ -225,8 +219,6 @@ export class GenerateDb1772098907075 implements MigrationInterface {
       `DROP INDEX "public"."IDX_5f9286e6c25594c6b88c108db7"`,
     );
     await queryRunner.query(`DROP TABLE "user_roles_role"`);
-    await queryRunner.query(`DROP INDEX "public"."Index_audit_log_created_at"`);
-    await queryRunner.query(`DROP TABLE "audit_log"`);
     await queryRunner.query(`DROP INDEX "public"."Index_token_unique"`);
     await queryRunner.query(`DROP TABLE "refresh_token"`);
     await queryRunner.query(`DROP INDEX "public"."Index_role_scope_unique"`);
