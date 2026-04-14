@@ -24,13 +24,25 @@ import { UsersRoles } from './users/usersRoles.entity';
 import { FileModule } from './files/file.module';
 import { UploadFile } from './files/file.entity';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000,
+        limit: 20,
+      },
+      {
+        name: 'medium',
+        ttl: 10000,
+        limit: 3,
+      },
+    ]),
     TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: `./.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`,
       envFilePath: './.env',
     }),
     TypeOrmModule.forRootAsync({
@@ -47,7 +59,7 @@ import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
         ssl: cfg.get('DB_SSL') ? { rejectUnauthorized: false } : undefined,
         autoLoadEntities: true,
         synchronize: false,
-        migrationsRun: true,
+        migrationsRun: false,
         migrations: [],
         migrationsTableName: 'migrationsHistory',
         migrationsTransactionMode: 'all',

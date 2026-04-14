@@ -5,23 +5,33 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { DataSource } from 'typeorm';
 import { User } from '../users/user.entity';
+import { AuditLog } from '../auditLogs/auditLog.entity';
 
 @Injectable()
 export class OrderDB {
   constructor(private dataSource: DataSource) {}
-  async createOrder(order: NewOrderReq) {
+  async createOrder(order: NewOrderReq, auditContext: AuditLog) {
     let totalPriceAtPurchase = 0;
     return await this.dataSource.transaction(async (manager) => {
       const orderRepository = manager.getRepository(Order);
       const orderItemRepository = manager.getRepository(OrderItem);
       const productRepository = manager.getRepository(Product);
       const userRepository = manager.getRepository(User);
-
+      const auditLogRepository = manager.getRepository(AuditLog);
       const user = await userRepository.findOneBy({ id: order.userId });
       if (!user) {
+        const errorMessage = 'User was not found';
+        const auditContextDetails = {
+          ...auditContext,
+          outcome: 'failure',
+          reason: errorMessage,
+          statusCode: HttpStatus.NOT_FOUND.toString(),
+          log: JSON.stringify({ cause: { userId: order.userId } }),
+        };
+        await auditLogRepository.insert(auditContextDetails);
         throw new HttpException(
           {
-            message: 'User was not found',
+            message: errorMessage,
             userId: order.userId,
           },
           HttpStatus.NOT_FOUND,
@@ -54,6 +64,14 @@ export class OrderDB {
             'duplicate key value violates unique constraint',
           )
         ) {
+          const auditContextDetails = {
+            ...auditContext,
+            outcome: 'failure',
+            reason: error.message,
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+            log: JSON.stringify({ cause: { stack: (err as Error)?.stack } }),
+          };
+          await auditLogRepository.insert(auditContextDetails);
           throw new Error((err as Error)?.stack ?? String(err));
         }
         console.log('parallel');
@@ -72,9 +90,18 @@ export class OrderDB {
           });
 
           if (!productDb) {
+            const errorMessage = 'Product was not found in stock';
+            const auditContextDetails = {
+              ...auditContext,
+              outcome: 'failure',
+              reason: errorMessage,
+              statusCode: HttpStatus.NOT_FOUND.toString(),
+              log: JSON.stringify({ cause: { productId: product.productId } }),
+            };
+            await auditLogRepository.insert(auditContextDetails);
             throw new HttpException(
               {
-                message: 'Product was not found in stock',
+                message: errorMessage,
                 productId: product.productId,
               },
               HttpStatus.NOT_FOUND,
@@ -85,9 +112,20 @@ export class OrderDB {
             totalPriceAtPurchase + productDb.price * product.quantity;
 
           if (rest < 0) {
+            const errorMessage = 'There is not enough products in the stock';
+            const auditContextDetails = {
+              ...auditContext,
+              outcome: 'failure',
+              reason: errorMessage,
+              statusCode: HttpStatus.BAD_REQUEST.toString(),
+              log: JSON.stringify({
+                cause: { id: productDb.id, name: productDb.name },
+              }),
+            };
+            await auditLogRepository.insert(auditContextDetails);
             throw new HttpException(
               {
-                message: 'There is not enough products in the stock.',
+                message: errorMessage,
                 productId: productDb.id,
                 name: productDb.name,
                 quantity: productDb.quantity,
@@ -127,6 +165,15 @@ export class OrderDB {
         where: { id: newOrder.id },
         relations: ['user', 'orderItems'],
       });
+      const auditContextDetails = {
+        ...auditContext,
+        targetId: createdOrder?.id ?? '',
+        outcome: 'success',
+        reason: 'Order created successfully',
+        statusCode: HttpStatus.CREATED.toString(),
+        log: 'Order created successfully',
+      };
+      await auditLogRepository.insert(auditContextDetails);
       return createdOrder;
     });
   }

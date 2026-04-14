@@ -29,6 +29,7 @@ import { UUID } from 'crypto';
 import { ProcessedMessage } from './processed.message.entity';
 import { PaymentsGrpcClient } from './payments.grpc.client';
 import { firstValueFrom } from 'rxjs';
+import { AuditLog } from '../auditLogs/auditLog.entity';
 
 @Injectable()
 export class OrdersService {
@@ -37,6 +38,8 @@ export class OrdersService {
   constructor(
     private orderDb: OrderDB,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(AuditLog)
+    private auditLogRepository: Repository<AuditLog>,
     @InjectRepository(ProcessedMessage)
     private processedMessageRepository: Repository<ProcessedMessage>,
     private datasource: DataSource,
@@ -44,20 +47,58 @@ export class OrdersService {
     private paymentsGrpcClient: PaymentsGrpcClient,
   ) {}
 
-  async authorize(orderId: UUID) {
+  async authorize(orderId: UUID, auditContext: AuditLog) {
+    auditContext.action = 'authorize_payment';
+    auditContext.targetType = 'order';
+    auditContext.targetId = orderId;
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) {
+      const auditContextDetails = {
+        ...auditContext,
+        outcome: 'failure',
+        reason: 'Order not found',
+        statusCode: HttpStatus.NOT_FOUND.toString(),
+        log: 'Order not found',
+      };
+      await this.auditLogRepository.insert(auditContextDetails);
       throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
     }
 
-    return await firstValueFrom(
-      this.paymentsGrpcClient.authorize({
-        orderId,
-        amount: order.totalPriceAtPurchase,
-        currency: 'pln',
-        idempotencyKey: orderId,
-      }),
-    );
+    try {
+      const paymentData = await firstValueFrom(
+        this.paymentsGrpcClient.authorize({
+          orderId,
+          amount: order.totalPriceAtPurchase,
+          currency: 'pln',
+          idempotencyKey: orderId,
+        }),
+      );
+
+      const auditContextDetails = {
+        ...auditContext,
+        outcome: 'success',
+        reason: 'Payment authorized successfully',
+        statusCode: HttpStatus.OK.toString(),
+        log: 'Payment authorized successfully',
+      };
+      await this.auditLogRepository.insert(auditContextDetails);
+
+      return paymentData;
+    } catch (error) {
+      console.log(error);
+      const auditContextDetails = {
+        ...auditContext,
+        outcome: 'failure',
+        reason: (error as Error).message,
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+        log: JSON.stringify({ cause: { stack: (error as Error)?.stack } }),
+      };
+      await this.auditLogRepository.insert(auditContextDetails);
+      throw new HttpException(
+        'Payment not authorized',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getPaymentStatus(paymentId: UUID) {
@@ -66,12 +107,15 @@ export class OrdersService {
     );
   }
 
-  async createOrder(order: NewOrderReq) {
+  async createOrder(order: NewOrderReq, auditContext: AuditLog) {
+    auditContext.action = 'create_order';
+    auditContext.targetType = 'order';
+    auditContext.log = 'Order created successfully';
     try {
       if (!order) {
         throw new HttpException('There should be body', HttpStatus.BAD_REQUEST);
       }
-      const createdOrder = await this.orderDb.createOrder(order);
+      const createdOrder = await this.orderDb.createOrder(order, auditContext);
 
       if (createdOrder) {
         const message: OrderProcessedMessage = {

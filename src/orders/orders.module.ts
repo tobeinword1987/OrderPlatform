@@ -21,10 +21,12 @@ import { ProcessedMessage } from '../../src/orders/processed.message.entity';
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentsGrpcClient } from './payments.grpc.client';
+import { AuditLog } from '../auditLogs/auditLog.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      AuditLog,
       Order,
       OrderItem,
       User,
@@ -42,6 +44,9 @@ import { PaymentsGrpcClient } from './payments.grpc.client';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.GRPC,
           options: {
+            tlsOptions: {
+              ca: [configService.get<string>('GRPC_TLS_CERT')],
+            },
             package: 'payments',
             protoPath: join(process.cwd(), 'proto/payments.proto'),
             url: configService.get<string>(
