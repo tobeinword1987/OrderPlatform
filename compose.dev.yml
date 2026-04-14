@@ -133,7 +133,7 @@ services:
     networks:
       - backend
     ports:
-      - ${DB_PORT}:${DB_PORT}
+      - 5433:5432
     volumes:
       - ./pgdata_files_module:/var/lib/postgresql/data
 

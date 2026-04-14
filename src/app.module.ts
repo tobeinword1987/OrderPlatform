@@ -37,8 +37,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
       {
         name: 'medium',
         ttl: 10000,
-        limit: 3
-      }
+        limit: 3,
+      },
     ]),
     TypeOrmModule.forFeature([UsersRoles, Role]),
     ConfigModule.forRoot({

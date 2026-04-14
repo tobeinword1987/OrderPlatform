@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { OrdersService } from './orders.service';
 import { Roles } from '../../src/decorators/roles.decorator';
@@ -15,13 +15,19 @@ export class OrdersController {
 
   @Roles(['admin', 'user'])
   @Post()
-  async createOrder(@Req() req: Request & { correlationId: string, user: User }, @Body() order: NewOrderReq) {
+  async createOrder(
+    @Req() req: Request & { user: User },
+    @Body() order: NewOrderReq,
+  ) {
     const auditContext = {
-      correlationId: req.correlationId,
+      correlationId: req.headers['correlation-id'] as string,
       actorId: req.user?.id,
     };
-    
-    const orders = this.ordersService.createOrder(order, auditContext as AuditLog);
+
+    const orders = this.ordersService.createOrder(
+      order,
+      auditContext as AuditLog,
+    );
     return orders;
   }
 
@@ -29,12 +35,18 @@ export class OrdersController {
   @Throttle({ short: {} })
   @Roles(['admin', 'user'])
   @Post('authorize')
-  async authorize(@Req() req: Request & { correlationId: string, user: User },@Body('orderId') orderId: UUID): Promise<PaymentData> {
+  async authorize(
+    @Req() req: Request & { user: User },
+    @Body('orderId') orderId: UUID,
+  ): Promise<PaymentData> {
     const auditContext = {
-      correlationId: req.correlationId,
+      correlationId: req.headers['correlation-id'] as string,
       actorId: req.user?.id,
     };
-    return await this.ordersService.authorize(orderId, auditContext as AuditLog);
+    return await this.ordersService.authorize(
+      orderId,
+      auditContext as AuditLog,
+    );
   }
 
   @Roles(['admin', 'user'])

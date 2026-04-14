@@ -38,7 +38,8 @@ export class OrdersService {
   constructor(
     private orderDb: OrderDB,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
-    @InjectRepository(AuditLog) private auditLogRepository: Repository<AuditLog>,
+    @InjectRepository(AuditLog)
+    private auditLogRepository: Repository<AuditLog>,
     @InjectRepository(ProcessedMessage)
     private processedMessageRepository: Repository<ProcessedMessage>,
     private datasource: DataSource,
@@ -64,7 +65,7 @@ export class OrdersService {
     }
 
     try {
-      const paymentData =  await firstValueFrom(
+      const paymentData = await firstValueFrom(
         this.paymentsGrpcClient.authorize({
           orderId,
           amount: order.totalPriceAtPurchase,
@@ -88,14 +89,16 @@ export class OrdersService {
       const auditContextDetails = {
         ...auditContext,
         outcome: 'failure',
-        reason: error.message,
+        reason: (error as Error).message,
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR.toString(),
         log: JSON.stringify({ cause: { stack: (error as Error)?.stack } }),
       };
       await this.auditLogRepository.insert(auditContextDetails);
-      throw new HttpException('Payment not authorized', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Payment not authorized',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    
   }
 
   async getPaymentStatus(paymentId: UUID) {

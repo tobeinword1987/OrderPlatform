@@ -118,7 +118,9 @@ export class OrderDB {
               outcome: 'failure',
               reason: errorMessage,
               statusCode: HttpStatus.BAD_REQUEST.toString(),
-              log: JSON.stringify({ cause: { id: productDb.id, name: productDb.name } }),
+              log: JSON.stringify({
+                cause: { id: productDb.id, name: productDb.name },
+              }),
             };
             await auditLogRepository.insert(auditContextDetails);
             throw new HttpException(
