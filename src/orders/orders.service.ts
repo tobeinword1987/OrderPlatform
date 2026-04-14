@@ -29,7 +29,7 @@ import { UUID } from 'crypto';
 import { ProcessedMessage } from './processed.message.entity';
 import { PaymentsGrpcClient } from './payments.grpc.client';
 import { firstValueFrom } from 'rxjs';
-import { AuditLog } from 'src/auditLogs/auditLog.entity';
+import { AuditLog } from '../auditLogs/auditLog.entity';
 
 @Injectable()
 export class OrdersService {

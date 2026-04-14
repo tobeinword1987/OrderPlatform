@@ -5,7 +5,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { DataSource } from 'typeorm';
 import { User } from '../users/user.entity';
-import { AuditLog } from 'src/auditLogs/auditLog.entity';
+import { AuditLog } from '../auditLogs/auditLog.entity';
 
 @Injectable()
 export class OrderDB {

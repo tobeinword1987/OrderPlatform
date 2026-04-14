@@ -6,8 +6,8 @@ import type { UUID } from 'crypto';
 import type { PaymentData } from './payments.grpc.client';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request } from 'express';
-import { User } from 'src/users/user.entity';
-import { AuditLog } from 'src/auditLogs/auditLog.entity';
+import { User } from '../users/user.entity';
+import { AuditLog } from '../auditLogs/auditLog.entity';
 
 @Controller('orders')
 export class OrdersController {
