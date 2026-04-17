@@ -28,7 +28,8 @@
     "test:unique_race": "node scripts/test_parallel_requests.js",
     "up": "docker compose up",
     "downAll": "docker compose down --volumes",
-    "down": "docker compose down && docker volume rm order-platform_pgdata_files_module"
+    "down": "docker compose down && docker volume rm order-platform_pgdata_files_module",
+    "test:get_orders_filtered": "node scripts/test_get_orders_filtered.mjs"
   },
   "dependencies": {
     "@apollo/server": "^5.4.0",
@@ -50,6 +51,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
+    "autocannon": "^8.0.0",
     "dataloader": "^2.2.3",
     "dotenv": "^17.2.3",
     "graphql": "^16.12.0",
@@ -73,6 +75,7 @@
     "@suites/doubles.jest": "^3.0.1",
     "@suites/unit": "^3.0.1",
     "@types/amqplib": "^0.10.8",
+    "@types/autocannon": "^7.12.7",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",

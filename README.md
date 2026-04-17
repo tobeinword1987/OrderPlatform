@@ -1,3 +1,26 @@
+#Homework #21
+## Performance Optimization Report
+
+All description for this homework is in homework-report.md file.
+All evidences and metrucs which were measured are in files:
+
+ - ./performance-finops-evidence/performance_test_before.txt;
+ - ./performance-finops-evidence/performance_test_after.txt;
+ - ./performance-finops-evidence/autocannon_tests_test_before.txt;
+ - ./performance-finops-evidence/autocannon_tests_test_after.txt;
+
+There were 2 improvements and both are connected with the "List filtered orders" endpoint. Yiu can find this endpoint in ./postman_collection/GraphQl_postman_collection.json
+But before using this endpoint be sure you are authorized with auth/login endpoint
+
+curl --location 'http://localhost:3000/auth/login' \
+--header 'Content-Type: application/json' \
+--data ' {
+    "username": "login1",
+    "password": "password1"
+}'
+
+Use then the token you will receive.
+
 # Homework_19
 
 # Security baseline
