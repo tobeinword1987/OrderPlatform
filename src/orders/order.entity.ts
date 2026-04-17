@@ -31,6 +31,9 @@ registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 @Index('Index_order_user_id', ['userId'])
 @Index('Index_order_created_at', ['createdAt'])
 @Index('Index_idempotency_key_unique', ['idempotencyKey'], { unique: true })
+@Index('Index_created_at_order_status', ['createdAt', 'orderStatus'], {
+  unique: false,
+})
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => ID, { nullable: false })

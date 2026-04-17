@@ -1,7 +1,7 @@
 #Homework #21
 # Performance Optimization Report
 
-1. Hot scenarious: curl --location 'http://localhost:3000/graphql'
+1. Hot scenario: curl --location 'http://localhost:3000/graphql'
 
 Order filtered graphQl request, at code there is a method ordersFiltered in OrdersService class.
 
@@ -24,17 +24,22 @@ Also I tested this endpoint with autocannon tool, with the one time load of 10 c
 
 3. I used Math.round to round number of pages. I changed it to the Math.ceil. It rounds to the biggest integer, so it lets me to make less requests to the DB, to list all orders.
 
-4. Evidences. All measurements and metrics are in the next files:
+4. The next improvement: I added one more index on table Order:
+@Index('Index_created_at_order_status', ['createdAt', 'orderStatus'], { unique: false })
+
+It improve cost/runtime, because the search in DB becomes faster, for we are searching where cretaed_at and order_status condition.
+
+5. Evidences. All measurements and metrics are in the next files:
 
  - ./performance-finops-evidence/performance_tests_before.txt;
  - ./performance-finops-evidence/performance_tests_after.txt;
- - ./performance-finops-evidence/autocannon_tests_test_before.txt;
- - ./performance-finops-evidence/autocannon_tests_test_after.txt;
+ - ./performance-finops-evidence/autocannon_tests_before.txt;
+ - ./performance-finops-evidence/autocannon_tests_after.txt;
 
 All final results are gathered in final table: ./performance-finops-evidence/result_table.txt;
 
-5. Both improvements improved both conditions:
+6. Both improvements improved both conditions:
  - performance (requests are impressionaly faster now);
  - cost/runtime. Low requests required more replicas of service. Fast requests allow to provide fast service to the large number of customers.
 
-6. From metrics I see that now I more CPU memory is needed. So it can be the bottleneck in the future, and, maybe I will need to provide more CPU. I have to control this value with some dashboards (Grafana).
+7. From metrics I see that now I more CPU memory is needed. So it can be the bottleneck in the future, and, maybe I will need to provide more CPU. I have to control this value with some dashboards (Grafana).

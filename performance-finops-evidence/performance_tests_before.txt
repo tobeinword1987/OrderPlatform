@@ -1,6 +1,6 @@
 My performance duration:  50.414875000016764
 CPU usage user:  60299 µs
-CPU usage system:  2848 ms
+CPU usage system:  2848 µs
 Memory usage:  9051256 bytes
 Memory usage total:  9150464 bytes
 After... 50ms
@@ -9,7 +9,7 @@ After... 50ms
 
 My performance duration:  64.55029099999228
 CPU usage user:  73190 µs
-CPU usage system:  9033 ms
+CPU usage system:  9033 µs
 Memory usage:  9981232 bytes
 Memory usage total:  9936896 bytes
 After... 65ms
@@ -19,7 +19,7 @@ After... 65ms
 
 My performance duration:  86.13108400002238
 CPU usage user:  99592 µs
-CPU usage system:  13841 ms
+CPU usage system:  13841 µs
 Memory usage:  7876352 bytes
 Memory usage total:  15441920 bytes
 After... 86ms
