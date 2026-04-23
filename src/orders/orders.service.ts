@@ -30,6 +30,8 @@ import { ProcessedMessage } from './processed.message.entity';
 import { PaymentsGrpcClient } from './payments.grpc.client';
 import { firstValueFrom } from 'rxjs';
 import { AuditLog } from '../auditLogs/auditLog.entity';
+import { performance, PerformanceObserver } from 'node:perf_hooks';
+import { cpuUsage } from 'node:process';
 
 @Injectable()
 export class OrdersService {
@@ -46,6 +48,14 @@ export class OrdersService {
     private rabbitmqService: RabbitmqService,
     private paymentsGrpcClient: PaymentsGrpcClient,
   ) {}
+
+  onModuleInit() {
+    const obs = new PerformanceObserver((items) => {
+      console.log(items.getEntries()[0].duration);
+      performance.clearMarks();
+    });
+    obs.observe({ type: 'measure' });
+  }
 
   async authorize(orderId: UUID, auditContext: AuditLog) {
     auditContext.action = 'authorize_payment';
@@ -210,9 +220,14 @@ export class OrdersService {
     filter: OrdersFilterInput,
     ordersPaginationInput: OrdersPaginationInput,
   ): Promise<PageResult> {
+    const correlationId = Math.random().toString(36).slice(2, 8);
+    const startUsage = cpuUsage();
+    performance.mark(`ordersFiltered:start:${correlationId}`);
+    const memoryUsageBefore = process.memoryUsage().heapUsed;
+    const memoryUsageTotalBefore = process.memoryUsage().heapTotal;
+
     if (this.limitFirst !== ordersPaginationInput.limit) {
       console.log('Limit was changed, we have to reload pages from 0');
-      ordersPaginationInput.createdAt = undefined;
       this.limitFirst = ordersPaginationInput.limit;
     }
 
@@ -236,20 +251,16 @@ export class OrdersService {
       });
     }
 
-    const allFilteredOrders = await ordersSortedQb.getMany();
+    const allFilteredOrders = await ordersSortedQb.getCount();
 
     const orders = await ordersSortedQb
       .take(ordersPaginationInput.limit)
       .getMany();
 
-    const numberOfPages = Math.round(
-      allFilteredOrders.length / this.limitFirst,
-    );
+    const numberOfPages = Math.ceil(allFilteredOrders / this.limitFirst);
 
     const countOfPages =
-      allFilteredOrders.length % this.limitFirst
-        ? numberOfPages
-        : numberOfPages + 1;
+      allFilteredOrders % this.limitFirst ? numberOfPages : numberOfPages + 1;
     const idTieBreaker = orders[orders.length - 1].id;
     const createdAt = orders[orders.length - 1].createdAt;
 
@@ -262,6 +273,23 @@ export class OrdersService {
       },
     };
     console.log(pageResult);
+
+    performance.mark(`ordersFiltered:finished:${correlationId}`);
+    const performanceInfo = performance.measure(
+      `ordersFiltered:start:${correlationId} to ordersFiltered:finished:${correlationId}`,
+      `ordersFiltered:start:${correlationId}`,
+      `ordersFiltered:finished:${correlationId}`,
+    );
+    console.log('My performance duration: ', performanceInfo.duration);
+    const endUsage = cpuUsage(startUsage);
+    console.log('CPU usage user: ', endUsage.user, 'µs');
+    console.log('CPU usage system: ', endUsage.system, 'ms');
+    const memoryUsageAfter = process.memoryUsage().heapUsed;
+    const memoryUsageTotalAfter = process.memoryUsage().heapTotal;
+    const memoryUsage = memoryUsageAfter - memoryUsageBefore;
+    const memoryUsageTotal = memoryUsageTotalAfter - memoryUsageTotalBefore;
+    console.log('Memory usage: ', memoryUsage, 'bytes');
+    console.log('Memory usage total: ', memoryUsageTotal, 'bytes');
 
     return pageResult;
   }
