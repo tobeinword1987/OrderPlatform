@@ -26,6 +26,7 @@ export enum ORDER_STATUS {
   UPDATED = 'updated',
   IN_PROGRESS = 'in_progress',
   CLOSED = 'closed',
+  FAILED = 'failed',
 }
 
 export class Order {

@@ -19,6 +19,7 @@ import {
   LessThan,
   MoreThan,
   Repository,
+  TypeORMError,
 } from 'typeorm';
 import {
   exchanges,
@@ -32,6 +33,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuditLog } from '../auditLogs/auditLog.entity';
 import { performance, PerformanceObserver } from 'node:perf_hooks';
 import { cpuUsage } from 'node:process';
+import { GraphQLError } from 'graphql/error';
 
 @Injectable()
 export class OrdersService {
@@ -174,7 +176,7 @@ export class OrdersService {
         .update({ id: orderId }, { orderStatus: status });
       await manager
         .getRepository(ProcessedMessage)
-        .insert({ messageId, orderId, handler: 'Order proceed' });
+        .upsert({ messageId, orderId, handler: status }, ['orderId']);
     });
   }
 
@@ -200,12 +202,12 @@ export class OrdersService {
     }
   }
 
-  async getOrderById(id: UUID) {
+  async getOrderById(id: UUID): Promise<Order> {
     try {
       const order = await this.orderRepository.findOneByOrFail({ id });
       return order;
     } catch (err) {
-      if (!(err instanceof HttpException)) {
+      if (!(err instanceof HttpException) && !(err instanceof TypeORMError)) {
         console.log(err);
         throw new InternalServerErrorException(
           'Getting orders for the user failed',

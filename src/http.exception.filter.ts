@@ -5,6 +5,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { GraphQLError } from 'graphql/error';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -13,12 +14,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-
-    response.status(status).json({
-      statusCode: status,
-      response: exception.getResponse(),
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+    if (
+      (host as unknown as { contextType: string }).contextType !== 'graphql'
+    ) {
+      response.status(status).json({
+        statusCode: status,
+        response: exception.getResponse(),
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
+    } else {
+      throw new GraphQLError(exception.message, {
+        extensions: {
+          code: exception.getStatus(),
+        },
+      });
+    }
   }
 }

@@ -72,7 +72,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
     await ch.assertQueue(queues.ORDERS_PROCESS_QUEUE, { durable: true });
 
     await ch.assertExchange(exchanges[queues.ORDERS_PROCESS_QUEUE], 'fanout', {
-      durable: false,
+      durable: true,
     });
 
     await ch.bindQueue(
@@ -84,7 +84,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
     await ch.assertQueue(queues.ORDERS_DLQ_QUEUE, { durable: true });
 
     await ch.assertExchange(exchanges[queues.ORDERS_DLQ_QUEUE], 'fanout', {
-      durable: false,
+      durable: true,
     });
 
     await ch.bindQueue(
@@ -96,7 +96,7 @@ export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
     await ch.assertQueue(queues.DOMAINS_EVENTS_QUEUE, { durable: true });
 
     await ch.assertExchange(exchanges[queues.DOMAINS_EVENTS_QUEUE], 'fanout', {
-      durable: false,
+      durable: true,
     });
 
     await ch.bindQueue(

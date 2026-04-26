@@ -6,6 +6,7 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ObjectType } from '@nestjs/graphql';
 import type { UUID } from 'crypto';
@@ -15,6 +16,7 @@ import { Order } from './order.entity';
 @ObjectType()
 @Index('Index_message_order_id', ['orderId'])
 @Index('Index_order_procesed_at', ['processedAt'])
+@Index('Index_order_id_Unique', ['orderId'], { unique: true })
 export class ProcessedMessage {
   @PrimaryGeneratedColumn('uuid')
   id: UUID;
@@ -36,4 +38,7 @@ export class ProcessedMessage {
 
   @CreateDateColumn({ type: 'timestamptz', name: 'processed_at' })
   processedAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

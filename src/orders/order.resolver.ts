@@ -21,6 +21,7 @@ import {
 } from '../../src/orders/order.types.graphql';
 import { OrdersService } from '../../src/orders/orders.service';
 import { Roles } from '../../src/decorators/roles.decorator';
+import type { UUID } from 'crypto';
 
 registerEnumType(ORDER_STATUS, { name: 'OrderStatus' });
 
@@ -41,6 +42,12 @@ export class OrderResolver {
       relations: ['orderItems', 'user'],
     });
     return orders;
+  }
+
+  @Query(() => Order, { nullable: true })
+  @Roles(['user', 'admin'])
+  async orderById(@Args('id') id: UUID): Promise<Order> {
+    return await this.orderService.getOrderById(id);
   }
 
   @Query(() => PageResult)
