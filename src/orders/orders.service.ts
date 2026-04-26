@@ -33,7 +33,6 @@ import { firstValueFrom } from 'rxjs';
 import { AuditLog } from '../auditLogs/auditLog.entity';
 import { performance, PerformanceObserver } from 'node:perf_hooks';
 import { cpuUsage } from 'node:process';
-import { GraphQLError } from 'graphql/error';
 
 @Injectable()
 export class OrdersService {
