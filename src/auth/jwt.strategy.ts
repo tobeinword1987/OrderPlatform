@@ -15,7 +15,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private refreshTokenRepository: Repository<RefreshTokens>,
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {
-    console.log(process.env['JWT_SECRET']);
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
@@ -49,10 +48,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         return user;
       }
     } else {
-      console.log(
-        'Access token was expired, please refresh it with refreshToken',
-        request.body,
-      );
       if (request.body && request.body['refresh_token']) {
         return user;
       } else

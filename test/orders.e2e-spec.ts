@@ -14,7 +14,6 @@ describe('Orders (e2e)', () => {
       body: JSON.stringify(testUserDB),
     });
     const userData = await response.json();
-    console.log(userData);
 
     const orderFromRes = {
       id: expect.any(String),

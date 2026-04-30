@@ -19,6 +19,7 @@ import {
   LessThan,
   MoreThan,
   Repository,
+  TypeORMError,
 } from 'typeorm';
 import {
   exchanges,
@@ -32,6 +33,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuditLog } from '../auditLogs/auditLog.entity';
 import { performance, PerformanceObserver } from 'node:perf_hooks';
 import { cpuUsage } from 'node:process';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class OrdersService {
@@ -50,8 +52,7 @@ export class OrdersService {
   ) {}
 
   onModuleInit() {
-    const obs = new PerformanceObserver((items) => {
-      console.log(items.getEntries()[0].duration);
+    const obs = new PerformanceObserver((_items) => {
       performance.clearMarks();
     });
     obs.observe({ type: 'measure' });
@@ -93,9 +94,10 @@ export class OrdersService {
       };
       await this.auditLogRepository.insert(auditContextDetails);
 
+      await this.updateOrderStatus(orderId, ORDER_STATUS.PAYED);
+
       return paymentData;
     } catch (error) {
-      console.log(error);
       const auditContextDetails = {
         ...auditContext,
         outcome: 'failure',
@@ -104,17 +106,24 @@ export class OrdersService {
         log: JSON.stringify({ cause: { stack: (error as Error)?.stack } }),
       };
       await this.auditLogRepository.insert(auditContextDetails);
-      throw new HttpException(
-        'Payment not authorized',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new RpcException({
+        details: 'Payment not authorized',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
   async getPaymentStatus(paymentId: UUID) {
-    return await firstValueFrom(
-      this.paymentsGrpcClient.getPaymentStatus({ paymentId }),
-    );
+    try {
+      return await firstValueFrom(
+        this.paymentsGrpcClient.getPaymentStatus({ paymentId }),
+      );
+    } catch (error) {
+      throw new RpcException({
+        details: (error as Error).message,
+        code: HttpStatus.NOT_FOUND,
+      });
+    }
   }
 
   async createOrder(order: NewOrderReq, auditContext: AuditLog) {
@@ -134,12 +143,11 @@ export class OrdersService {
           attempt: 0,
           createdAt: new Date().toISOString(),
         };
-        const res = this.rabbitmqService.publishToExchange(
+        this.rabbitmqService.publishToExchange(
           exchanges[queues.ORDERS_PROCESS_QUEUE],
           message,
           { correlationId: createdOrder.id, messageId: createdOrder.id },
         );
-        console.log('message was sent', res);
       }
 
       return createdOrder;
@@ -155,7 +163,7 @@ export class OrdersService {
   async updateOrderStatus(
     orderId: UUID,
     status: ORDER_STATUS,
-    messageId: UUID,
+    messageId?: UUID,
   ) {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) {
@@ -167,14 +175,16 @@ export class OrdersService {
     const message = await this.processedMessageRepository.findOneBy({
       id: messageId,
     });
-    if (message) return;
+    if (message && messageId) return;
     await this.datasource.transaction(async (manager: EntityManager) => {
       await manager
         .getRepository(Order)
         .update({ id: orderId }, { orderStatus: status });
-      await manager
-        .getRepository(ProcessedMessage)
-        .insert({ messageId, orderId, handler: 'Order proceed' });
+      if (messageId) {
+        await manager
+          .getRepository(ProcessedMessage)
+          .upsert({ messageId, orderId, handler: status }, ['orderId']);
+      }
     });
   }
 
@@ -190,7 +200,6 @@ export class OrdersService {
       return orders;
     } catch (err) {
       if (!(err instanceof HttpException)) {
-        console.log(err);
         throw new InternalServerErrorException(
           'Getting orders for the user failed',
         );
@@ -200,13 +209,12 @@ export class OrdersService {
     }
   }
 
-  async getOrderById(id: UUID) {
+  async getOrderById(id: UUID): Promise<Order> {
     try {
       const order = await this.orderRepository.findOneByOrFail({ id });
       return order;
     } catch (err) {
-      if (!(err instanceof HttpException)) {
-        console.log(err);
+      if (!(err instanceof HttpException) && !(err instanceof TypeORMError)) {
         throw new InternalServerErrorException(
           'Getting orders for the user failed',
         );
@@ -227,7 +235,6 @@ export class OrdersService {
     const memoryUsageTotalBefore = process.memoryUsage().heapTotal;
 
     if (this.limitFirst !== ordersPaginationInput.limit) {
-      console.log('Limit was changed, we have to reload pages from 0');
       this.limitFirst = ordersPaginationInput.limit;
     }
 
@@ -272,7 +279,6 @@ export class OrdersService {
         idTieBreaker,
       },
     };
-    console.log(pageResult);
 
     performance.mark(`ordersFiltered:finished:${correlationId}`);
     const performanceInfo = performance.measure(

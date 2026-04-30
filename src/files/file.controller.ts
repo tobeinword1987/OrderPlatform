@@ -15,7 +15,6 @@ export class FileController {
     @Req() request: Request & { user?: User },
     @Body() presignedBody: PresignedBody,
   ) {
-    console.log('***', request.user);
     const { contentType, visibility, size } = presignedBody;
     return await this.fileService.getPresignedUrl(
       request.user as User,

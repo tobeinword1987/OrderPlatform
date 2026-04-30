@@ -41,9 +41,7 @@ export class OrderDB {
       const orderExist = await orderRepository.findOneBy({
         idempotencyKey: order.idempotencyKey,
       });
-      console.log(orderExist);
       if (orderExist) {
-        console.log('sequential');
         return orderExist;
       }
       // This is made for testing unique concurrency race, it can be commented
@@ -74,7 +72,6 @@ export class OrderDB {
           await auditLogRepository.insert(auditContextDetails);
           throw new Error((err as Error)?.stack ?? String(err));
         }
-        console.log('parallel');
 
         return await this.dataSource.getRepository(Order).findOneBy({
           idempotencyKey: order.idempotencyKey,

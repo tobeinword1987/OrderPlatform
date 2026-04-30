@@ -22,6 +22,7 @@ import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentsGrpcClient } from './payments.grpc.client';
 import { AuditLog } from '../auditLogs/auditLog.entity';
+import { OrdersWorkerFailed } from './orders.worker.failed';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { AuditLog } from '../auditLogs/auditLog.entity';
     OrderItemResolver,
     OrdersService,
     OrdersWorkerService,
+    OrdersWorkerFailed,
     PaymentsGrpcClient,
     OrderDB,
     Repository<Order>,

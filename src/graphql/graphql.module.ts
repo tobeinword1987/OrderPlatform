@@ -13,6 +13,7 @@ import { UsersModule } from '../../src/users/users.module';
 import { OrdersModule } from '../../src/orders/orders.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from '../../src/http.exception.filter';
+import { ApolloServerErrorCode } from '@apollo/server/errors';
 
 @Module({
   imports: [
@@ -26,7 +27,6 @@ import { HttpExceptionFilter } from '../../src/http.exception.filter';
       useFactory: (dtLoader: DtLoader) => ({
         path: '/graphql',
         graphiql: true,
-        // autoSchemaFile: join(process.cwd(), '/graphql.gql'),
         autoSchemaFile: true,
         sortSchema: true,
         definitions: {
@@ -37,6 +37,25 @@ import { HttpExceptionFilter } from '../../src/http.exception.filter';
           loaders: dtLoader.createLoaders(),
           strategy: process.env['STRATEGY'] || ('optimized' as const),
         }),
+        formatError: (formattedError, error) => {
+          console.log(error);
+          if (
+            formattedError?.extensions?.code ===
+            ApolloServerErrorCode.GRAPHQL_VALIDATION_FAILED
+          ) {
+            return {
+              ...formattedError,
+              message:
+                "Your query doesn't match the schema. Try double-checking it!",
+            };
+          }
+          return {
+            message: formattedError.message,
+            extensions: {
+              code: formattedError?.extensions?.code,
+            },
+          };
+        },
       }),
     }),
   ],

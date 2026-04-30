@@ -23,9 +23,11 @@ export type OrdersPaginationInput = {
 export enum ORDER_STATUS {
   CREATED = 'created',
   PROCEED = 'proceed',
+  PAYED = 'payed',
   UPDATED = 'updated',
   IN_PROGRESS = 'in_progress',
   CLOSED = 'closed',
+  FAILED = 'failed',
 }
 
 export class Order {
