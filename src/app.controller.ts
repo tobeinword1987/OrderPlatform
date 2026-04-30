@@ -29,7 +29,6 @@ export class AppController {
     @Req() request: Request & { user: User },
     @Body() refreshTokenBody: { refresh_token: string },
   ) {
-    console.log(request.user);
     return this.authService.refreshToken(request.user, refreshTokenBody);
   }
 
@@ -37,5 +36,11 @@ export class AppController {
   @Get()
   getMessage(): { msg: string } {
     return this.appService.getHello();
+  }
+
+  @Public()
+  @Get('health')
+  getHealth() {
+    return this.appService.getHealth();
   }
 }

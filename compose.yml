@@ -30,7 +30,7 @@ services:
       # target: prod
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
       minio:
         condition: service_started
       rabbitmq:
@@ -93,8 +93,8 @@ services:
     links:
       - postgres
     depends_on:
-      - postgres
-      - app
+      postgres:
+        condition: service_healthy
 
   seed:
     image: seed
@@ -106,7 +106,6 @@ services:
       - path: ./.env
         required: false
     environment:
-      environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}
@@ -133,6 +132,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - backend
     volumes:

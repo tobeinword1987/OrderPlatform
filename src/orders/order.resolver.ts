@@ -73,7 +73,6 @@ export class OrderResolver {
   ) {
     const { id } = order;
     if (strategy !== 'optimized') {
-      console.log('---NAIVE---Request to OrderItem table');
       return await this.orderItemRepository.find({
         where: { orderId: id },
         relations: ['product'],
@@ -93,7 +92,6 @@ export class OrderResolver {
   ) {
     const { userId } = order;
     if (strategy !== 'optimized') {
-      console.log('---NAIVE---Request to User table');
       return await this.userRepository.findOneBy({ id: userId });
     }
     return loaders.getOptimizedUsers.load(userId);

@@ -45,8 +45,6 @@ export class DtLoader {
       orderItemsByOrderIds.get(orderId),
     );
 
-    console.log('---OPTIMIZED---Request to OrderItem table');
-
     const result: OrderItem[][] = [];
 
     orderIds.forEach((id) => {
@@ -67,8 +65,6 @@ export class DtLoader {
 
     const usersByIds = new Map(users.map((user) => [user.id, user]));
 
-    console.log('---OPTIMIZED---Request to User table');
-
     return userIds.map((userId) => usersByIds.get(userId) ?? null);
   }
 
@@ -81,8 +77,6 @@ export class DtLoader {
     const productsByIds = new Map(
       products.map((product) => [product.id, product]),
     );
-
-    console.log('---OPTIMIZED---Request to Product table');
 
     return orderItemsIds.map(
       (orderItemsId) => productsByIds.get(orderItemsId) ?? null,

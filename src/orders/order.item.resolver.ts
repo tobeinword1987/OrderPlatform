@@ -23,7 +23,6 @@ export class OrderItemResolver {
   ) {
     const { productId } = orderItem;
     if (strategy !== 'optimized') {
-      console.log('---NAIVE---Request to Product table');
       return this.productRepository.findOne({ where: { id: productId } });
     }
     return loaders.getOptimizedProducts.load(productId);

@@ -15,7 +15,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private refreshTokenRepository: Repository<RefreshTokens>,
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {
-    console.log(process.env['JWT_SECRET']);
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,

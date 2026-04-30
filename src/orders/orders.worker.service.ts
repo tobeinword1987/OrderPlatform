@@ -49,7 +49,6 @@ export class OrdersWorkerService implements OnApplicationBootstrap {
       message.attempt = message.attempt + 1;
 
       if (message.attempt > this.configService.get('RABBITMQ_MAX_ATTEMPTS')) {
-        console.log('Limit of attempts are reached to the MAX value');
         ch.ack(msg);
         this.rabbitmqService.publishToExchange(
           exchanges[queues.ORDERS_DLQ_QUEUE],

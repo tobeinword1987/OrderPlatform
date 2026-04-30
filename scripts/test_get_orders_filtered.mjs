@@ -3,10 +3,6 @@
 import autocannon, { printResult } from 'autocannon';
 import fs from 'fs';
 
-//todo why it doesn't understand that autocannon is an object
-
-console.log(process.env.BASE_URL);
-
 let response;
 const baseUrl = 'http://localhost:3000'
 
@@ -27,10 +23,8 @@ response = await fetch(`${baseUrl}/auth/login`, {
  body: JSON.stringify(testUserDB),
 });
 const userData = await response.json();
-console.log(userData);
 
 const foo = async () => {
- console.log(typeof autocannon);
  const result = await autocannon({
   url: `${baseUrl}/graphql`,
   method: 'POST',
@@ -48,12 +42,10 @@ const foo = async () => {
 
 try {
   const data = autocannon.printResult(await foo());
-  console.log(data);
   fs.writeFile("./performance-finops-evidence/autocannon_tests", data, function(err) {
     if(err) {
         return console.log(err);
     }
-    console.log("The file was saved!");
 });
 } catch (error) {
   console.error(error);
