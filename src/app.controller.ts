@@ -6,12 +6,21 @@ import { Public } from './decorators/public';
 import { User } from './users/user.entity';
 import { AppService } from './app.service';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import {
+  HealthCheckService,
+  HttpHealthIndicator,
+  HealthCheck,
+} from '@nestjs/terminus';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class AppController {
   constructor(
     private authService: AuthService,
     private appService: AppService,
+    private health: HealthCheckService,
+    private http: HttpHealthIndicator,
+    private configService: ConfigService,
   ) {}
 
   @UseGuards(ThrottlerGuard, LogInAuthGuard)
@@ -40,7 +49,9 @@ export class AppController {
 
   @Public()
   @Get('health')
-  getHealth() {
-    return this.appService.getHealth();
+  @HealthCheck()
+  check() {
+    const url: string = this.configService.get('BASE_URL') || '';
+    return this.health.check([() => this.http.pingCheck('app', url)]);
   }
 }

@@ -15,7 +15,6 @@ import { Order } from './order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   DataSource,
-  EntityManager,
   LessThan,
   MoreThan,
   Repository,
@@ -31,8 +30,6 @@ import { ProcessedMessage } from './processed.message.entity';
 import { PaymentsGrpcClient } from './payments.grpc.client';
 import { firstValueFrom } from 'rxjs';
 import { AuditLog } from '../auditLogs/auditLog.entity';
-import { performance, PerformanceObserver } from 'node:perf_hooks';
-import { cpuUsage } from 'node:process';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
@@ -51,12 +48,7 @@ export class OrdersService {
     private paymentsGrpcClient: PaymentsGrpcClient,
   ) {}
 
-  onModuleInit() {
-    const obs = new PerformanceObserver((_items) => {
-      performance.clearMarks();
-    });
-    obs.observe({ type: 'measure' });
-  }
+  onModuleInit() {}
 
   async authorize(orderId: UUID, auditContext: AuditLog) {
     auditContext.action = 'authorize_payment';
@@ -94,7 +86,7 @@ export class OrdersService {
       };
       await this.auditLogRepository.insert(auditContextDetails);
 
-      await this.updateOrderStatus(orderId, ORDER_STATUS.PAYED);
+      await this.orderDb.updateOrderStatus(orderId, ORDER_STATUS.PAYED);
 
       return paymentData;
     } catch (error) {
@@ -160,32 +152,22 @@ export class OrdersService {
     }
   }
 
-  async updateOrderStatus(
-    orderId: UUID,
-    status: ORDER_STATUS,
-    messageId?: UUID,
-  ) {
-    const order = await this.orderRepository.findOneBy({ id: orderId });
-    if (!order) {
-      throw new HttpException(
-        `There is no order with id ${orderId}`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    const message = await this.processedMessageRepository.findOneBy({
-      id: messageId,
-    });
-    if (message && messageId) return;
-    await this.datasource.transaction(async (manager: EntityManager) => {
-      await manager
-        .getRepository(Order)
-        .update({ id: orderId }, { orderStatus: status });
-      if (messageId) {
-        await manager
-          .getRepository(ProcessedMessage)
-          .upsert({ messageId, orderId, handler: status }, ['orderId']);
+  async deleteOrder(orderId: UUID, auditContext: AuditLog) {
+    auditContext.action = 'delete_order';
+    auditContext.targetType = 'order';
+    auditContext.log = 'Order deleted successfully';
+    try {
+      if (!orderId) {
+        throw new HttpException('There should be body', HttpStatus.BAD_REQUEST);
       }
-    });
+      return await this.orderDb.deleteOrder(orderId, auditContext);
+    } catch (err) {
+      if (!(err instanceof HttpException)) {
+        throw new InternalServerErrorException('Order deleting failed');
+      } else {
+        throw err;
+      }
+    }
   }
 
   async getOrdersByUserId(id: string) {
@@ -228,12 +210,6 @@ export class OrdersService {
     filter: OrdersFilterInput,
     ordersPaginationInput: OrdersPaginationInput,
   ): Promise<PageResult> {
-    const correlationId = Math.random().toString(36).slice(2, 8);
-    const startUsage = cpuUsage();
-    performance.mark(`ordersFiltered:start:${correlationId}`);
-    const memoryUsageBefore = process.memoryUsage().heapUsed;
-    const memoryUsageTotalBefore = process.memoryUsage().heapTotal;
-
     if (this.limitFirst !== ordersPaginationInput.limit) {
       this.limitFirst = ordersPaginationInput.limit;
     }
@@ -279,24 +255,6 @@ export class OrdersService {
         idTieBreaker,
       },
     };
-
-    performance.mark(`ordersFiltered:finished:${correlationId}`);
-    const performanceInfo = performance.measure(
-      `ordersFiltered:start:${correlationId} to ordersFiltered:finished:${correlationId}`,
-      `ordersFiltered:start:${correlationId}`,
-      `ordersFiltered:finished:${correlationId}`,
-    );
-    console.log('My performance duration: ', performanceInfo.duration);
-    const endUsage = cpuUsage(startUsage);
-    console.log('CPU usage user: ', endUsage.user, 'µs');
-    console.log('CPU usage system: ', endUsage.system, 'ms');
-    const memoryUsageAfter = process.memoryUsage().heapUsed;
-    const memoryUsageTotalAfter = process.memoryUsage().heapTotal;
-    const memoryUsage = memoryUsageAfter - memoryUsageBefore;
-    const memoryUsageTotal = memoryUsageTotalAfter - memoryUsageTotalBefore;
-    console.log('Memory usage: ', memoryUsage, 'bytes');
-    console.log('Memory usage total: ', memoryUsageTotal, 'bytes');
-
     return pageResult;
   }
 }

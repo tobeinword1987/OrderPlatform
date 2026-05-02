@@ -340,7 +340,7 @@ orders.push(
     deliveryAddress:
       'Ukraine, Cherkasy, Taraask street, building 12, loc. 12, 85-796',
     orderStatus: ORDER_STATUS.CREATED,
-    userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a3',
+    userId: '0c6af838-fad5-4f6f-909d-d74886b1d5a1',
     totalPriceAtPurchase: 12.5,
     createdAt: new Date(),
     updatedAt: new Date(),

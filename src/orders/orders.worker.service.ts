@@ -8,6 +8,7 @@ import { ORDER_STATUS, OrderProcessedMessage } from './order.dto';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { OrdersService } from './orders.service';
 import { ConfigService } from '@nestjs/config';
+import { OrderDB } from './orders.repo';
 
 @Injectable()
 export class OrdersWorkerService implements OnApplicationBootstrap {
@@ -17,6 +18,7 @@ export class OrdersWorkerService implements OnApplicationBootstrap {
     private orderService: OrdersService,
     private rabbitmqService: RabbitmqService,
     private configService: ConfigService,
+    private orderDb: OrderDB,
   ) {}
 
   async onApplicationBootstrap() {
@@ -38,7 +40,7 @@ export class OrdersWorkerService implements OnApplicationBootstrap {
       ) {
         throw new Error(`Simulated error when order status was updating`);
       }
-      await this.orderService.updateOrderStatus(
+      await this.orderDb.updateOrderStatus(
         orderId,
         ORDER_STATUS.PROCEED,
         message.messageId,

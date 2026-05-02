@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Post, Req, UseGuards } from '@nestjs/common';
 import { NewOrderReq } from './order.dto';
 import { OrdersService } from './orders.service';
 import { Roles } from '../../src/decorators/roles.decorator';
@@ -29,6 +29,24 @@ export class OrdersController {
       auditContext as AuditLog,
     );
     return orders;
+  }
+
+  @Roles(['admin'])
+  @Delete()
+  async deleteOrder(
+    @Req() req: Request & { user: User },
+    @Body('id') id: UUID,
+  ) {
+    const auditContext = {
+      correlationId: req.headers['correlation-id'] as string,
+      actorId: req.user?.id,
+    };
+
+    const deletedOrder = this.ordersService.deleteOrder(
+      id,
+      auditContext as AuditLog,
+    );
+    return deletedOrder;
   }
 
   @UseGuards(ThrottlerGuard)
