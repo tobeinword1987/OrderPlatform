@@ -12,9 +12,14 @@ services:
     environment:
       INTEGRATION_TESTS_URL: 'http://app:${PORT}'
     depends_on:
-      - app
-      - seed
-      - migrate
+      migrate:
+        condition: service_completed_successfully
+      app:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      payments-grpc:
+        condition: service_healthy
     volumes:
       - ./:/app
       - /app/node_modules
@@ -233,6 +238,16 @@ services:
       - ./:/app
     ports:
       - ${GRPC_BIND_PORT}:${GRPC_BIND_PORT}
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - require('net').createConnection({host:'127.0.0.1',port:Number(process.env.GRPC_BIND_PORT||5021)},()=>process.exit(0)).on('error',()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
     command: sh -c "corepack enable && npm install && npm run start:payments:dev"
 
 volumes:
