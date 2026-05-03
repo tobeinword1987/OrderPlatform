@@ -5,7 +5,7 @@ metadata:
     kompose.cmd: kompose -f compose.dev.yml convert
     kompose.version: 1.38.0 (HEAD)
   labels:
-    io.kompose.service: app
+    app: app
   name: app
 spec:
   ports:
@@ -13,4 +13,4 @@ spec:
       port: 3000
       targetPort: 3000
   selector:
-    io.kompose.service: app
+    app: app
