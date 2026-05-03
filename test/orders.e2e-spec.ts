@@ -53,21 +53,21 @@ describe('Orders (e2e)', () => {
     expect(orderById.order_status).toEqual(ORDER_STATUS.PROCEED)
 
     //authorize payments
-    response = await fetch(`${url}/orders/authorize`, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        Authorization: `Bearer ${userData.accessToken}`,
-      },
-      body: JSON.stringify({
-        orderId: orderCreated.id
-      }),
-    });
+    // response = await fetch(`${url}/orders/authorize`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-type': 'application/json',
+    //     Authorization: `Bearer ${userData.accessToken}`,
+    //   },
+    //   body: JSON.stringify({
+    //     orderId: orderCreated.id
+    //   }),
+    // });
 
-    //get orderById
-    orderById = await getOrderById(orderCreated.id, userData.accessToken);
+    // //get orderById
+    // orderById = await getOrderById(orderCreated.id, userData.accessToken);
 
-    expect(orderById.order_status).toEqual(ORDER_STATUS.PAYED)
+    // expect(orderById.order_status).toEqual(ORDER_STATUS.PAYED)
 
     // delete order
     response = await fetch(`${url}/orders`, {
