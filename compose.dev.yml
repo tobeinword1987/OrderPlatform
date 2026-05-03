@@ -247,7 +247,7 @@ services:
         - CMD
         - node
         - -e
-        - require('net').createConnection({host:'127.0.0.1',port:Number(process.env.GRPC_BIND_PORT||5021)},()=>process.exit(0)).on('error',()=>process.exit(1))
+        - require('net').createConnection({host:'127.0.0.1',port:${GRPC_BIND_PORT:-5021}},()=>process.exit(0)).on('error',()=>process.exit(1))
       interval: 5s
       timeout: 5s
       retries: 12
