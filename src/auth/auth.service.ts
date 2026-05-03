@@ -47,10 +47,10 @@ export class AuthService {
     };
   }
 
-  async refreshToken(user: User, refreshTokenBody: { refresh_token: string }) {
+  async refreshToken(user: User, refreshTokenBody: object) {
     const currentToken = await this.refreshTokenRepository.findOneBy({
       userId: user.id,
-      token: refreshTokenBody.refresh_token,
+      token: (refreshTokenBody as { refreshToken: string }).refreshToken,
     });
     if (
       !currentToken ||
@@ -70,10 +70,6 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     } else {
-      await this.refreshTokenRepository.update(
-        { userId: user.id },
-        { isActive: false },
-      );
       return await this.login(user);
     }
   }

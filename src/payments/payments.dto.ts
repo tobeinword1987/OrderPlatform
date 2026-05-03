@@ -1,8 +1,8 @@
 import { UUID } from 'crypto';
 
-export type PaymentPayload = {
+export class PaymentStatusDto {
   paymentId: UUID;
-};
+}
 
 export type Payment = {
   id: number;

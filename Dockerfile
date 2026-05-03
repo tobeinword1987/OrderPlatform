@@ -2,6 +2,7 @@ ARG NODE_VERSION="20"
 ARG DEBIAN_VERSION="12"
 
 FROM node:${NODE_VERSION}-alpine AS base
+RUN apk add --no-cache curl
 RUN adduser -D appuser
 USER appuser
 WORKDIR /app

@@ -2,14 +2,88 @@ import { Order } from './order.entity';
 import { Product } from '../products/product.entity';
 import { OrderItem } from './order.item.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { NewOrderReq } from './order.dto';
-import { DataSource } from 'typeorm';
+import { NewOrderReq, ORDER_STATUS } from './order.dto';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { User } from '../users/user.entity';
 import { AuditLog } from '../auditLogs/auditLog.entity';
+import { UUID } from 'crypto';
+import { ProcessedMessage } from './processed.message.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class OrderDB {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(Order) private orderRepository: Repository<Order>,
+    @InjectRepository(ProcessedMessage)
+    private processedMessageRepository: Repository<ProcessedMessage>,
+  ) {}
+
+  async deleteOrder(orderId: UUID, auditContext: AuditLog) {
+    auditContext.action = 'delete_order';
+    auditContext.targetType = 'order';
+    auditContext.log = 'Order deleted successfully';
+    auditContext.targetId = orderId;
+
+    return await this.dataSource.transaction(async (manager) => {
+      const orderRepository = manager.getRepository(Order);
+      const auditLogRepository = manager.getRepository(AuditLog);
+      if (!orderId) {
+        const errorMessage = 'There should be body';
+        const auditContextDetails = {
+          ...auditContext,
+          outcome: 'failure',
+          reason: errorMessage,
+          statusCode: HttpStatus.BAD_REQUEST.toString(),
+          log: errorMessage,
+        };
+        await auditLogRepository.insert(auditContextDetails);
+        throw new HttpException('There should be body', HttpStatus.BAD_REQUEST);
+      }
+      const order = await orderRepository.findOneBy({ id: orderId });
+      if (!order) {
+        const errorMessage = 'Order was not found';
+        throw new HttpException(errorMessage, HttpStatus.NOT_FOUND);
+      }
+      try {
+        const deletedOrder = await orderRepository.remove(order);
+
+        const auditContextDetails = {
+          ...auditContext,
+          outcome: 'success',
+          reason: 'Order deleted successfully',
+          statusCode: HttpStatus.OK.toString(),
+          log: 'Order deleted successfully',
+        };
+        await auditLogRepository.insert(auditContextDetails);
+
+        return deletedOrder;
+      } catch (err) {
+        const errorMessage = 'Order was not deleted';
+        const auditContextDetails = {
+          ...auditContext,
+          outcome: 'failure',
+          reason: errorMessage,
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+          log: JSON.stringify({
+            cause: {
+              errorType: (err as Error)?.name,
+              errorMessage: (err as Error)?.message,
+            },
+          }),
+        };
+        await auditLogRepository.insert(auditContextDetails);
+        throw new HttpException(
+          {
+            message: 'Order was not deleted',
+            orderId,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    });
+  }
+
   async createOrder(order: NewOrderReq, auditContext: AuditLog) {
     let totalPriceAtPurchase = 0;
     return await this.dataSource.transaction(async (manager) => {
@@ -191,5 +265,33 @@ export class OrderDB {
     } catch (error) {
       throw new Error((error as Error)?.stack ?? String(error));
     }
+  }
+
+  async updateOrderStatus(
+    orderId: UUID,
+    status: ORDER_STATUS,
+    messageId?: UUID,
+  ) {
+    const order = await this.orderRepository.findOneBy({ id: orderId });
+    if (!order) {
+      throw new HttpException(
+        `There is no order with id ${orderId}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const message = await this.processedMessageRepository.findOneBy({
+      id: messageId,
+    });
+    if (message && messageId) return;
+    await this.dataSource.transaction(async (manager: EntityManager) => {
+      await manager
+        .getRepository(Order)
+        .update({ id: orderId }, { orderStatus: status });
+      if (messageId) {
+        await manager
+          .getRepository(ProcessedMessage)
+          .upsert({ messageId, orderId, handler: status }, ['orderId']);
+      }
+    });
   }
 }

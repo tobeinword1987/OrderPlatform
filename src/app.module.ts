@@ -25,9 +25,13 @@ import { FileModule } from './files/file.module';
 import { UploadFile } from './files/file.entity';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    TerminusModule,
+    HttpModule,
     ThrottlerModule.forRoot([
       {
         name: 'short',

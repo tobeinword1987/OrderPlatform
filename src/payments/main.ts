@@ -6,6 +6,7 @@ import { PaymentsModule } from './payments.module';
 const start = async () => {
   const cert = process.env.GRPC_TLS_CERT;
   const key = process.env.GRPC_TLS_KEY;
+  const port = process.env.GRPC_BIND_PORT ?? '5021';
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     PaymentsModule,
@@ -15,7 +16,7 @@ const start = async () => {
         ...(cert && key ? { tlsOptions: { key, cert } } : {}),
         package: 'payments',
         protoPath: join(process.cwd(), 'proto/payments.proto'),
-        url: '0.0.0.0:5021',
+        url: `0.0.0.0:${port}`,
       },
     },
   );

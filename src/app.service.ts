@@ -5,8 +5,4 @@ export class AppService {
   getHello(): { msg: string } {
     return { msg: 'Ecommerce Order Platform' };
   }
-
-  getHealth() {
-    return { msg: 'OK' };
-  }
 }
