@@ -81,7 +81,7 @@ describe('Orders (e2e)', () => {
 
     const orderData = await response.json();
     expect(response.status).toEqual(200);
-  }, 50000);
+  });
 });
 
 const getOrderById = async (orderId: UUID, accessToken: any) => {
