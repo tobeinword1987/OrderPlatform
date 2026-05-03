@@ -59,6 +59,57 @@
       "response": []
     },
     {
+      "name": "http://localhost:3000/orders",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NjEwODc3MiwiZXhwIjoxNzc2MTk1MTcyfQ.VR-fAM0-IJy_vgeEEchX-d_radYeX_rf-0SiOIIiR9Q",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"id\": \"0c6af838-fad5-4f6f-909d-d74886b1d5e1\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "http://localhost:3000/authorize",
       "event": [
         {
@@ -468,7 +519,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3MzA2MDUxNSwiZXhwIjoxNzczMTQ2OTE1fQ.YrAt_kUpFzZ8OtzVCBbhnFeW7NFvPk0zpeiNDsbAmS8",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NzgwODU2NiwiZXhwIjoxNzc3ODk0OTY2fQ.Q5CkR4hVC6ZTzXUIr-xkaJHNk_numB_VAruXWjIbGUE",
               "type": "string"
             }
           ]
@@ -477,7 +528,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"fileId\": \"29715fe4-8554-4902-9d2f-1974c2d0dfeb\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
@@ -485,7 +536,7 @@
           }
         },
         "url": {
-          "raw": "http://localhost:3000/files/29715fe4-8554-4902-9d2f-1974c2d0dfeb",
+          "raw": "http://localhost:3000/files/:id",
           "protocol": "http",
           "host": [
             "localhost"
@@ -493,7 +544,13 @@
           "port": "3000",
           "path": [
             "files",
-            "29715fe4-8554-4902-9d2f-1974c2d0dfeb"
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "d0b5d8b8-4ab3-4b2f-9627-073ecb52fdc9"
+            }
           ]
         }
       },
@@ -533,6 +590,61 @@
           "path": [
             "users",
             "avatar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "http://localhost:3000/health",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImxvZ2luMSIsInN1YiI6IjBjNmFmODM4LWZhZDUtNGY2Zi05MDlkLWQ3NDg4NmIxZDVhMSIsImlhdCI6MTc3NzQ5NDU2NCwiZXhwIjoxNzc3NTgwOTY0fQ.e5-Iu6IsOfaVptcqCLfi92Gr5Zlk0rMrHMhglk41G7U",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"paymentId\": \"091c6daf-2dc5-4252-aa26-7a6729aa4c69\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/orders/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "orders",
+            "health"
           ]
         }
       },
