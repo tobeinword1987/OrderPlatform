@@ -59,12 +59,12 @@ export class OrdersService {
       const auditContextDetails = {
         ...auditContext,
         outcome: 'failure',
-        reason: 'Order not found',
+        reason: 'Order was not found',
         statusCode: HttpStatus.NOT_FOUND.toString(),
-        log: 'Order not found',
+        log: 'Order was not found',
       };
       await this.auditLogRepository.insert(auditContextDetails);
-      throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Order was not found', HttpStatus.NOT_FOUND);
     }
 
     try {

@@ -52,3 +52,15 @@ export class NewOrderReq {
   deliveryAddress: string;
   products: Product[];
 }
+
+export class DeleteOrderDto {
+  id: UUID;
+}
+
+export class AuthorizeOrderDto {
+  orderId: UUID;
+}
+
+export class GetPaymentStatusDto {
+  paymentId: UUID;
+}

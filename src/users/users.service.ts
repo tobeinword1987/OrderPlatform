@@ -17,37 +17,46 @@ export class UsersService {
   ) {}
 
   async setAvatarId(user: User, fileId: UUID) {
-    const userDb = await this.usersRepository.findOneBy({ id: user.id });
-    if (!userDb) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    try {
+      const userDb = await this.usersRepository.findOneBy({ id: user.id });
+      if (!userDb) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      const file = await this.fileRepository.findOneBy({ id: fileId });
+      if (!file) {
+        throw new HttpException('File not found', HttpStatus.NOT_FOUND);
+      }
+
+      if (file.status !== Status.READY) {
+        throw new HttpException(
+          'File is not fully uploaded to the storage',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (user.id !== file.userId) {
+        throw new HttpException(
+          'User is not the owner of this file',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      await this.usersRepository.update({ id: user.id }, { avatarId: fileId });
+
+      return {
+        id: user.id,
+        avatarId: fileId,
+        avatarUrl: this.s3Service.buildPublicUrl(file.key),
+      };
+    } catch (error) {
+      if (!(error instanceof HttpException)) {
+        throw new HttpException(
+          'Setting avatar failed',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
-
-    const file = await this.fileRepository.findOneBy({ id: fileId });
-    if (!file) {
-      throw new HttpException('File not found', HttpStatus.NOT_FOUND);
-    }
-
-    if (file.status !== Status.READY) {
-      throw new HttpException(
-        'File is not fully uploaded to the storage',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    if (user.id !== file.userId) {
-      throw new HttpException(
-        'User is not the owner of this file',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
-    await this.usersRepository.update({ id: user.id }, { avatarId: fileId });
-
-    return {
-      id: user.id,
-      avatarId: fileId,
-      avatarUrl: this.s3Service.buildPublicUrl(file.key),
-    };
   }
 
   async listUsers(): Promise<Array<User>> {

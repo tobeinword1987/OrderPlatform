@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
-  type PaymentPayload,
+  PaymentStatusDto,
   type AuthorizedDataPayload,
   type PaymentData,
   PAYMENT_STATE,
@@ -41,7 +41,7 @@ export class PaymentsService {
     };
   }
 
-  getPaymentStatus(data: PaymentPayload): PaymentData {
+  getPaymentStatus(data: PaymentStatusDto): PaymentData {
     if (!this.ordersPaymentDataMap.has(data.paymentId)) {
       throw new RpcException({
         code: GrpcStatus.NOT_FOUND,
